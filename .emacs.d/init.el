@@ -152,6 +152,15 @@
   :custom
   (treesit-auto-install 'prompt)
   :config
+  (setq treesit-language-source-alist
+        '((rust "https://github.com/tree-sitter/tree-sitter-rust")
+          (go "https://github.com/tree-sitter/tree-sitter-go")
+          (haskell "https://github.com/tree-sitter/tree-sitter-haskell")
+          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+          (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+          (c "https://github.com/tree-sitter/tree-sitter-c")
+          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")))
   (global-treesit-auto-mode))
 
 ;;; --- 7. LSP (EGLOT) ---
