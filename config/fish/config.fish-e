@@ -30,5 +30,3 @@ if not string match -q -- $PNPM_HOME $PATH
 end
 # pnpm end
 export PATH="$HOME/.local/bin:$PATH"
-
-set -q GHCUP_INSTALL_BASE_PREFIX[1]; or set GHCUP_INSTALL_BASE_PREFIX $HOME ; set -gx PATH $HOME/.cabal/bin $PATH /Users/nanaadjeimanu/.ghcup/bin # ghcup-env

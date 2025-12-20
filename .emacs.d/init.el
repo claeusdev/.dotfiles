@@ -3,7 +3,7 @@
 
 (add-hook 'emacs-startup-hook
           (lambda ()
-            (setq gc-cons-threshold (* 2 1024 1024)))) ; 2MB for normal use
+            (setq gc-cons-threshold (* 16 1024 1024)))) ; 2MB for normal use
 
 ;; Set custom file to a separate location to keep init.el clean
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
@@ -11,6 +11,7 @@
   (load custom-file))
 
 ;;; --- 2. UI & DEFAULTS ---
+
 (setq-default
  inhibit-startup-screen t
  initial-scratch-message ";; Welcome back!\n"
@@ -32,6 +33,7 @@
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
 (pixel-scroll-precision-mode 1)
+(display-time-mode 1) ; Show time in the modeline
 
 ;; Remember state
 (recentf-mode 1)
@@ -61,19 +63,32 @@
 (use-package nerd-icons
   :if (display-graphic-p))
 
-(use-package doom-themes
-  :config
-  (setq doom-themes-enable-italic t
-        doom-themes-enable-bold t)
-  (doom-themes-org-config))
+(setq modus-themes-region '(accented)
+      modus-themes-mode-line '(:eval (list 'borderless 'accented)) ; Stylize the modeline
+      modus-themes-completions '((matches . (extrabold underline)))
+      modus-themes-bold-constructs t
+      modus-themes-italic-constructs t
+      modus-themes-prompts '(bold)
+      modus-themes-paren-match '(bold intense underline)
+      modus-themes-syntax '(alt-syntax ansi-color-faint)
+      modus-themes-syntax '(green-strings yellow-comments)
+      )
 
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom
-  (doom-modeline-height 25)
-  (doom-modeline-icon t))
+(load-theme 'modus-operandi t)
 
-(set-face-attribute 'default nil :font "Fira Mono" :height 120)
+(use-package all-the-icons-dired
+  :ensure t
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(set-face-attribute 'default nil :font "Fira Mono" :height 150)
+
+;; Custom modeline styling
+(set-face-attribute 'mode-line nil :background "#B18AE2" :foreground "#FFFFFF" :box '(:line-width 1 :color "#B18AE2"))
+(set-face-attribute 'mode-line-inactive nil :background "#E0BBE4" :foreground "#000000" :box '(:line-width 1 :color "#E0BBE4"))
 
 ;;; --- 5. COMPLETION STACK (Vertico/Corfu) ---
 
@@ -119,12 +134,16 @@
 (use-package magit
   :bind (("C-x g" . magit-status)))
 
+(use-package forge
+  :ensure t
+  :after magit)
+
 (use-package projectile
-  :init (projectile-mode +1)
+  :init (projectile-mode 1)
   :bind-keymap ("C-c p" . projectile-command-map))
 
 (use-package consult
-  :bind (("C-s" . consult-line)
+  :bind (("M-s" . consult-line)
          ("M-y" . consult-yank-pop)
          ("C-x b" . consult-buffer)))
 
@@ -146,7 +165,52 @@
 (use-package wgrep)
 
 (use-package avy
-  :bind ("M-s" . avy-goto-char-2))
+  :bind (("C-c j" . avy-goto-char-2)))
+
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode 1))
+
+(use-package dap-mode
+  :ensure t
+  :config
+  (dap-ui-mode 1)
+  :bind (:map dap-mode-map
+         ("C-c d b" . dap-add-breakpoint)
+         ("C-c d d" . dap-debug)
+         ("C-c d n" . dap-next)
+         ("C-c d c" . dap-continue)))
+
+;; Web, GraphQL, and SQL modes
+(use-package web-mode
+  :ensure t
+  :mode (("\\.html?\\'" . web-mode)
+         ("\\.jsx\\\'" . web-mode)))
+
+(use-package graphql-mode
+  :ensure t
+  :mode ("\\.graphql\\\'" . graphql-mode)
+  :hook (graphql-mode . eglot-ensure))
+
+(use-package sql
+  :ensure nil ; Built-in
+  :mode ("\\.sql\\\'" . sql-mode)
+  :hook (sql-mode . eglot-ensure))
+
+;; Elixir, Ruby, and Rails modes
+(use-package elixir-mode
+  :ensure t
+  :mode "\\.exs?\\'")
+
+(use-package ruby-mode
+  :ensure nil ; Built-in
+  :mode "\\.rb\\'")
+
+(use-package projectile-rails
+  :ensure t
+  :after projectile
+  :config (projectile-rails-global-mode))
 
 (use-package treesit-auto
   :custom
@@ -166,30 +230,34 @@
 ;;; --- 7. LSP (EGLOT) ---
 (use-package eglot
   :ensure nil ; Built-in
-  :hook ((python-mode . eglot-ensure)
-         (python-ts-mode . eglot-ensure)
-         (typescript-ts-mode . eglot-ensure)
-         (tsx-ts-mode . eglot-ensure)
-         (haskell-mode . eglot-ensure)
-         (go-ts-mode . eglot-ensure)
-         (rust-ts-mode . eglot-ensure)
-         (js-ts-mode . eglot-ensure)
-         (c-ts-mode . eglot-ensure)
-         (c++-ts-mode . eglot-ensure)
-         (tuareg-mode . eglot-ensure))
+  :init
+  (setq eglot-ensure-modes
+        '(python-mode python-ts-mode typescript-ts-mode tsx-ts-mode
+          haskell-ts-mode haskell-mode go-ts-mode go-mode
+          rust-ts-mode rust-mode js-ts-mode c-ts-mode c++-ts-mode
+          tuareg-mode elm-mode reason-mode rescript-mode css-mode
+          lua-ts-mode tuareg-ts-mode
+          web-mode graphql-mode sql-mode
+          elixir-mode ruby-mode))
+  :hook
+  ((eval . (lambda ()
+             (mapc (lambda (mode) (add-hook mode 'eglot-ensure))
+                   eglot-ensure-modes)))
+   (eglot-managed-mode . (lambda ()
+                           (add-hook 'before-save-hook #'eglot-format-buffer nil 'local))))
   :config
   (setq eglot-autoshutdown t
-        eglot-send-changes-idle-time 0.1)
+        eglot-send-changes-idle-time 0.1
+        eglot-hover-eldoc-documentation t
+        eldoc-echo-area-use-multiline-p t)
   :bind (:map eglot-mode-map
-              ("C-c C-r" . eglot-rename)
-              ("C-c C-f" . eglot-format-buffer)
-              ("C-c l f" . eglot-format)
-              ("C-c l a" . eglot-code-actions)))
-
-(use-package consult-eglot
-  :after (consult eglot)
-  :bind (:map eglot-mode-map
-              ("C-c C-s" . consult-eglot-symbols)))
+              ("C-c l a" . eglot-code-actions)
+              ("C-c l f" . eglot-format-buffer)
+              ("C-c l r" . eglot-rename)
+              ("C-c l d" . eglot-find-declaration)
+              ("C-c l i" . eglot-find-implementation)
+              ("C-c l t" . eglot-find-type-definition)
+              ("C-c l s" . consult-eglot-symbols)))
 
 ;;; --- 8. OCAML CONFIGURATION ---
 (use-package tuareg
@@ -244,3 +312,37 @@
 ;; ## added by OPAM user-setup for emacs / base ## 56ab50dc8996d2bb95e7856a6eddb17b ## you can edit, but keep this line
 (require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
 ;; ## end of OPAM user-setup addition for emacs / base ## keep this line
+
+;;; --- 10. ORG MODE ---
+(use-package org
+  :ensure nil
+  :config
+  (setq org-agenda-files '("~/org"))
+  (use-package org-superstar
+    :ensure t
+    :hook (org-mode . org-superstar-mode))
+  :bind (("C-c a" . org-agenda)))
+
+;;; --- 11. FILE EXPLORER ---
+(use-package treemacs
+  :ensure t
+  :defer t
+  :config
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t)
+  (treemacs-project-follow-mode t)
+  (treemacs-git-mode 'simple)
+  :bind
+  (:map global-map
+        ("M-0" . treemacs-select-window)
+        ("C-x t t" . treemacs)))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
+
+(use-package treemacs-all-the-icons
+  :after treemacs
+  :ensure t
+  :config (treemacs-load-theme "all-the-icons"))
+
