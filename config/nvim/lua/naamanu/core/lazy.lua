@@ -30,6 +30,9 @@ require("lazy").setup({
   ui = {
     border = "rounded",
   },
+  rocks = {
+    enabled = false,
+  },
   performance = {
     rtp = {
       disabled_plugins = {

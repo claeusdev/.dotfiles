@@ -161,13 +161,7 @@ if ! command -v node &> /dev/null; then
 fi
 
 # Python
-if [ "$PKG_MGR" = "apt" ]; then
-    $PKG_INSTALL python3 python3-pip python3-venv
-elif [ "$PKG_MGR" = "dnf" ]; then
-    $PKG_INSTALL python3 python3-pip
-elif [ "$PKG_MGR" = "pacman" ]; then
-    $PKG_INSTALL python python-pip
-fi
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Rust
 if ! command -v rustc &> /dev/null; then
@@ -194,7 +188,10 @@ echo ""
 echo "Installing language servers and formatters..."
 
 # Python tools
-python3 -m pip install --user black ruff pyright
+#uv tool install black
+#uv tool install mypy
+#uv tool install ruff
+#uv tool install ty
 
 # Prettier for JS/TS
 if command -v npm &> /dev/null; then
@@ -254,7 +251,9 @@ if ! command -v ghostty &> /dev/null; then
         echo "Installing Ghostty from source..."
         # Ghostty requires building from source on Linux
         # Install dependencies
-        sudo apt install -y libgtk-4-dev libadwaita-1-dev git zig
+        sudo apt install -y libgtk-4-dev libadwaita-1-dev git
+	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"  
+
 
         # Clone and build (this is a placeholder - actual build may vary)
         echo "Note: Ghostty installation on Linux requires manual steps."

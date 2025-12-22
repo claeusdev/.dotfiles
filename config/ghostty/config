@@ -2,7 +2,7 @@
 
 # Font configuration
 font-family = "Inconsolata Nerd Font"
-font-size = 14
+font-size = 15
 font-thicken = true
 
 # Window configuration
@@ -12,7 +12,7 @@ window-decoration = true
 window-theme = dark
 
 # Theme and colors
-theme = dark
+# theme = dark
 background-opacity = 0.95
 unfocused-split-opacity = 0.7
 
