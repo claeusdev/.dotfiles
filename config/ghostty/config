@@ -1,0 +1,36 @@
+# Ghostty Terminal Configuration
+
+# Font configuration
+font-family = "Inconsolata Nerd Font"
+font-size = 14
+font-thicken = true
+
+# Window configuration
+window-padding-x = 8
+window-padding-y = 8
+window-decoration = true
+window-theme = dark
+
+# Theme and colors
+theme = dark
+background-opacity = 0.95
+unfocused-split-opacity = 0.7
+
+# Shell
+shell-integration = fish
+shell-integration-features = cursor,sudo,title
+
+# Keybindings
+keybind = ctrl+shift+c=copy_to_clipboard
+keybind = ctrl+shift+v=paste_from_clipboard
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+w=close_surface
+keybind = ctrl+tab=next_tab
+keybind = ctrl+shift+tab=previous_tab
+
+# Performance
+copy-on-select = true
+
+# Cursor
+cursor-style = block
+cursor-style-blink = true

@@ -13,7 +13,7 @@ cd ~/.dotfiles
 ```
 
 This will:
-- Create symlinks for your dotfiles (tmux, git, nvim, fish, emacs)
+- Create symlinks for your dotfiles (tmux, git, nvim, fish, ghostty, starship, emacs)
 - Initialize git submodules
 - Back up any existing configs to `~/.dotfiles_old/`
 
@@ -39,10 +39,11 @@ Choose the script for your operating system:
 - **Package managers**: Homebrew (macOS), nvm (Node.js)
 
 ### Shell & Terminal
-- **fish**: Modern, user-friendly shell
+- **ghostty**: Modern GPU-accelerated terminal emulator
+- **fish**: Modern, user-friendly shell with excellent autocompletion
 - **tmux**: Terminal multiplexer for session management
-- **starship**: Beautiful cross-shell prompt
-- **zoxide**: Smart directory navigation
+- **starship**: Beautiful, fast, and customizable cross-shell prompt
+- **zoxide**: Smart directory navigation (cd replacement)
 
 ### Modern CLI Utilities
 - **neovim**: Hyperextensible Vim-based text editor
@@ -89,18 +90,42 @@ Choose the script for your operating system:
 
 ### macOS Specific
 - **Rectangle**: Window management
-- **iTerm2**: Advanced terminal emulator
-- **Raycast**: Spotlight replacement
+- **Raycast**: Spotlight replacement with plugins
 
 ## Post-Installation
 
-### 1. Configure Git
+### 1. Launch Ghostty
+The installation scripts automatically configure Ghostty with:
+- Inconsolata Nerd Font
+- Fish shell integration
+- Dark theme with transparency
+- Useful keybindings
+
+Just launch Ghostty and you're ready to go!
+
+### 2. Verify Fish Shell Configuration
+Open a new terminal and verify modern tools are working:
+```bash
+# Test eza (modern ls)
+ls
+
+# Test bat (cat with syntax highlighting)
+cat ~/.config/fish/config.fish
+
+# Test zoxide (smart cd)
+z ~  # or just 'cd' somewhere, then 'z' to jump back
+
+# Test starship prompt
+# You should see a beautiful prompt with git info, language versions, etc.
+```
+
+### 3. Configure Git
 ```bash
 git config --global user.name "Your Name"
 git config --global user.email "your.email@example.com"
 ```
 
-### 2. Set Fish as Default Shell
+### 4. Set Fish as Default Shell
 ```bash
 # macOS
 chsh -s /opt/homebrew/bin/fish
@@ -109,16 +134,75 @@ chsh -s /opt/homebrew/bin/fish
 chsh -s $(which fish)
 ```
 
-### 3. Install Neovim Plugins
+### 5. Install Neovim Plugins
 ```bash
 nvim +Lazy sync +qa
 ```
 
-### 4. Restart Terminal
-Log out and back in, or open a new terminal window to apply all changes.
+### 6. Restart Terminal
+Log out and back in, or open a new terminal window (or use Ghostty!) to apply all changes.
 
-### 5. Docker Setup (Linux)
+### 7. Docker Setup (Linux)
 After installation, log out and back in for Docker group permissions to take effect.
+
+## Using Modern CLI Tools
+
+The installation configures your shell with aliases for modern replacements of classic Unix tools:
+
+### File Listing (eza)
+```bash
+ls          # List files with icons
+ll          # Long format with details
+la          # List all files including hidden
+lt          # Tree view
+tree        # Also aliased to eza --tree
+```
+
+### File Viewing (bat)
+```bash
+cat file.txt           # View file with syntax highlighting
+bat file.txt           # Same thing
+bat --style=plain      # Plain output without decorations
+```
+
+### File Finding (fd & ripgrep)
+```bash
+fd pattern              # Find files/directories
+fd "\.js$"              # Find all .js files
+rg "search term"        # Search file contents (replaces grep)
+rg -i "case insensitive" # Case-insensitive search
+```
+
+### Smart Navigation (zoxide)
+```bash
+z workspace            # Jump to most-used directory matching "workspace"
+z proj work            # Jump to directory matching "proj" and "work"
+zi                     # Interactive directory picker
+```
+
+After using `cd` to navigate a few times, zoxide learns your patterns and `z` becomes very powerful!
+
+### Git Shortcuts
+The fish config includes many git aliases:
+```bash
+g          # git
+gs         # git status
+ga         # git add
+gc         # git commit
+gcm        # git commit -m "message"
+gp         # git push
+gl         # git pull
+glog       # Pretty git log with graph
+gd         # git diff
+gco        # git checkout
+gb         # git branch
+```
+
+### Lazygit & Lazydocker
+```bash
+lazygit    # Terminal UI for git
+lazydocker # Terminal UI for Docker
+```
 
 ## Customization
 

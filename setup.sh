@@ -42,6 +42,18 @@ mv ~/.config/fish $olddir/
 echo "Creating symlink to fish in ~/.config directory."
 ln -s $dir/config/fish ~/.config/fish
 
+# create symlink for ghostty
+echo "Moving any existing ghostty config from ~/.config to $olddir"
+mv ~/.config/ghostty $olddir/
+echo "Creating symlink to ghostty in ~/.config directory."
+ln -s $dir/config/ghostty ~/.config/ghostty
+
+# create symlink for starship
+echo "Moving any existing starship config from ~/.config to $olddir"
+mv ~/.config/starship.toml $olddir/
+echo "Creating symlink to starship.toml in ~/.config directory."
+ln -s $dir/config/starship.toml ~/.config/starship.toml
+
 # create symlink for emacs
 echo "Moving any existing emacs config from ~/.emacs.d to $olddir"
 mv ~/.emacs.d $olddir/

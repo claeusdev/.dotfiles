@@ -105,7 +105,7 @@ brew install k9s               # Kubernetes TUI
 echo ""
 echo "Installing productivity tools..."
 brew install --cask rectangle  # Window management
-brew install --cask iterm2     # Better terminal
+brew install --cask ghostty    # Modern GPU-accelerated terminal
 brew install --cask raycast    # Spotlight replacement
 
 echo ""
@@ -114,10 +114,106 @@ brew tap homebrew/cask-fonts
 brew install --cask font-jetbrains-mono-nerd-font
 brew install --cask font-fira-code-nerd-font
 brew install --cask font-hack-nerd-font
+brew install --cask font-inconsolata-nerd-font
 
 echo ""
 echo "Setting up fzf key bindings..."
 $(brew --prefix)/opt/fzf/install --key-bindings --completion --no-update-rc
+
+echo ""
+echo "Setting up fish shell configuration..."
+# Create fish config directory if it doesn't exist
+mkdir -p ~/.config/fish
+
+# Initialize starship for fish
+if command -v starship &> /dev/null; then
+    echo "starship init fish | source" >> ~/.config/fish/config.fish
+fi
+
+# Initialize zoxide for fish
+if command -v zoxide &> /dev/null; then
+    echo "zoxide init fish | source" >> ~/.config/fish/config.fish
+fi
+
+# Set up fish aliases and functions
+cat >> ~/.config/fish/config.fish << 'EOF'
+
+# Modern CLI tool aliases
+if command -v eza &> /dev/null
+    alias ls='eza --icons'
+    alias ll='eza -l --icons'
+    alias la='eza -la --icons'
+    alias lt='eza --tree --icons'
+end
+
+if command -v bat &> /dev/null
+    alias cat='bat'
+end
+
+# Git aliases
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias glog='git log --oneline --graph --decorate'
+
+# Directory navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Useful shortcuts
+alias c='clear'
+alias h='history'
+alias vim='nvim'
+alias v='nvim'
+
+EOF
+
+echo ""
+echo "Setting up ghostty terminal configuration..."
+mkdir -p ~/.config/ghostty
+cat > ~/.config/ghostty/config << 'EOF'
+# Ghostty Terminal Configuration
+
+# Font configuration
+font-family = "Inconsolata Nerd Font"
+font-size = 14
+font-thicken = true
+
+# Window configuration
+window-padding-x = 8
+window-padding-y = 8
+window-decoration = true
+window-theme = dark
+
+# Theme and colors
+theme = dark
+background-opacity = 0.95
+unfocused-split-opacity = 0.7
+
+# Shell
+shell-integration = fish
+shell-integration-features = cursor,sudo,title
+
+# Keybindings
+keybind = ctrl+shift+c=copy_to_clipboard
+keybind = ctrl+shift+v=paste_from_clipboard
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+w=close_surface
+keybind = ctrl+tab=next_tab
+keybind = ctrl+shift+tab=previous_tab
+
+# Performance
+copy-on-select = true
+
+# Cursor
+cursor-style = block
+cursor-style-blink = true
+
+EOF
 
 echo ""
 echo "========================================="
