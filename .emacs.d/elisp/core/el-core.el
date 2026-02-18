@@ -1,15 +1,9 @@
 ;;; --- 1. STARTUP OPTIMIZATION ---
-(setq gc-cons-threshold (* 50 1024 1024)) ; 50MB during startup
-
+;; GC threshold and native-comp settings live in early-init.el.
+;; Reset GC to a reasonable value after startup completes.
 (add-hook 'emacs-startup-hook
           (lambda ()
             (setq gc-cons-threshold (* 16 1024 1024)))) ; 16MB for normal use
-
-;; Native compilation settings (Emacs 29+)
-(when (featurep 'native-compile)
-  (setq native-comp-async-report-warnings-errors nil) ; Silence warnings
-  (setq native-comp-deferred-compilation t)           ; Compile in background
-  (setq native-comp-speed 2))                         ; Max optimization
 
 ;; Set custom file to a separate location to keep init.el clean
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))

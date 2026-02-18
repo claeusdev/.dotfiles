@@ -1,7 +1,5 @@
 ;;; --- 7. LSP (EGLOT) ---
-;; NOTE: You need to install the language servers for eglot to work.
-;; For example, for rust, you would run: rustup component add rust-analyzer
-;; To enable LSP for a specific mode, use M-x eglot or add hooks for specific modes
+;; NOTE: You need to install language servers for Eglot to work.
 
 (defconst my/ocaml-lsp-command
   (or (executable-find "ocamllsp")
@@ -16,52 +14,58 @@
 
 (use-package consult-eglot
   :ensure t
-  :after (consult eglot))
+  :defer t
+  :commands (consult-eglot-symbols))
 
 (use-package eglot
   :ensure nil ; Built-in
   :commands (eglot eglot-ensure)
-  ;; Optional: uncomment specific hooks for modes you actively use
-  ;; :hook ((rust-mode rust-ts-mode) . eglot-ensure)
-  ;; :hook ((python-mode python-ts-mode) . eglot-ensure)
   :config
   ;; Better throughput for language servers during large typechecks/indexing.
   (setq read-process-output-max (* 1024 1024))
 
-  (add-to-list 'eglot-server-programs '(elixir-mode . ("elixir-ls")))
-  (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
-  (add-to-list 'eglot-server-programs '(rust-ts-mode . ("rust-analyzer")))
-  (add-to-list 'eglot-server-programs `(haskell-mode . (,my/haskell-lsp-command "--lsp")))
-  (add-to-list 'eglot-server-programs `(haskell-ts-mode . (,my/haskell-lsp-command "--lsp")))
-  (add-to-list 'eglot-server-programs '(js-mode . ("typescript-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs '(js-ts-mode . ("typescript-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs '(typescript-mode . ("typescript-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs '(typescript-ts-mode . ("typescript-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs '(tsx-ts-mode . ("typescript-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs '(web-mode . ("typescript-language-server" "--stdio")))
+  ;; C/C++
   (add-to-list 'eglot-server-programs '((c-mode c++-mode) . ("clangd")))
   (add-to-list 'eglot-server-programs '((c-ts-mode c++-ts-mode) . ("clangd")))
+
+  ;; OCaml
   (add-to-list 'eglot-server-programs `(tuareg-mode . (,my/ocaml-lsp-command)))
   (add-to-list 'eglot-server-programs `(tuareg-ts-mode . (,my/ocaml-lsp-command)))
-  (add-to-list 'eglot-server-programs '(sql-mode . ("sqls")))
 
-  ;; Web/Data languages
-  (add-to-list 'eglot-server-programs '(css-mode . ("vscode-css-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs '(yaml-mode . ("yaml-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
-  (add-to-list 'eglot-server-programs '(python-ts-mode . ("pyright-langserver" "--stdio")))
-  
-  ;; Functional languages - ML family
-  (add-to-list 'eglot-server-programs '(elm-mode . ("elm-language-server")))
-  
-  ;; Functional languages - Lisp family
-  (add-to-list 'eglot-server-programs '(racket-mode . ("racket-langserver")))
-  
-  ;; Functional languages - Other
-  (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
-  (when (and (executable-find "millet-ls")
-             (locate-library "sml-mode"))
+  ;; Haskell
+  (add-to-list 'eglot-server-programs `(haskell-mode . (,my/haskell-lsp-command "--lsp")))
+  (add-to-list 'eglot-server-programs `(haskell-ts-mode . (,my/haskell-lsp-command "--lsp")))
+
+  ;; Nix (optional, if nil is installed)
+  (when (executable-find "nil")
+    (add-to-list 'eglot-server-programs '(nix-mode . ("nil"))))
+
+  ;; Standard ML (optional, if millet-ls is installed)
+  (when (executable-find "millet-ls")
     (add-to-list 'eglot-server-programs '(sml-mode . ("millet-ls"))))
+
+  ;; Racket (optional, if racket-langserver is installed)
+  (when (executable-find "racket-langserver")
+    (add-to-list 'eglot-server-programs '(racket-mode . ("racket-langserver"))))
+
+  ;; Coq (optional, if coq-lsp is installed)
+  (when (executable-find "coq-lsp")
+    (add-to-list 'eglot-server-programs '(coq-mode . ("coq-lsp"))))
+
+  ;; Python (pyright preferred, pylsp fallback)
+  (cond
+   ((executable-find "pyright")
+    (add-to-list 'eglot-server-programs '(python-ts-mode . ("pyright" "--stdio")))
+    (add-to-list 'eglot-server-programs '(python-mode . ("pyright" "--stdio"))))
+   ((executable-find "pylsp")
+    (add-to-list 'eglot-server-programs '(python-ts-mode . ("pylsp")))
+    (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))))
+
+  ;; Julia (optional, if julia is installed)
+  (when (executable-find "julia")
+    (add-to-list 'eglot-server-programs
+                 '(julia-mode . ("julia" "--startup-file=no" "--history-file=no"
+                                 "-e" "using LanguageServer; runserver()"))))
 
   (setq eglot-autoshutdown t
         eglot-events-buffer-size 0

@@ -256,7 +256,66 @@ All settings are in clearly marked sections. Adjust values in respective files:
 
 ---
 
-**Status**: ✅ All modernization steps completed successfully!  
-**Neovim Parity**: 95%+ achieved
+---
 
-The 5% difference is intentional - Emacs has its own strengths (Org mode, built-in features) that complement the modern improvements.
+## Phase 4: Research Engineer Enhancements ✅ (2026-02-18)
+
+### 10. Startup Optimization (`early-init.el`) ✨ NEW FILE
+
+- ✅ Created `early-init.el` for pre-init optimizations
+- ✅ Moved GC threshold (`most-positive-fixnum`) from `el-core.el`
+- ✅ Moved native-comp settings from `el-core.el`
+- ✅ Disabled `package-enable-at-startup`
+- ✅ Disabled menu-bar, tool-bar, scroll-bar before first frame draw (avoids UI flash)
+
+### 11. Python Support (`el-languages.el`, `el-lsp.el`)
+
+- ✅ Added `python-ts-mode` with tree-sitter fallback to `python-mode`
+- ✅ Added pyright LSP (preferred) with pylsp fallback
+- ✅ Eglot auto-starts for both `python-mode` and `python-ts-mode`
+
+### 12. Julia Support (`el-languages.el`, `el-lsp.el`, `el-bindings.el`)
+
+- ✅ Added `julia-mode` use-package with eglot hook
+- ✅ Added Julia LanguageServer.jl LSP entry (conditional on `julia` binary)
+- ✅ Added `C-c f j` — open Julia REPL
+- ✅ Added `C-c f J` — load current file into Julia REPL
+
+### 13. LaTeX Support (`el-latex.el`) ✨ NEW FILE
+
+- ✅ AUCTeX with auto-save, parse-self, PDF mode
+- ✅ Platform-aware PDF viewer (`open` on macOS, `zathura` on Linux)
+- ✅ pdf-tools for inline PDF viewing
+- ✅ cdlatex for fast math input (LaTeX and org-mode)
+
+### 14. Org-babel (`el-org.el`)
+
+- ✅ Enabled babel languages: Python, Julia, shell, LaTeX, emacs-lisp
+- ✅ Disabled babel evaluation prompt for research workflow speed
+- ✅ Set `python3` as babel Python command
+- ✅ Preserve code block indentation on export
+
+### 15. Org-roam (`el-org.el`)
+
+- ✅ Database directory: `~/org/roam/`
+- ✅ Auto-sync database on startup
+- ✅ Keybindings: `C-c n f` (find), `C-c n i` (insert), `C-c n l` (backlinks), `C-c n c` (capture), `C-c n d` (daily)
+
+### New Files Created
+
+- `/Users/nanaadjeimanu/dotfiles/.emacs.d/early-init.el` ✨
+- `/Users/nanaadjeimanu/dotfiles/.emacs.d/elisp/plugins/el-latex.el` ✨
+
+### Files Modified
+
+- `el-core.el` — removed GC startup hack and native-comp (moved to early-init)
+- `el-lsp.el` — added Python (pyright/pylsp) and Julia LSP servers
+- `el-languages.el` — added Python tree-sitter mode and Julia mode
+- `el-bindings.el` — added Julia REPL keybindings (`C-c f j/J`)
+- `el-org.el` — added org-babel and org-roam
+- `init.el` — added `(require 'el-latex)`
+
+---
+
+**Status**: ✅ All modernization steps completed successfully!
+**Neovim Parity**: 95%+ achieved — plus research workflow features unique to Emacs (org-babel, org-roam, AUCTeX).

@@ -100,6 +100,21 @@
    ((executable-find "rlwrap") (my/fp-open-comint-repl "*sml-repl*" "rlwrap" "sml"))
    (t (my/fp-open-comint-repl "*sml-repl*" "sml"))))
 
+(defun my/fp-open-julia-repl ()
+  "Open Julia REPL."
+  (interactive)
+  (my/fp-open-comint-repl "*julia-repl*" "julia"))
+
+(defun my/fp-load-julia-file ()
+  "Load current file into Julia REPL."
+  (interactive)
+  (unless buffer-file-name
+    (user-error "Current buffer is not visiting a file"))
+  (save-buffer)
+  (my/fp-open-julia-repl)
+  (let ((proc (get-buffer-process "*julia-repl*")))
+    (comint-send-string proc (format "include(\"%s\")\n" (expand-file-name buffer-file-name)))))
+
 (defun my/fp-lean-build ()
   "Run `lake build` from the nearest Lean project."
   (interactive)
@@ -133,6 +148,8 @@
 (define-key my/fp-map (kbd "r") #'my/fp-open-racket-repl)
 (define-key my/fp-map (kbd "e") #'my/fp-open-elixir-repl)
 (define-key my/fp-map (kbd "s") #'my/fp-open-sml-repl)
+(define-key my/fp-map (kbd "j") #'my/fp-open-julia-repl)
+(define-key my/fp-map (kbd "J") #'my/fp-load-julia-file)
 (define-key my/fp-map (kbd "l") #'my/fp-lean-build)
 (define-key my/fp-map (kbd "c") #'my/fp-coq-step)
 (define-key my/fp-map (kbd "a") #'my/fp-agda-load)

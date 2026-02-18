@@ -55,6 +55,9 @@ return {
         -- Functional (Other)
         "scala",
         "nix",
+        -- Research
+        "julia",
+        "latex",
       },
       auto_install = true,
       highlight = {

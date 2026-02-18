@@ -16,6 +16,7 @@
 (require 'el-dev-tools)
 (require 'el-lsp)
 (require 'el-languages)
+(require 'el-latex)
 (require 'el-org)
 (require 'el-treemacs)
 (require 'el-vterm)

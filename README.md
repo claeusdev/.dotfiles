@@ -310,6 +310,20 @@ Marks appear as icons in the sign column (gutter) for visual feedback.
 | :--- | :---------- | :--------------- |
 | n    | `<leader>z` | Toggle Zen Mode  |
 
+### LaTeX (vimtex)
+
+**Prefix**: `<localleader>l` (localleader = `,`)
+
+| Mode | Keybinding        | Description             |
+| :--- | :---------------- | :---------------------- |
+| n    | `,ll`             | Compile (continuous)    |
+| n    | `,lv`             | View PDF                |
+| n    | `,lk`             | Stop compilation        |
+| n    | `,lc`             | Clean auxiliary files   |
+| n    | `,lt`             | Open ToC                |
+
+PDF viewer: Skim on macOS, zathura on Linux.
+
 ### Markdown Preview
 
 | Command                  | Description                  |
@@ -425,11 +439,45 @@ Active when editing a file with LSP support.
 - `RET` - Accept completion
 - `C-g` - Cancel
 
+### FP / Research REPLs
+
+**Prefix**: `C-c f` opens the REPL command map
+
+| Keybinding | Description             |
+| :--------- | :---------------------- |
+| `C-c f h`  | Open Haskell REPL       |
+| `C-c f H`  | Load file into Haskell  |
+| `C-c f o`  | Open OCaml REPL         |
+| `C-c f O`  | Load file into OCaml    |
+| `C-c f j`  | Open Julia REPL         |
+| `C-c f J`  | Load file into Julia    |
+| `C-c f r`  | Open Racket REPL        |
+| `C-c f e`  | Open Elixir REPL        |
+| `C-c f s`  | Open SML REPL           |
+| `C-c f l`  | Lean build              |
+| `C-c f c`  | Coq proof step          |
+| `C-c f a`  | Agda type-check/load    |
+
 ### Org Mode
 
-| Keybinding | Description |
-| :--------- | :---------- |
-| `C-c a`    | Org agenda  |
+| Keybinding | Description                          |
+| :--------- | :----------------------------------- |
+| `C-c a`    | Org agenda                           |
+| `C-c c`    | Org capture                          |
+| `C-c l`    | Store link                           |
+| `C-c C-c`  | Execute babel source block           |
+
+### Org-roam (Zettelkasten Notes)
+
+**Prefix**: `C-c n`
+
+| Keybinding | Description              |
+| :--------- | :----------------------- |
+| `C-c n f`  | Find node                |
+| `C-c n i`  | Insert node link         |
+| `C-c n l`  | Toggle backlinks buffer  |
+| `C-c n c`  | Capture to node          |
+| `C-c n d`  | Daily note (today)       |
 
 ### Which-Key
 

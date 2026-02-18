@@ -2,25 +2,14 @@
 (use-package nerd-icons
   :if (display-graphic-p))
 
-;; Monokai theme with doom-themes
-(use-package doom-themes
+;; Modus theme (light)
+(use-package modus-themes
   :ensure t
+  :init
+  (setq modus-themes-bold-constructs t
+        modus-themes-italic-constructs t)
   :config
-  (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t
-        doom-themes-padded-modeline t)
-
-  ;; Load Monokai Pro theme
-  (load-theme 'doom-monokai-pro t)
-
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-
-  ;; Enable custom treemacs theme
-  (doom-themes-treemacs-config)
-
-  ;; Enable custom keywords
-  (doom-themes-org-config))
+  (load-theme 'modus-operandi t))
 
 (use-package doom-modeline
   :ensure t

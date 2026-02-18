@@ -51,7 +51,11 @@ go install golang.org/x/tools/gopls@latest
 ### Python
 
 ```bash
-pip3 install ruff-lsp
+# Pyright (preferred — used by both Emacs and Neovim)
+npm install -g pyright
+
+# Or pylsp (fallback if pyright is unavailable)
+pip3 install python-lsp-server
 ```
 
 ### OCaml
@@ -66,6 +70,13 @@ opam install ocaml-lsp-server
 brew install haskell-language-server
 # or via ghcup
 ghcup install hls
+```
+
+### Julia
+
+```bash
+# Install LanguageServer.jl (used by both Emacs and Neovim)
+julia -e 'using Pkg; Pkg.add("LanguageServer")'
 ```
 
 ### Functional Languages
@@ -158,7 +169,7 @@ which rust-analyzer
 which gopls
 
 # Python
-which ruff-lsp
+which pyright
 
 # OCaml
 which ocamllsp
@@ -269,7 +280,8 @@ Some servers need specific versions. Check:
 | YAML          | yaml-language-server        | ✅ Installed | Already done                                      |
 | Rust          | rust-analyzer               | ⚠️ Optional  | `rustup component add rust-analyzer`              |
 | Go            | gopls                       | ⚠️ Optional  | `brew install gopls`                              |
-| Python        | ruff-lsp                    | ⚠️ Optional  | `pip3 install ruff-lsp`                           |
+| Python        | pyright                     | ⚠️ Optional  | `npm install -g pyright`                          |
+| Julia         | LanguageServer.jl           | ⚠️ Optional  | `julia -e 'using Pkg; Pkg.add("LanguageServer")'`|
 | OCaml         | ocamllsp                    | ⚠️ Optional  | `opam install ocaml-lsp-server`                   |
 | Haskell       | hls                         | ⚠️ Optional  | `brew install haskell-language-server`            |
 | Clojure       | clojure-lsp                 | ⚠️ Optional  | `brew install clojure-lsp`                        |
@@ -295,6 +307,11 @@ Install in this order based on your needs:
 
 - Rust: `rustup component add rust-analyzer`
 - Go: `brew install gopls`
+
+### Priority 2.5 (Research)
+
+- Python: `npm install -g pyright`
+- Julia: `julia -e 'using Pkg; Pkg.add("LanguageServer")'`
 
 ### Priority 3 (Functional Programming)
 

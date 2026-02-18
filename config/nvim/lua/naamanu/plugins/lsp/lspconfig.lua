@@ -209,6 +209,20 @@ return {
 
       -- Racket
       racket_langserver = {},
+
+      -- Julia
+      julials = {
+        cmd = {
+          "julia",
+          "--startup-file=no",
+          "--history-file=no",
+          "-e",
+          [[
+            using LanguageServer
+            runserver()
+          ]],
+        },
+      },
     }
 
     -- Configure and enable all servers using vim.lsp.config

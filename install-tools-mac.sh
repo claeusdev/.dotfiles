@@ -75,6 +75,43 @@ brew install rust              # Rust
 brew install lua               # Lua
 
 echo ""
+echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
+brew install llvm              # Clang/LLVM toolchain (includes clangd)
+brew install bear              # compile_commands.json generator
+brew install ocaml             # OCaml compiler
+brew install opam              # OCaml package manager
+brew install dune              # OCaml build system
+brew install ocaml-lsp         # OCaml language server
+brew install ocamlformat       # OCaml formatter
+brew install merlin            # OCaml editor helper
+brew install smlnj             # Standard ML (SML/NJ)
+brew install sbcl              # Common Lisp
+brew install racket            # Racket runtime
+brew install coq               # Coq proof assistant
+brew install agda              # Agda + agda-mode
+
+# Optional: formula availability can vary by Homebrew setup.
+if brew info isabelle > /dev/null 2>&1; then
+    brew install isabelle
+else
+    echo "Skipping Isabelle (formula not available in this Homebrew setup)."
+fi
+
+if brew info coq-lsp > /dev/null 2>&1; then
+    brew install coq-lsp
+else
+    echo "Skipping coq-lsp (install via OPAM if needed: opam install coq-lsp)."
+fi
+
+if command -v cargo &> /dev/null; then
+    cargo install millet || true
+fi
+
+if command -v raco &> /dev/null; then
+    raco pkg install --auto racket-langserver || true
+fi
+
+echo ""
 echo "Installing language servers and formatters..."
 brew install lua-language-server
 brew install stylua            # Lua formatter
@@ -225,11 +262,13 @@ echo "  - Core: git, curl, wget, make, cmake, gcc"
 echo "  - Shell: fish, tmux, starship, zoxide"
 echo "  - CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, yq"
 echo "  - Languages: node, python, go, rust, lua"
+echo "  - Target stack: clang/clangd, OCaml, SML, Lisp, Racket, Coq, Agda, Isabelle*"
 echo "  - LSP/Formatters: Various language servers and formatters"
 echo "  - Git: gh, lazygit, git-delta"
 echo "  - Databases: postgresql, sqlite, redis"
 echo "  - Containers: docker, lazydocker"
 echo "  - Cloud: awscli, terraform, kubectl, k9s"
+echo "  * Isabelle and coq-lsp are installed when available via Homebrew."
 echo ""
 echo "Next steps:"
 echo "  1. Restart your terminal or run: source ~/.zprofile"

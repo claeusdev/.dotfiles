@@ -34,6 +34,29 @@ else
     exit 1
 fi
 
+install_optional_pkg() {
+    local pkg="$1"
+
+    if [ "$PKG_MGR" = "apt" ]; then
+        sudo apt install -y "$pkg" > /dev/null 2>&1 || {
+            echo "Skipping optional package: $pkg (not available in apt repos)."
+            return 0
+        }
+    elif [ "$PKG_MGR" = "dnf" ]; then
+        sudo dnf install -y "$pkg" > /dev/null 2>&1 || {
+            echo "Skipping optional package: $pkg (not available in dnf repos)."
+            return 0
+        }
+    elif [ "$PKG_MGR" = "pacman" ]; then
+        sudo pacman -S --noconfirm "$pkg" > /dev/null 2>&1 || {
+            echo "Skipping optional package: $pkg (not available in pacman repos)."
+            return 0
+        }
+    fi
+
+    echo "Installed optional package: $pkg"
+}
+
 echo ""
 echo "Updating package lists..."
 $PKG_UPDATE
@@ -185,6 +208,39 @@ fi
 $PKG_INSTALL lua5.4 || $PKG_INSTALL lua || true
 
 echo ""
+echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
+if [ "$PKG_MGR" = "apt" ]; then
+    $PKG_INSTALL clang clangd lldb bear ocaml opam
+elif [ "$PKG_MGR" = "dnf" ]; then
+    $PKG_INSTALL clang clang-tools-extra lldb bear ocaml opam
+elif [ "$PKG_MGR" = "pacman" ]; then
+    $PKG_INSTALL clang llvm lldb bear ocaml opam
+fi
+
+# Dune package names vary by distro.
+install_optional_pkg dune
+install_optional_pkg ocaml-dune
+
+# Additional language runtimes for the target workflow.
+install_optional_pkg smlnj
+install_optional_pkg sbcl
+install_optional_pkg racket
+
+# Proof assistants and theorem provers (repo availability varies by distro).
+install_optional_pkg coq
+install_optional_pkg agda
+install_optional_pkg isabelle
+
+# OPAM-based editor tooling (best effort).
+if command -v opam &> /dev/null; then
+    if [ ! -d "$HOME/.opam" ]; then
+        opam init -a --disable-sandboxing --shell-setup || true
+    fi
+    eval "$(opam env 2>/dev/null)" || true
+    opam install -y ocaml-lsp-server ocamlformat merlin coq-lsp || true
+fi
+
+echo ""
 echo "Installing language servers and formatters..."
 
 # Python tools
@@ -201,6 +257,12 @@ fi
 # Lua tools
 if command -v cargo &> /dev/null; then
     cargo install stylua
+    cargo install millet || true
+fi
+
+# Racket language server (best effort).
+if command -v raco &> /dev/null; then
+    raco pkg install --auto racket-langserver || true
 fi
 
 # ShellCheck
@@ -416,10 +478,12 @@ echo "  - Core: build tools, git, curl, wget, cmake"
 echo "  - Shell: fish, tmux, starship, zoxide"
 echo "  - CLI: neovim, ripgrep, fd, fzf, bat, eza, jq"
 echo "  - Languages: node (via nvm), python3, rust, go, lua"
+echo "  - Target stack: clang/clangd, OCaml, SML, Lisp, Racket, Coq, Agda, Isabelle*"
 echo "  - LSP/Formatters: Various language servers and formatters"
 echo "  - Git: gh, lazygit, git-delta"
 echo "  - Databases: postgresql, sqlite"
 echo "  - Containers: docker, lazydocker"
+echo "  * Some target-stack packages are optional and distro-repository dependent."
 echo ""
 echo "Next steps:"
 echo "  1. Log out and back in for group changes to take effect (Docker)"

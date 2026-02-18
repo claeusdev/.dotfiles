@@ -1,24 +1,27 @@
 # Emacs Configuration Structure
 
-This directory contains the modular Emacs configuration. The main `init.el` file loads the modules from here.
+This directory contains the modular Emacs configuration. The main `init.el` file loads the modules from here. `early-init.el` (in the parent directory) runs before `init.el` for startup optimization.
 
 ## Structure
 
-- `core/`: Contains the core Emacs configuration files.
-  - `el-core.el`: Basic Emacs settings, UI, and startup optimizations.
+- `core/`: Core Emacs configuration files.
+  - `el-core.el`: Basic Emacs settings, UI defaults, GC reset hook.
   - `el-packages.el`: Package management setup (`package.el`, `use-package`).
-  - `el-bindings.el`: Global keybindings.
-- `plugins/`: Contains the configuration for various plugins.
+  - `el-bindings.el`: Global keybindings and FP/research REPL commands.
+- `plugins/`: Plugin and feature configuration.
   - `el-theme.el`: Theme and appearance settings.
-  - `el-completion.el`: Completion setup.
-  - `el-dev-tools.el`: Development tools.
-  - `el-lsp.el`: LSP (Eglot) setup.
-  - `el-languages.el`: Language-specific configurations.
-  - `el-org.el`: Org Mode setup.
-  - `el-treemacs.el`: Treemacs file explorer setup.
-  - `el-vterm.el`: Vterm setup.
-  - `el-evil.el`: Evil mode setup.
+  - `el-completion.el`: Completion setup (Vertico, Corfu).
+  - `el-dev-tools.el`: Development tools and git integration.
+  - `el-lsp.el`: LSP (Eglot) — Python, Julia, OCaml, Haskell, C/C++, etc.
+  - `el-languages.el`: Language modes — FP (OCaml, Haskell, Coq, Lean, Agda), research (Python, Julia), systems (C/C++).
+  - `el-latex.el`: LaTeX editing — AUCTeX, pdf-tools, cdlatex.
+  - `el-org.el`: Org Mode — agenda, capture, babel, roam, citar.
+  - `el-treemacs.el`: Treemacs file explorer.
+  - `el-vterm.el`: Vterm terminal emulator.
+  - `el-evil.el`: Evil mode (Vim keybindings).
+  - `el-session.el`: Session management (desktop-save-mode).
+  - `el-which-key.el`: Keybinding discovery.
 
 ## Adding New Configurations
 
-To add a new configuration, create a new `.el` file in the appropriate directory (`core` or `plugins`) and then `require` it in the main `init.el` file.
+Create a new `.el` file in the appropriate directory (`core` or `plugins`) and then `require` it in the main `init.el` file.

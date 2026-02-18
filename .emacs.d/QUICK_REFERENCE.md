@@ -61,8 +61,17 @@ brew install clojure-lsp nil haskell-language-server
 30+ treesitter parsers including:
 
 - All functional langs (OCaml, Haskell, Elm, Gleam, PureScript, Clojure, Racket, Elixir, Erlang, Scala, Nix)
+- Research (Python, Julia, LaTeX)
 - Web (TypeScript, JavaScript, HTML, CSS)
 - Systems (Rust, Go, C, C++)
+
+### 7. Research Workflow
+
+- **Python** — tree-sitter mode, pyright/pylsp LSP
+- **Julia** — julia-mode, LanguageServer.jl LSP, REPL (`C-c f j`)
+- **LaTeX** — AUCTeX + pdf-tools + cdlatex for fast math input
+- **Org-babel** — execute Python, Julia, shell, LaTeX, elisp blocks inline
+- **Org-roam** — Zettelkasten-style linked notes (`C-c n` prefix)
 
 ---
 
@@ -84,6 +93,26 @@ brew install clojure-lsp nil haskell-language-server
 - `C-c l i` - Go to implementation
 - `C-c l t` - Go to type definition
 - `C-c l s` - Search symbols
+
+### FP / Research REPLs (`C-c f` prefix)
+
+- `C-c f h` / `H` - Haskell REPL / load file
+- `C-c f o` / `O` - OCaml REPL / load file
+- `C-c f j` / `J` - Julia REPL / load file
+- `C-c f r` - Racket REPL
+- `C-c f s` - SML REPL
+- `C-c f e` - Elixir REPL
+- `C-c f l` - Lean build
+- `C-c f c` - Coq step
+- `C-c f a` - Agda load
+
+### Org-roam (`C-c n` prefix)
+
+- `C-c n f` - Find node
+- `C-c n i` - Insert node link
+- `C-c n l` - Toggle backlinks buffer
+- `C-c n c` - Capture to node
+- `C-c n d` - Daily note (today)
 
 ### Navigation
 
@@ -111,20 +140,23 @@ brew install clojure-lsp nil haskell-language-server
 
 ```
 ~/.emacs.d/
+├── early-init.el              # Startup optimization (GC, native-comp, UI)
 ├── init.el                    # Main entry point
 ├── elisp/
 │   ├── core/
 │   │   ├── el-packages.el    # Package management
 │   │   ├── el-core.el        # Core settings
-│   │   └── el-bindings.el    # Keybindings
+│   │   └── el-bindings.el    # Keybindings + FP/research REPLs
 │   └── plugins/
 │       ├── el-theme.el       # Theme & appearance
-│       ├── el-which-key.el   # ✨ NEW
+│       ├── el-which-key.el   # Keybinding discovery
 │       ├── el-completion.el  # Completion (Vertico/Corfu)
 │       ├── el-dev-tools.el   # Dev tools & git
-│       ├── el-lsp.el         # LSP configuration
-│       ├── el-languages.el   # Language modes & treesitter
-│       ├── el-session.el     # ✨ NEW
+│       ├── el-lsp.el         # LSP configuration (Eglot)
+│       ├── el-languages.el   # Language modes (FP + Python/Julia)
+│       ├── el-latex.el       # AUCTeX + pdf-tools + cdlatex
+│       ├── el-org.el         # Org + babel + roam + citar
+│       ├── el-session.el     # Session management
 │       └── ...
 ```
 
@@ -138,6 +170,9 @@ Want to change something? Edit these files:
 - **Theme**: `el-theme.el` → change `doom-one` to another
 - **Transparency**: `el-theme.el` → comment out transparency lines
 - **Add language**: `el-languages.el` → add `use-package` block
+- **LaTeX settings**: `el-latex.el` → AUCTeX, pdf-tools, cdlatex
+- **Org-roam directory**: `el-org.el` → `org-roam-directory`
+- **Babel languages**: `el-org.el` → `org-babel-load-languages`
 
 ---
 
@@ -229,15 +264,11 @@ M-x profiler-report
 
 1. Learn Magit: `C-x g` and explore the interface
 2. Try Org mode: Create a `.org` file
-3. Projectile: `C-c p h` for project help
-4. Debugging: `C-c d` prefix for DAP commands
-
-### Optional Enhancements
-
-- Add more themes: Install `modus-themes` or `ef-themes`
-- Customize modeline: Already have `doom-modeline`
-- Add snippets: Already have `yasnippet`
-- Org-roam for notes: `(use-package org-roam)`
+3. Org-roam: `C-c n f` to create your first Zettelkasten node
+4. Org-babel: Write a Python/Julia src block, `C-c C-c` to execute
+5. LaTeX: Open a `.tex` file — AUCTeX activates automatically
+6. Projectile: `C-c p h` for project help
+7. Debugging: `C-c d` prefix for DAP commands
 
 ### Resources
 
@@ -248,7 +279,7 @@ M-x profiler-report
 
 ---
 
-**Last Updated**: 2026-01-05  
-**Status**: ✅ Fully modernized and ready to use!
+**Last Updated**: 2026-02-18
+**Status**: ✅ Fully modernized with research workflow support!
 
 Enjoy your modernized Emacs configuration! 🎉

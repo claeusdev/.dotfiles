@@ -65,7 +65,19 @@
 
   ;; Enable citations automatically if a bibliography exists.
   (when (file-exists-p my/org-bibliography-file)
-    (setq org-cite-global-bibliography (list my/org-bibliography-file))))
+    (setq org-cite-global-bibliography (list my/org-bibliography-file)))
+
+  ;; Org-babel — execute source blocks in org files.
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t)
+     (julia . t)
+     (shell . t)
+     (latex . t)))
+  (setq org-confirm-babel-evaluate nil
+        org-babel-python-command "python3"
+        org-src-preserve-indentation t))
 
 (use-package citar
   :ensure t
@@ -88,6 +100,20 @@
 (use-package org-superstar
   :ensure t
   :hook (org-mode . org-superstar-mode))
+
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory (expand-file-name "roam" my/org-directory))
+  :bind (("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n c" . org-roam-capture)
+         ("C-c n d" . org-roam-dailies-goto-today))
+  :config
+  (unless (file-directory-p org-roam-directory)
+    (make-directory org-roam-directory t))
+  (org-roam-db-autosync-mode))
 
 (provide 'el-org)
 ;;; el-org.el ends here
