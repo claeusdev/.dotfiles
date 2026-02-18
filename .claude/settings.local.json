@@ -12,7 +12,11 @@
       "Bash(git rm:*)",
       "Bash(GIT_EDITOR=true git rebase:*)",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(git rebase:*)",
+      "Bash(git push:*)",
+      "Bash(ghostty:*)"
     ]
   }
 }

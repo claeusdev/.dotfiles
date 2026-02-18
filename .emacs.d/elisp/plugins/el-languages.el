@@ -5,6 +5,40 @@
   (unless (file-remote-p default-directory)
     (eglot-ensure)))
 
+(defun my/sml-maybe-eglot ()
+  "Start SML LSP only when Millet is available."
+  (when (executable-find "millet-ls")
+    (my/eglot-ensure-local)))
+
+(defun my/lean-installed-p ()
+  "Return non-nil when Lean and `lean4-mode` are installed."
+  (and (executable-find "lean")
+       (locate-library "lean4-mode")))
+
+(defun my/coq-installed-p ()
+  "Return non-nil when Coq and Proof General are installed."
+  (and (executable-find "coqtop")
+       (or (locate-library "proof-site")
+           (locate-library "proof-general"))))
+
+(defun my/sml-installed-p ()
+  "Return non-nil when SML and `sml-mode` are installed."
+  (and (executable-find "sml")
+       (locate-library "sml-mode")))
+
+(defun my/setup-agda-mode ()
+  "Load Agda mode from `agda-mode locate` when available."
+  (let* ((agda-mode-bin (executable-find "agda-mode"))
+         (agda-mode-file
+          (when agda-mode-bin
+            (ignore-errors (car (process-lines agda-mode-bin "locate"))))))
+    (when (and agda-mode-file (file-readable-p agda-mode-file))
+      (load-file agda-mode-file)
+      (add-to-list 'auto-mode-alist '("\\.agda\\'" . agda2-mode))
+      (add-to-list 'auto-mode-alist '("\\.lagda\\'" . agda2-mode))
+      (add-to-list 'auto-mode-alist '("\\.lagda\\.md\\'" . agda2-mode))
+      t)))
+
 ;; Web and SQL modes
 (use-package web-mode
   :ensure t
@@ -117,6 +151,8 @@
         c-ts-mode-indent-style 'linux))
 
 ;; Functional languages - ML family
+(my/setup-agda-mode)
+
 (use-package elm-mode
   :ensure t
   :mode "\\.elm\\'"
@@ -150,6 +186,32 @@
   :hook (erlang-mode . my/eglot-ensure-local))
 
 ;; Functional languages - Other
+(use-package lean4-mode
+  :if (my/lean-installed-p)
+  :ensure nil
+  :mode "\\.lean\\'")
+
+(use-package proof-general
+  :if (my/coq-installed-p)
+  :ensure nil
+  :defer t
+  :init
+  (setq proof-splash-enable nil))
+
+(when (my/coq-installed-p)
+  (add-to-list 'auto-mode-alist '("\\.v\\'" . coq-mode)))
+
+(use-package sml-mode
+  :if (my/sml-installed-p)
+  :ensure nil
+  :mode (("\\.sml\\'" . sml-mode)
+         ("\\.sig\\'" . sml-mode)
+         ("\\.fun\\'" . sml-mode)
+         ("\\.cm\\'" . sml-mode))
+  :hook (sml-mode . my/sml-maybe-eglot)
+  :config
+  (setq sml-indent-level 2))
+
 (use-package nix-mode
   :ensure t
   :mode "\\.nix\\'"

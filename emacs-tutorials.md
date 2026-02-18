@@ -58,6 +58,27 @@ Recommended structure:
 - `C-c f O`: Load current OCaml file into REPL
 - `C-c f r`: Open Racket REPL
 - `C-c f e`: Open Elixir REPL (`iex`)
+- `C-c f s`: Open Standard ML REPL
+- `C-c f l`: Build Lean project with `lake build`
+- `C-c f c`: Step Coq proof forward (Proof General)
+- `C-c f a`: Type-check/load current Agda file (`agda2-load`)
+
+## Agda Mode Setup
+
+Your config auto-loads Agda mode by running `agda-mode locate` at startup.
+
+Requirements:
+- `agda` and `agda-mode` installed and on `PATH`.
+- Typical install path from Haskell tooling (`cabal`): `~/.cabal/bin/agda-mode`.
+
+Common install commands:
+- `cabal install Agda`
+- Then verify: `agda-mode locate`
+
+File extensions enabled:
+- `.agda`
+- `.lagda`
+- `.lagda.md`
 
 Typical OCaml loop:
 1. Open `.ml` file.
@@ -68,3 +89,11 @@ Typical paper-note loop:
 1. `C-c b a` to attach paper.
 2. `C-c c` then select `p` (paper note).
 3. In notes, `C-c b i` to insert citations.
+
+## Additional FP Languages To Add Next
+
+- Idris 2: dependent types and totality checking.
+- F*: verification-oriented functional programming.
+- Common Lisp (`sly`): REPL-first macro-heavy workflow.
+- Clojure (`clojure-mode` + CIDER): hosted Lisp with strong tooling.
+- Purescript: typed FP with JavaScript runtime.

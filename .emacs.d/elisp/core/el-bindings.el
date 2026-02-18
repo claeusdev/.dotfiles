@@ -92,6 +92,38 @@
   (interactive)
   (my/fp-open-comint-repl "*elixir-repl*" "iex"))
 
+(defun my/fp-open-sml-repl ()
+  "Open Standard ML REPL."
+  (interactive)
+  (cond
+   ((fboundp 'run-sml) (call-interactively 'run-sml))
+   ((executable-find "rlwrap") (my/fp-open-comint-repl "*sml-repl*" "rlwrap" "sml"))
+   (t (my/fp-open-comint-repl "*sml-repl*" "sml"))))
+
+(defun my/fp-lean-build ()
+  "Run `lake build` from the nearest Lean project."
+  (interactive)
+  (let ((default-directory (or (locate-dominating-file default-directory "lakefile.lean")
+                               default-directory)))
+    (compile "lake build")))
+
+(defun my/fp-coq-step ()
+  "Advance one Coq proof step when Proof General is active."
+  (interactive)
+  (unless (fboundp 'proof-assert-next-command-interactive)
+    (user-error "Proof General is not loaded in this buffer"))
+  (call-interactively 'proof-assert-next-command-interactive))
+
+(defun my/fp-agda-load ()
+  "Type-check/load current Agda buffer."
+  (interactive)
+  (unless buffer-file-name
+    (user-error "Current buffer is not visiting a file"))
+  (unless (fboundp 'agda2-load)
+    (user-error "Agda mode is not loaded. Install Agda and ensure `agda-mode` is on PATH"))
+  (save-buffer)
+  (call-interactively 'agda2-load))
+
 (define-prefix-command 'my/fp-map)
 (global-set-key (kbd "C-c f") 'my/fp-map)
 (define-key my/fp-map (kbd "h") #'my/fp-open-haskell-repl)
@@ -100,6 +132,10 @@
 (define-key my/fp-map (kbd "O") #'my/fp-load-ocaml-file)
 (define-key my/fp-map (kbd "r") #'my/fp-open-racket-repl)
 (define-key my/fp-map (kbd "e") #'my/fp-open-elixir-repl)
+(define-key my/fp-map (kbd "s") #'my/fp-open-sml-repl)
+(define-key my/fp-map (kbd "l") #'my/fp-lean-build)
+(define-key my/fp-map (kbd "c") #'my/fp-coq-step)
+(define-key my/fp-map (kbd "a") #'my/fp-agda-load)
 
 ;; Embark (Actions menu)
 (use-package embark

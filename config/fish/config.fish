@@ -27,6 +27,11 @@ if command -v zoxide &> /dev/null
     zoxide init fish | source
 end
 
+# fnm (Fast Node Manager)
+if command -v fnm &> /dev/null
+    fnm env --use-on-cd --shell fish | source
+end
+
 # ======================
 # Modern CLI Tool Aliases
 # ======================

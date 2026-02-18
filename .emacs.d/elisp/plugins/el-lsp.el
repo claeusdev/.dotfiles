@@ -59,6 +59,9 @@
   
   ;; Functional languages - Other
   (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
+  (when (and (executable-find "millet-ls")
+             (locate-library "sml-mode"))
+    (add-to-list 'eglot-server-programs '(sml-mode . ("millet-ls"))))
 
   (setq eglot-autoshutdown t
         eglot-events-buffer-size 0
