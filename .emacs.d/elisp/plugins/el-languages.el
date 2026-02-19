@@ -1,14 +1,30 @@
-;;; el-languages.el --- Language-specific modes and tooling -*- lexical-binding: t; -*-
+;;; el-languages.el --- Language setup -*- lexical-binding: t; -*-
 
 (defun my/eglot-ensure-local ()
   "Start Eglot only for local projects."
   (unless (file-remote-p default-directory)
     (eglot-ensure)))
 
-(defun my/sml-maybe-eglot ()
-  "Start SML LSP only when Millet is available."
-  (when (executable-find "millet-ls")
+(defun my/eglot-ensure-when-executable (server-binary)
+  "Start Eglot when SERVER-BINARY is available."
+  (when (executable-find server-binary)
     (my/eglot-ensure-local)))
+
+(defun my/sml-maybe-eglot ()
+  "Start Eglot for Standard ML when Millet is available."
+  (my/eglot-ensure-when-executable "millet-ls"))
+
+(defun my/racket-maybe-eglot ()
+  "Start Eglot for Racket when racket-langserver is available."
+  (my/eglot-ensure-when-executable "racket-langserver"))
+
+(defun my/nix-maybe-eglot ()
+  "Start Eglot for Nix when nil is available."
+  (my/eglot-ensure-when-executable "nil"))
+
+(defun my/coq-maybe-eglot ()
+  "Start Eglot for Coq when coq-lsp is available."
+  (my/eglot-ensure-when-executable "coq-lsp"))
 
 (defun my/treesit-ready-p (language)
   "Return non-nil when tree-sitter LANGUAGE grammar is available."
@@ -18,19 +34,19 @@
        (treesit-ready-p language t)))
 
 (defun my/c-or-c-ts-mode ()
-  "Use `c-ts-mode' when ready, otherwise fall back to `c-mode'."
+  "Use `c-ts-mode' when available, otherwise use `c-mode'."
   (if (my/treesit-ready-p 'c)
       (c-ts-mode)
     (c-mode)))
 
 (defun my/cpp-or-cpp-ts-mode ()
-  "Use `c++-ts-mode' when ready, otherwise fall back to `c++-mode'."
+  "Use `c++-ts-mode' when available, otherwise use `c++-mode'."
   (if (my/treesit-ready-p 'cpp)
       (c++-ts-mode)
     (c++-mode)))
 
 (defun my/proof-general-load ()
-  "Load Proof General if available."
+  "Load Proof General when available."
   (or (featurep 'proof-general)
       (featurep 'proof-site)
       (require 'proof-site nil t)
@@ -45,7 +61,7 @@
     (fundamental-mode)))
 
 (defun my/isabelle-file-mode ()
-  "Open Isabelle theory files using Proof General when available."
+  "Open Isabelle files using Proof General when available."
   (interactive)
   (my/proof-general-load)
   (cond
@@ -65,12 +81,6 @@
       (add-to-list 'auto-mode-alist '("\\.lagda\\'" . agda2-mode))
       (add-to-list 'auto-mode-alist '("\\.lagda\\.md\\'" . agda2-mode))
       t)))
-
-(defun my/python-or-python-ts-mode ()
-  "Use `python-ts-mode' when ready, otherwise fall back to `python-mode'."
-  (if (my/treesit-ready-p 'python)
-      (python-ts-mode)
-    (python-mode)))
 
 (defun my/lean-installed-p ()
   "Return non-nil when Lean and `lean4-mode` are installed."
@@ -94,24 +104,21 @@
 
 ;;; OCaml
 (use-package tuareg
-  :ensure t
   :mode ("\\.ml[ily]?\\'" . tuareg-mode)
   :hook (tuareg-mode . my/eglot-ensure-local))
 
 (add-to-list 'auto-mode-alist '("dune\\'" . tuareg-mode))
 (add-to-list 'auto-mode-alist '("dune-project\\'" . tuareg-mode))
 
-;; Use OPAM Merlin integration if available.
 (let ((opam-share (ignore-errors (car (process-lines "opam" "var" "share")))))
   (when (and opam-share (file-directory-p opam-share))
     (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
     (autoload 'merlin-mode "merlin" "Merlin mode" t)
-    (add-hook 'tuareg-mode-hook 'merlin-mode)
-    (add-hook 'caml-mode-hook 'merlin-mode)))
+    (add-hook 'tuareg-mode-hook #'merlin-mode)
+    (add-hook 'caml-mode-hook #'merlin-mode)))
 
 ;;; Standard ML
 (use-package sml-mode
-  :ensure t
   :mode (("\\.sml\\'" . sml-mode)
          ("\\.sig\\'" . sml-mode)
          ("\\.fun\\'" . sml-mode)
@@ -120,7 +127,7 @@
   :config
   (setq sml-indent-level 2))
 
-;;; Lisp + Racket
+;;; Lisp and Racket
 (use-package lisp-mode
   :ensure nil
   :mode (("\\.lisp\\'" . lisp-mode)
@@ -131,17 +138,12 @@
   :ensure nil
   :mode "\\.scm\\'")
 
-(define-derived-mode racket-mode scheme-mode "Racket"
-  "Major mode for Racket source files."
-  (setq-local comment-start ";")
-  (setq-local comment-end ""))
-
-(add-to-list 'auto-mode-alist '("\\.rkt\\'" . racket-mode))
-(add-hook 'racket-mode-hook #'my/eglot-ensure-local)
+(use-package racket-mode
+  :mode "\\.rkt\\'"
+  :hook (racket-mode . my/racket-maybe-eglot))
 
 ;;; Haskell
 (use-package haskell-mode
-  :ensure t
   :mode "\\.hs\\'"
   :hook ((haskell-mode . my/eglot-ensure-local)
          (haskell-mode . interactive-haskell-mode))
@@ -149,38 +151,25 @@
   (setq haskell-process-suggest-remove-import-lines t
         haskell-process-auto-import-loaded-modules t))
 
-;;; Lean + Nix
+;;; Lean and Nix
 (use-package lean4-mode
   :if (my/lean-installed-p)
   :ensure nil
   :mode "\\.lean\\'")
 
 (use-package nix-mode
-  :ensure t
   :mode "\\.nix\\'"
-  :hook (nix-mode . my/eglot-ensure-local))
+  :hook (nix-mode . my/nix-maybe-eglot))
 
-;;; Coq + Isabelle (Proof General)
+;;; Coq and Isabelle
 (use-package proof-general
-  :ensure t
   :defer t
   :init
   (setq proof-splash-enable nil))
 
 (add-to-list 'auto-mode-alist '("\\.v\\'" . my/coq-file-mode))
 (add-to-list 'auto-mode-alist '("\\.thy\\'" . my/isabelle-file-mode))
-(add-hook 'coq-mode-hook #'my/eglot-ensure-local)
-
-;;; Python
-(add-to-list 'auto-mode-alist '("\\.py\\'" . my/python-or-python-ts-mode))
-(add-hook 'python-mode-hook #'my/eglot-ensure-local)
-(add-hook 'python-ts-mode-hook #'my/eglot-ensure-local)
-
-;;; Julia
-(use-package julia-mode
-  :ensure t
-  :mode "\\.jl\\'"
-  :hook (julia-mode . my/eglot-ensure-local))
+(add-hook 'coq-mode-hook #'my/coq-maybe-eglot)
 
 ;;; Agda
 (my/setup-agda-mode)

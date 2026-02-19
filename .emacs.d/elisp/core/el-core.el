@@ -1,91 +1,51 @@
-;;; --- 1. STARTUP OPTIMIZATION ---
-;; GC threshold and native-comp settings live in early-init.el.
-;; Reset GC to a reasonable value after startup completes.
+;;; el-core.el --- Core editor defaults -*- lexical-binding: t; -*-
+
 (add-hook 'emacs-startup-hook
           (lambda ()
-            (setq gc-cons-threshold (* 16 1024 1024)))) ; 16MB for normal use
+            (setq gc-cons-threshold (* 16 1024 1024))))
 
-;; Set custom file to a separate location to keep init.el clean
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
-  (load custom-file))
+  (load custom-file nil 'nomessage))
 
-;; Load shell environment variables (important for GUI Emacs)
 (use-package exec-path-from-shell
-  :ensure t
-  :init
-  (when (memq window-system '(mac ns x))
-    (exec-path-from-shell-initialize)))
-
-;;; --- 2. UI & DEFAULTS ---
+  :if (memq window-system '(mac ns x))
+  :config
+  (exec-path-from-shell-initialize))
 
 (setq-default
  inhibit-startup-screen t
- initial-scratch-message ";; Welcome back!\n"
- use-dialog-box nil
- use-file-dialog nil
- cursor-in-non-selected-windows nil
- highlight-nonselected-windows nil
- truncate-lines t
+ initial-scratch-message ";; Clean slate loaded.\n"
  indent-tabs-mode nil
+ tab-width 2
+ fill-column 100
+ truncate-lines t
  require-final-newline t
- sentence-end-double-space nil
- line-move-visual t
- visible-bell t
- show-trailing-whitespace nil) ; Enable per-mode instead
+ sentence-end-double-space nil)
 
-;; Show trailing whitespace only in prog-mode
-(add-hook 'prog-mode-hook (lambda () (setq show-trailing-whitespace t)))
+(when (fboundp 'tool-bar-mode)
+  (tool-bar-mode -1))
+(when (fboundp 'scroll-bar-mode)
+  (scroll-bar-mode -1))
+(when (fboundp 'menu-bar-mode)
+  (menu-bar-mode -1))
 
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
-(pixel-scroll-precision-mode 1)
-(display-time-mode 1) ; Show time in the modeline
 
-;; Remember state
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (setq show-trailing-whitespace t)
+            (display-fill-column-indicator-mode 1)))
+
 (recentf-mode 1)
 (savehist-mode 1)
 (save-place-mode 1)
 (global-auto-revert-mode 1)
-(setq global-auto-revert-non-file-buffers t)
-(setq history-length 25)
 
-(add-hook 'prog-mode-hook
-          (lambda () 
-            (display-line-numbers-mode 1)
-            (hl-line-mode 1)
-            (hs-minor-mode 1)))
-
-;;; --- 3. MODERN DEFAULTS (Neovim parity) ---
-
-;; Scrolloff equivalent - keep cursor centered
-(setq scroll-margin 8)
-(setq scroll-conservatively 101)
-(setq scroll-preserve-screen-position t)
-
-;; Color column at 100 (like Neovim)
-(setq-default fill-column 100)
-(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-
-;; System clipboard integration
-(setq select-enable-clipboard t)
-(setq select-enable-primary t)
-(setq save-interprogram-paste-before-kill t)
-
-;; Persistent undo history
-(use-package undo-tree
-  :ensure t
-  :config
-  (global-undo-tree-mode)
-  (setq undo-tree-auto-save-history t)
-  (setq undo-tree-history-directory-alist
-        '(("." . "~/.emacs.d/undo"))))
-
-;; Create undo directory if it doesn't exist
-(let ((undo-dir (expand-file-name "~/.emacs.d/undo")))
-  (unless (file-directory-p undo-dir)
-    (make-directory undo-dir t)))
+(setq select-enable-clipboard t
+      select-enable-primary t
+      history-length 200)
 
 (provide 'el-core)
+;;; el-core.el ends here

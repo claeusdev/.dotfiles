@@ -1,30 +1,9 @@
-;;; --- 9. TERMINAL & KEYS ---
+;;; el-bindings.el --- Keybindings and REPL helpers -*- lexical-binding: t; -*-
+
 (require 'comint)
 
-(defun my/toggle-vterm ()
-  "Toggle vterm terminal at bottom."
-  (interactive)
-  (if (get-buffer "*vterm*")
-      (if (string= (buffer-name) "*vterm*")
-          (delete-window)
-        (pop-to-buffer "*vterm*"))
-    (vterm)))
-
-(global-set-key (kbd "C-`") 'my/toggle-vterm)
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(global-set-key (kbd "M-o") 'other-window)
-(global-set-key (kbd "C-c w") 'delete-window)
-(global-set-key (kbd "C-c r") 'replace-string)
-
-;; Enable CUA mode for familiar copy/paste/undo bindings (Cmd on Mac, Ctrl on Linux/Windows)
-;; This uses Command key on macOS (s-c, s-v, s-x, s-z, s-a) which won't conflict
-(cua-mode t)
-(setq cua-auto-tabify-rectangles nil) ; Don't tabify after rectangle commands
-(setq cua-keep-region-after-copy t)   ; Keep region active after copy
-
-;; Additional undo/redo bindings
-(global-set-key (kbd "C-z") 'undo-tree-undo)     ; Undo (Ctrl+Z)
-(global-set-key (kbd "C-S-z") 'undo-tree-redo)   ; Redo (Ctrl+Shift+Z)
+(global-set-key (kbd "<escape>") #'keyboard-escape-quit)
+(global-set-key (kbd "M-o") #'other-window)
 
 (defun my/fp-open-comint-repl (buffer-name program &rest args)
   "Open BUFFER-NAME running PROGRAM with ARGS in a comint session."
@@ -59,7 +38,7 @@
   (interactive)
   (cond
    ((fboundp 'utop) (utop))
-   ((fboundp 'tuareg-run-ocaml) (call-interactively 'tuareg-run-ocaml))
+   ((fboundp 'tuareg-run-ocaml) (call-interactively #'tuareg-run-ocaml))
    ((executable-find "utop") (my/fp-open-comint-repl "*ocaml-repl*" "utop"))
    (t (my/fp-open-comint-repl "*ocaml-repl*" "ocaml"))))
 
@@ -80,6 +59,14 @@
           (user-error "No OCaml REPL process found"))
         (comint-send-string proc (format "#use \"%s\";;\n" (expand-file-name buffer-file-name)))))))
 
+(defun my/fp-open-sml-repl ()
+  "Open Standard ML REPL."
+  (interactive)
+  (cond
+   ((fboundp 'run-sml) (call-interactively #'run-sml))
+   ((executable-find "rlwrap") (my/fp-open-comint-repl "*sml-repl*" "rlwrap" "sml"))
+   (t (my/fp-open-comint-repl "*sml-repl*" "sml"))))
+
 (defun my/fp-open-racket-repl ()
   "Open Racket REPL."
   (interactive)
@@ -87,33 +74,15 @@
       (racket-repl)
     (my/fp-open-comint-repl "*racket-repl*" "racket")))
 
-(defun my/fp-open-elixir-repl ()
-  "Open Elixir REPL."
+(defun my/fp-open-common-lisp-repl ()
+  "Open Common Lisp REPL via SBCL."
   (interactive)
-  (my/fp-open-comint-repl "*elixir-repl*" "iex"))
+  (my/fp-open-comint-repl "*common-lisp-repl*" "sbcl"))
 
-(defun my/fp-open-sml-repl ()
-  "Open Standard ML REPL."
+(defun my/fp-open-nix-repl ()
+  "Open Nix REPL."
   (interactive)
-  (cond
-   ((fboundp 'run-sml) (call-interactively 'run-sml))
-   ((executable-find "rlwrap") (my/fp-open-comint-repl "*sml-repl*" "rlwrap" "sml"))
-   (t (my/fp-open-comint-repl "*sml-repl*" "sml"))))
-
-(defun my/fp-open-julia-repl ()
-  "Open Julia REPL."
-  (interactive)
-  (my/fp-open-comint-repl "*julia-repl*" "julia"))
-
-(defun my/fp-load-julia-file ()
-  "Load current file into Julia REPL."
-  (interactive)
-  (unless buffer-file-name
-    (user-error "Current buffer is not visiting a file"))
-  (save-buffer)
-  (my/fp-open-julia-repl)
-  (let ((proc (get-buffer-process "*julia-repl*")))
-    (comint-send-string proc (format "include(\"%s\")\n" (expand-file-name buffer-file-name)))))
+  (my/fp-open-comint-repl "*nix-repl*" "nix" "repl"))
 
 (defun my/fp-lean-build ()
   "Run `lake build` from the nearest Lean project."
@@ -127,17 +96,15 @@
   (interactive)
   (unless (fboundp 'proof-assert-next-command-interactive)
     (user-error "Proof General is not loaded in this buffer"))
-  (call-interactively 'proof-assert-next-command-interactive))
+  (call-interactively #'proof-assert-next-command-interactive))
 
 (defun my/fp-agda-load ()
   "Type-check/load current Agda buffer."
   (interactive)
-  (unless buffer-file-name
-    (user-error "Current buffer is not visiting a file"))
   (unless (fboundp 'agda2-load)
-    (user-error "Agda mode is not loaded. Install Agda and ensure `agda-mode` is on PATH"))
+    (user-error "Agda mode is not loaded. Ensure `agda-mode` is on PATH"))
   (save-buffer)
-  (call-interactively 'agda2-load))
+  (call-interactively #'agda2-load))
 
 (define-prefix-command 'my/fp-map)
 (global-set-key (kbd "C-c f") 'my/fp-map)
@@ -145,22 +112,13 @@
 (define-key my/fp-map (kbd "H") #'my/fp-load-haskell-file)
 (define-key my/fp-map (kbd "o") #'my/fp-open-ocaml-repl)
 (define-key my/fp-map (kbd "O") #'my/fp-load-ocaml-file)
-(define-key my/fp-map (kbd "r") #'my/fp-open-racket-repl)
-(define-key my/fp-map (kbd "e") #'my/fp-open-elixir-repl)
 (define-key my/fp-map (kbd "s") #'my/fp-open-sml-repl)
-(define-key my/fp-map (kbd "j") #'my/fp-open-julia-repl)
-(define-key my/fp-map (kbd "J") #'my/fp-load-julia-file)
+(define-key my/fp-map (kbd "r") #'my/fp-open-racket-repl)
+(define-key my/fp-map (kbd "k") #'my/fp-open-common-lisp-repl)
+(define-key my/fp-map (kbd "n") #'my/fp-open-nix-repl)
 (define-key my/fp-map (kbd "l") #'my/fp-lean-build)
 (define-key my/fp-map (kbd "c") #'my/fp-coq-step)
 (define-key my/fp-map (kbd "a") #'my/fp-agda-load)
 
-;; Embark (Actions menu)
-(use-package embark
-  :bind (("C-." . embark-act)
-         ("M-." . embark-dwim))
-  :init (setq prefix-help-command #'embark-prefix-help-command))
-
-(use-package embark-consult
-  :after (embark consult))
-
 (provide 'el-bindings)
+;;; el-bindings.el ends here
