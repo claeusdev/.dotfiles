@@ -1,25 +1,24 @@
-.emacs.d/elpa
-.emacs.d/tree-sitter
-.emacs.d/recentf
-.emacs.d/places
-.emacs.d/history
-.emacs.d/projectile-bookmarks.eld
-.emacs.d/custom.el
-.emacs.d/desktop/
-.emacs.d/undo/
-.emacs.d/eln-cache/
-.emacs.d/auto-save-list/
-.emacs.d/opam-user-setup.el
-.emacs.d/#*#
-.emacs.d/*~
+dot_emacs.d/elpa
+dot_emacs.d/tree-sitter
+dot_emacs.d/recentf
+dot_emacs.d/places
+dot_emacs.d/history
+dot_emacs.d/projectile-bookmarks.eld
+dot_emacs.d/desktop/
+dot_emacs.d/undo/
+dot_emacs.d/eln-cache/
+dot_emacs.d/auto-save-list/
+dot_emacs.d/org-roam.db
+dot_emacs.d/#*#
+dot_emacs.d/*~
 .DS_Store
 
 # Fish shell
-config/fish/fish_variables
+dot_config/fish/fish_variables
 
 # Backup files
 *.bak
 
+# Neovim
 lazy-lock.json
-/lazy-lock.json
-config/nvim/lazy-lock.json
+dot_config/nvim/lazy-lock.json
