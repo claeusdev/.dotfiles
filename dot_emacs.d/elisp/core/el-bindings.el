@@ -1,124 +1,66 @@
-;;; el-bindings.el --- Keybindings and REPL helpers -*- lexical-binding: t; -*-
+;;; el-bindings.el --- Global keybindings -*- lexical-binding: t; -*-
 
-(require 'comint)
+;;; Code:
 
-(global-set-key (kbd "<escape>") #'keyboard-escape-quit)
-(global-set-key (kbd "M-o") #'other-window)
+;; --- Global bindings ---
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(global-set-key (kbd "M-o") 'other-window)
+(global-set-key (kbd "C-c w") 'delete-window)
+(global-set-key (kbd "C-c r") 'replace-string)
 
-(defun my/fp-open-comint-repl (buffer-name program &rest args)
-  "Open BUFFER-NAME running PROGRAM with ARGS in a comint session."
-  (unless (executable-find program)
-    (user-error "Executable not found: %s" program))
-  (unless (comint-check-proc buffer-name)
-    (apply #'make-comint-in-buffer buffer-name buffer-name program nil args))
-  (pop-to-buffer buffer-name))
+;; --- FP REPL helpers ---
+(defun my/run-repl (name start-fn &optional fallback-cmd)
+  "Launch a REPL named NAME using START-FN.
+If START-FN is not available and FALLBACK-CMD is given, run it as a shell command."
+  (if (fboundp start-fn)
+      (call-interactively start-fn)
+    (if fallback-cmd
+        (progn
+          (message "Running %s via shell..." fallback-cmd)
+          (let ((buf (make-comint name fallback-cmd)))
+            (pop-to-buffer buf)))
+      (user-error "%s is not available" name))))
 
-(defun my/fp-open-haskell-repl ()
-  "Open Haskell REPL."
-  (interactive)
-  (if (fboundp 'haskell-interactive-switch)
-      (haskell-interactive-switch)
-    (my/fp-open-comint-repl "*haskell-repl*" "ghci")))
+(defvar my/fp-repl-map (make-sparse-keymap)
+  "Keymap for FP REPL commands under C-c f.")
 
-(defun my/fp-load-haskell-file ()
-  "Load current file into Haskell REPL."
-  (interactive)
-  (unless buffer-file-name
-    (user-error "Current buffer is not visiting a file"))
-  (if (fboundp 'haskell-process-load-file)
-      (haskell-process-load-file)
-    (progn
-      (save-buffer)
-      (my/fp-open-comint-repl "*haskell-repl*" "ghci")
-      (let ((proc (get-buffer-process "*haskell-repl*")))
-        (comint-send-string proc (format ":load \"%s\"\n" (expand-file-name buffer-file-name)))))))
+(global-set-key (kbd "C-c f") my/fp-repl-map)
 
-(defun my/fp-open-ocaml-repl ()
-  "Open OCaml REPL."
-  (interactive)
-  (cond
-   ((fboundp 'utop) (utop))
-   ((fboundp 'tuareg-run-ocaml) (call-interactively #'tuareg-run-ocaml))
-   ((executable-find "utop") (my/fp-open-comint-repl "*ocaml-repl*" "utop"))
-   (t (my/fp-open-comint-repl "*ocaml-repl*" "ocaml"))))
+(define-key my/fp-repl-map (kbd "h")
+  (lambda () (interactive)
+    (my/run-repl "haskell" 'haskell-interactive-switch "ghci")))
 
-(defun my/fp-load-ocaml-file ()
-  "Load current file into OCaml REPL."
-  (interactive)
-  (unless buffer-file-name
-    (user-error "Current buffer is not visiting a file"))
-  (if (fboundp 'tuareg-eval-buffer)
-      (tuareg-eval-buffer)
-    (progn
-      (save-buffer)
-      (my/fp-open-ocaml-repl)
-      (let ((proc (or (get-buffer-process "*ocaml-repl*")
-                      (get-buffer-process "*inferior-caml*")
-                      (get-buffer-process "*ocaml*"))))
-        (unless proc
-          (user-error "No OCaml REPL process found"))
-        (comint-send-string proc (format "#use \"%s\";;\n" (expand-file-name buffer-file-name)))))))
+(define-key my/fp-repl-map (kbd "o")
+  (lambda () (interactive)
+    (my/run-repl "ocaml" 'utop "utop")))
 
-(defun my/fp-open-sml-repl ()
-  "Open Standard ML REPL."
-  (interactive)
-  (cond
-   ((fboundp 'run-sml) (call-interactively #'run-sml))
-   ((executable-find "rlwrap") (my/fp-open-comint-repl "*sml-repl*" "rlwrap" "sml"))
-   (t (my/fp-open-comint-repl "*sml-repl*" "sml"))))
+(define-key my/fp-repl-map (kbd "s")
+  (lambda () (interactive)
+    (my/run-repl "sml" 'sml-run "sml")))
 
-(defun my/fp-open-racket-repl ()
-  "Open Racket REPL."
-  (interactive)
-  (if (fboundp 'racket-repl)
-      (racket-repl)
-    (my/fp-open-comint-repl "*racket-repl*" "racket")))
+(define-key my/fp-repl-map (kbd "r")
+  (lambda () (interactive)
+    (my/run-repl "racket" 'racket-repl "racket")))
 
-(defun my/fp-open-common-lisp-repl ()
-  "Open Common Lisp REPL via SBCL."
-  (interactive)
-  (my/fp-open-comint-repl "*common-lisp-repl*" "sbcl"))
+(define-key my/fp-repl-map (kbd "l")
+  (lambda () (interactive)
+    (my/run-repl "lisp" 'sly "sbcl")))
 
-(defun my/fp-open-nix-repl ()
-  "Open Nix REPL."
-  (interactive)
-  (my/fp-open-comint-repl "*nix-repl*" "nix" "repl"))
+(define-key my/fp-repl-map (kbd "e")
+  (lambda () (interactive)
+    (ielm)))
 
-(defun my/fp-lean-build ()
-  "Run `lake build` from the nearest Lean project."
-  (interactive)
-  (let ((default-directory (or (locate-dominating-file default-directory "lakefile.lean")
-                               default-directory)))
-    (compile "lake build")))
+(define-key my/fp-repl-map (kbd "n")
+  (lambda () (interactive)
+    (my/run-repl "lean" 'lean4-repl)))
 
-(defun my/fp-coq-step ()
-  "Advance one Coq proof step when Proof General is active."
-  (interactive)
-  (unless (fboundp 'proof-assert-next-command-interactive)
-    (user-error "Proof General is not loaded in this buffer"))
-  (call-interactively #'proof-assert-next-command-interactive))
+(define-key my/fp-repl-map (kbd "c")
+  (lambda () (interactive)
+    (my/run-repl "coq" 'proof-shell-start)))
 
-(defun my/fp-agda-load ()
-  "Type-check/load current Agda buffer."
-  (interactive)
-  (unless (fboundp 'agda2-load)
-    (user-error "Agda mode is not loaded. Ensure `agda-mode` is on PATH"))
-  (save-buffer)
-  (call-interactively #'agda2-load))
-
-(define-prefix-command 'my/fp-map)
-(global-set-key (kbd "C-c f") 'my/fp-map)
-(define-key my/fp-map (kbd "h") #'my/fp-open-haskell-repl)
-(define-key my/fp-map (kbd "H") #'my/fp-load-haskell-file)
-(define-key my/fp-map (kbd "o") #'my/fp-open-ocaml-repl)
-(define-key my/fp-map (kbd "O") #'my/fp-load-ocaml-file)
-(define-key my/fp-map (kbd "s") #'my/fp-open-sml-repl)
-(define-key my/fp-map (kbd "r") #'my/fp-open-racket-repl)
-(define-key my/fp-map (kbd "k") #'my/fp-open-common-lisp-repl)
-(define-key my/fp-map (kbd "n") #'my/fp-open-nix-repl)
-(define-key my/fp-map (kbd "l") #'my/fp-lean-build)
-(define-key my/fp-map (kbd "c") #'my/fp-coq-step)
-(define-key my/fp-map (kbd "a") #'my/fp-agda-load)
+(define-key my/fp-repl-map (kbd "a")
+  (lambda () (interactive)
+    (my/run-repl "agda" 'agda2-mode)))
 
 (provide 'el-bindings)
 ;;; el-bindings.el ends here

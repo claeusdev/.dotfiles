@@ -1,22 +1,23 @@
-;;; el-packages.el --- Package bootstrap -*- lexical-binding: t; -*-
+;;; el-packages.el --- Package management -*- lexical-binding: t; -*-
 
+;;; Code:
+
+;; Configure package archives
 (require 'package)
-
 (setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
-        ("elpa" . "https://elpa.gnu.org/packages/")
-        ("org" . "https://orgmode.org/elpa/")))
+      '(("melpa"    . "https://melpa.org/packages/")
+        ("gnu"      . "https://elpa.gnu.org/packages/")
+        ("nongnu"   . "https://elpa.nongnu.org/nongnu/")))
 
 (package-initialize)
 
+;; Bootstrap use-package (built into Emacs 29+)
 (unless (package-installed-p 'use-package)
-  (unless package-archive-contents
-    (package-refresh-contents))
+  (package-refresh-contents)
   (package-install 'use-package))
 
 (require 'use-package)
-(setq use-package-always-ensure t
-      use-package-expand-minimally t)
+(setq use-package-always-ensure t)
 
 (provide 'el-packages)
 ;;; el-packages.el ends here

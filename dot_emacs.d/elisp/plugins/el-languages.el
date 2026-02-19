@@ -1,178 +1,95 @@
-;;; el-languages.el --- Language setup -*- lexical-binding: t; -*-
+;;; el-languages.el --- Programming language modes -*- lexical-binding: t; -*-
 
-(defun my/eglot-ensure-local ()
-  "Start Eglot only for local projects."
-  (unless (file-remote-p default-directory)
-    (eglot-ensure)))
+;;; Code:
 
-(defun my/eglot-ensure-when-executable (server-binary)
-  "Start Eglot when SERVER-BINARY is available."
-  (when (executable-find server-binary)
-    (my/eglot-ensure-local)))
+;; --- Tree-sitter readiness ---
+(defun my/treesit-available-p (lang)
+  "Check if tree-sitter is available for LANG."
+  (and (fboundp 'treesit-ready-p)
+       (treesit-ready-p lang t)))
 
-(defun my/sml-maybe-eglot ()
-  "Start Eglot for Standard ML when Millet is available."
-  (my/eglot-ensure-when-executable "millet-ls"))
+;; --- C/C++ ---
+(if (my/treesit-available-p 'c)
+    (use-package c-ts-mode
+      :ensure nil
+      :mode (("\\.c\\'" . c-ts-mode)
+             ("\\.h\\'" . c-ts-mode)
+             ("\\.cpp\\'" . c++-ts-mode)
+             ("\\.cc\\'" . c++-ts-mode)
+             ("\\.hpp\\'" . c++-ts-mode))
+      :custom (c-ts-mode-indent-offset 4)
+      :hook ((c-ts-mode . (lambda () (my/eglot-ensure-when-executable "clangd")))
+             (c++-ts-mode . (lambda () (my/eglot-ensure-when-executable "clangd")))))
+  ;; Fallback without tree-sitter
+  (add-hook 'c-mode-hook (lambda ()
+                           (setq c-basic-offset 4)
+                           (my/eglot-ensure-when-executable "clangd")))
+  (add-hook 'c++-mode-hook (lambda ()
+                              (setq c-basic-offset 4)
+                              (my/eglot-ensure-when-executable "clangd"))))
 
-(defun my/racket-maybe-eglot ()
-  "Start Eglot for Racket when racket-langserver is available."
-  (my/eglot-ensure-when-executable "racket-langserver"))
-
-(defun my/nix-maybe-eglot ()
-  "Start Eglot for Nix when nil is available."
-  (my/eglot-ensure-when-executable "nil"))
-
-(defun my/coq-maybe-eglot ()
-  "Start Eglot for Coq when coq-lsp is available."
-  (my/eglot-ensure-when-executable "coq-lsp"))
-
-(defun my/treesit-ready-p (language)
-  "Return non-nil when tree-sitter LANGUAGE grammar is available."
-  (and (fboundp 'treesit-available-p)
-       (treesit-available-p)
-       (fboundp 'treesit-ready-p)
-       (treesit-ready-p language t)))
-
-(defun my/c-or-c-ts-mode ()
-  "Use `c-ts-mode' when available, otherwise use `c-mode'."
-  (if (my/treesit-ready-p 'c)
-      (c-ts-mode)
-    (c-mode)))
-
-(defun my/cpp-or-cpp-ts-mode ()
-  "Use `c++-ts-mode' when available, otherwise use `c++-mode'."
-  (if (my/treesit-ready-p 'cpp)
-      (c++-ts-mode)
-    (c++-mode)))
-
-(defun my/proof-general-load ()
-  "Load Proof General when available."
-  (or (featurep 'proof-general)
-      (featurep 'proof-site)
-      (require 'proof-site nil t)
-      (require 'proof-general nil t)))
-
-(defun my/coq-file-mode ()
-  "Open Coq files using Proof General when available."
-  (interactive)
-  (my/proof-general-load)
-  (if (fboundp 'coq-mode)
-      (coq-mode)
-    (fundamental-mode)))
-
-(defun my/isabelle-file-mode ()
-  "Open Isabelle files using Proof General when available."
-  (interactive)
-  (my/proof-general-load)
-  (cond
-   ((fboundp 'isar-mode) (isar-mode))
-   ((fboundp 'isabelle-mode) (isabelle-mode))
-   (t (fundamental-mode))))
-
-(defun my/setup-agda-mode ()
-  "Load Agda mode from `agda-mode locate` when available."
-  (let* ((agda-mode-bin (executable-find "agda-mode"))
-         (agda-mode-file
-          (when agda-mode-bin
-            (ignore-errors (car (process-lines agda-mode-bin "locate"))))))
-    (when (and agda-mode-file (file-readable-p agda-mode-file))
-      (load-file agda-mode-file)
-      (add-to-list 'auto-mode-alist '("\\.agda\\'" . agda2-mode))
-      (add-to-list 'auto-mode-alist '("\\.lagda\\'" . agda2-mode))
-      (add-to-list 'auto-mode-alist '("\\.lagda\\.md\\'" . agda2-mode))
-      t)))
-
-(defun my/lean-installed-p ()
-  "Return non-nil when Lean and `lean4-mode` are installed."
-  (and (executable-find "lean")
-       (locate-library "lean4-mode")))
-
-;;; C/C++
-(add-to-list 'auto-mode-alist '("\\.c\\'" . my/c-or-c-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.h\\'" . my/c-or-c-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.cpp\\'" . my/cpp-or-cpp-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.cc\\'" . my/cpp-or-cpp-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.cxx\\'" . my/cpp-or-cpp-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.hpp\\'" . my/cpp-or-cpp-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.hxx\\'" . my/cpp-or-cpp-ts-mode))
-(add-hook 'c-mode-hook #'my/eglot-ensure-local)
-(add-hook 'c++-mode-hook #'my/eglot-ensure-local)
-(add-hook 'c-ts-mode-hook #'my/eglot-ensure-local)
-(add-hook 'c++-ts-mode-hook #'my/eglot-ensure-local)
-(setq c-basic-offset 4
-      c-ts-mode-indent-offset 4)
-
-;;; OCaml
+;; --- OCaml ---
 (use-package tuareg
-  :mode ("\\.ml[ily]?\\'" . tuareg-mode)
-  :hook (tuareg-mode . my/eglot-ensure-local))
+  :hook (tuareg-mode . (lambda () (my/eglot-ensure-when-executable "ocamllsp"))))
 
-(add-to-list 'auto-mode-alist '("dune\\'" . tuareg-mode))
-(add-to-list 'auto-mode-alist '("dune-project\\'" . tuareg-mode))
+(use-package merlin
+  :after tuareg
+  :hook (tuareg-mode . merlin-mode))
 
-(let ((opam-share (ignore-errors (car (process-lines "opam" "var" "share")))))
-  (when (and opam-share (file-directory-p opam-share))
-    (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
-    (autoload 'merlin-mode "merlin" "Merlin mode" t)
-    (add-hook 'tuareg-mode-hook #'merlin-mode)
-    (add-hook 'caml-mode-hook #'merlin-mode)))
-
-;;; Standard ML
-(use-package sml-mode
-  :mode (("\\.sml\\'" . sml-mode)
-         ("\\.sig\\'" . sml-mode)
-         ("\\.fun\\'" . sml-mode)
-         ("\\.cm\\'" . sml-mode))
-  :hook (sml-mode . my/sml-maybe-eglot)
-  :config
-  (setq sml-indent-level 2))
-
-;;; Lisp and Racket
-(use-package lisp-mode
-  :ensure nil
-  :mode (("\\.lisp\\'" . lisp-mode)
-         ("\\.lsp\\'" . lisp-mode)
-         ("\\.cl\\'" . lisp-mode)))
-
-(use-package scheme
-  :ensure nil
-  :mode "\\.scm\\'")
-
-(use-package racket-mode
-  :mode "\\.rkt\\'"
-  :hook (racket-mode . my/racket-maybe-eglot))
-
-;;; Haskell
+;; --- Haskell ---
 (use-package haskell-mode
-  :mode "\\.hs\\'"
-  :hook ((haskell-mode . my/eglot-ensure-local)
-         (haskell-mode . interactive-haskell-mode))
-  :config
-  (setq haskell-process-suggest-remove-import-lines t
-        haskell-process-auto-import-loaded-modules t))
+  :hook ((haskell-mode . interactive-haskell-mode)
+         (haskell-mode . (lambda () (my/eglot-ensure-when-executable "haskell-language-server-wrapper")))))
 
-;;; Lean and Nix
-(use-package lean4-mode
-  :if (my/lean-installed-p)
-  :ensure nil
-  :mode "\\.lean\\'")
+;; --- SML ---
+(use-package sml-mode
+  :mode "\\.\\(sml\\|sig\\|fun\\)\\'"
+  :custom (sml-indent-level 2)
+  :hook (sml-mode . (lambda () (my/eglot-ensure-when-executable "millet-ls"))))
 
+;; --- Racket ---
+(use-package racket-mode
+  :hook (racket-mode . (lambda () (my/eglot-ensure-when-executable "racket-langserver"))))
+
+;; --- Nix ---
 (use-package nix-mode
   :mode "\\.nix\\'"
-  :hook (nix-mode . my/nix-maybe-eglot))
+  :hook (nix-mode . (lambda () (my/eglot-ensure-when-executable "nil"))))
 
-;;; Coq and Isabelle
+;; --- Coq ---
 (use-package proof-general
-  :defer t
-  :init
-  (setq proof-splash-enable nil))
+  :mode ("\\.v\\'" . coq-mode)
+  :custom (proof-splash-enable nil)
+  :hook (coq-mode . (lambda () (my/eglot-ensure-when-executable "coq-lsp"))))
 
-(add-to-list 'auto-mode-alist '("\\.v\\'" . my/coq-file-mode))
-(add-to-list 'auto-mode-alist '("\\.thy\\'" . my/isabelle-file-mode))
-(add-hook 'coq-mode-hook #'my/coq-maybe-eglot)
+;; --- Lean 4 (not on MELPA; install via package-vc) ---
+(when (executable-find "lean")
+  (unless (package-installed-p 'lean4-mode)
+    (package-vc-install "https://github.com/leanprover-community/lean4-mode"))
+  (use-package lean4-mode
+    :ensure nil
+    :mode "\\.lean\\'"
+    :commands lean4-mode))
 
-;;; Agda
-(my/setup-agda-mode)
+;; --- Agda ---
+(let ((agda-mode-path
+       (when (executable-find "agda-mode")
+         (ignore-errors
+           (car (split-string
+                 (shell-command-to-string "agda-mode locate") "\n"))))))
+  (when (and agda-mode-path (file-exists-p agda-mode-path))
+    (load-file agda-mode-path)))
+
+;; --- Lisp / Scheme (built-in) ---
+(add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
+
+;; --- Markdown ---
+(use-package markdown-mode
+  :mode ("\\.md\\'" "\\.markdown\\'"))
+
+;; --- YAML ---
+(use-package yaml-mode
+  :mode "\\.ya?ml\\'")
 
 (provide 'el-languages)
 ;;; el-languages.el ends here

@@ -1,30 +1,36 @@
-;;; el-latex.el --- LaTeX editing with AUCTeX, pdf-tools, cdlatex -*- lexical-binding: t; -*-
+;;; el-latex.el --- LaTeX configuration -*- lexical-binding: t; -*-
 
-(use-package tex
-  :ensure auctex
-  :defer t
-  :config
-  (setq TeX-auto-save t
-        TeX-parse-self t
-        TeX-PDF-mode t)
-  (setq-default TeX-master nil)
-  ;; Viewer: macOS uses `open` (Skim picks up .pdf), Linux uses zathura.
-  (setq TeX-view-program-selection
-        (if (eq system-type 'darwin)
-            '((output-pdf "open"))
-          '((output-pdf "Zathura"))))
-  (when (eq system-type 'darwin)
-    (add-to-list 'TeX-view-program-list '("open" "open %o"))))
+;;; Code:
 
-(use-package pdf-tools
+(use-package auctex
   :ensure t
+  :mode ("\\.tex\\'" . LaTeX-mode)
+  :custom
+  (TeX-auto-save t)
+  (TeX-parse-self t)
+  (TeX-master nil) ; query for master file
+  (TeX-PDF-mode t)
+  (TeX-source-correlate-mode t)
+  (TeX-source-correlate-start-server t)
+  :config
+  ;; Viewer: Skim on macOS, Zathura on Linux
+  (cond
+   ((eq system-type 'darwin)
+    (setq TeX-view-program-selection '((output-pdf "Skim"))
+          TeX-view-program-list
+          '(("Skim" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b"))))
+   (t
+    (setq TeX-view-program-selection '((output-pdf "Zathura"))))))
+
+;; PDF Tools
+(use-package pdf-tools
   :mode ("\\.pdf\\'" . pdf-view-mode)
   :config
   (pdf-tools-install :no-query))
 
+;; CDLaTeX
 (use-package cdlatex
-  :ensure t
-  :hook ((LaTeX-mode . turn-on-cdlatex)
+  :hook ((LaTeX-mode . cdlatex-mode)
          (org-mode . org-cdlatex-mode)))
 
 (provide 'el-latex)

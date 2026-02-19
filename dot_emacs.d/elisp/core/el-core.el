@@ -1,51 +1,75 @@
-;;; el-core.el --- Core editor defaults -*- lexical-binding: t; -*-
+;;; el-core.el --- Editor defaults and UI settings -*- lexical-binding: t; -*-
 
+;;; Code:
+
+;; Reset GC threshold after startup
 (add-hook 'emacs-startup-hook
           (lambda ()
-            (setq gc-cons-threshold (* 16 1024 1024))))
+            (setq gc-cons-threshold (* 16 1024 1024)
+                  gc-cons-percentage 0.1)))
 
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(when (file-exists-p custom-file)
-  (load custom-file nil 'nomessage))
-
+;; Inherit PATH on macOS
 (use-package exec-path-from-shell
-  :if (memq window-system '(mac ns x))
+  :if (memq window-system '(mac ns))
   :config
   (exec-path-from-shell-initialize))
 
-(setq-default
- inhibit-startup-screen t
- initial-scratch-message ";; Clean slate loaded.\n"
- indent-tabs-mode nil
- tab-width 2
- fill-column 100
- truncate-lines t
- require-final-newline t
- sentence-end-double-space nil)
+;; --- Editor defaults ---
+(setq-default indent-tabs-mode nil
+              tab-width 2
+              fill-column 100)
+(setq require-final-newline t
+      sentence-end-double-space nil
+      delete-by-moving-to-trash t
+      create-lockfiles nil
+      make-backup-files nil
+      auto-save-default nil)
 
-(when (fboundp 'tool-bar-mode)
-  (tool-bar-mode -1))
-(when (fboundp 'scroll-bar-mode)
-  (scroll-bar-mode -1))
-(when (fboundp 'menu-bar-mode)
-  (menu-bar-mode -1))
+;; UTF-8 everywhere
+(set-language-environment "UTF-8")
+(prefer-coding-system 'utf-8)
 
-(global-display-line-numbers-mode 1)
+;; --- UI ---
+(setq ring-bell-function #'ignore
+      use-short-answers t)
+(column-number-mode 1)
+
+;; Relative line numbers in programming modes
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (setq display-line-numbers-type 'relative)
 
-(add-hook 'prog-mode-hook
-          (lambda ()
-            (setq show-trailing-whitespace t)
-            (display-fill-column-indicator-mode 1)))
+;; Show trailing whitespace in prog-mode
+(add-hook 'prog-mode-hook (lambda () (setq show-trailing-whitespace t)))
 
+;; Fill column indicator
+(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
+
+;; Smooth scrolling
+(setq scroll-margin 3
+      scroll-conservatively 101
+      scroll-preserve-screen-position t)
+
+;; --- Session ---
 (recentf-mode 1)
-(savehist-mode 1)
-(save-place-mode 1)
-(global-auto-revert-mode 1)
+(setq recentf-max-saved-items 200)
 
+(savehist-mode 1)
+
+(save-place-mode 1)
+
+(global-auto-revert-mode 1)
+(setq global-auto-revert-non-file-buffers t)
+
+;; Clipboard integration
 (setq select-enable-clipboard t
-      select-enable-primary t
-      history-length 200)
+      select-enable-primary t)
+
+;; Electric pairs
+(electric-pair-mode 1)
+
+;; Highlight matching parens
+(show-paren-mode 1)
+(setq show-paren-delay 0)
 
 (provide 'el-core)
 ;;; el-core.el ends here
