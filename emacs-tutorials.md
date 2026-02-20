@@ -6,44 +6,76 @@ This guide explains the keybindings configured in this repository and what they 
 
 ## Core Editing and Navigation
 
-- `C-\``: Toggle terminal (`vterm`) in the current window layout.
 - `Esc`: Cancel prompt / quit transient UI (`keyboard-escape-quit`).
 - `M-o`: Move to next window.
 - `C-c w`: Close current window.
 - `C-c r`: Run `replace-string`.
-- `C-z`: Undo (`undo-tree-undo`).
-- `C-S-z`: Redo (`undo-tree-redo`).
 
-## Project and Search
+## Search and Navigation
 
-- `C-x g`: Open Magit status.
-- `C-c p`: Projectile command map (project switching, file search, grep).
-- `M-s`: `consult-line` in current buffer.
-- `M-y`: `consult-yank-pop` (kill-ring browse).
-- `C-x b`: `consult-buffer`.
+- `M-s l`: `consult-line` — search in current buffer.
+- `M-s r`: `consult-ripgrep` — search across project files.
+- `M-s f`: `consult-find` — find file by name.
+- `M-y`: `consult-yank-pop` — browse kill-ring.
+- `M-g g`: `consult-goto-line` — jump to line number.
+- `M-g i`: `consult-imenu` — jump to symbol in buffer.
+- `C-x b`: `consult-buffer` — switch buffer with preview.
 - `C-.`: Embark actions on thing at point.
+- `M-.`: Embark dwim (do what I mean).
+- `C-h B`: Show all embark bindings.
+- `C-c j`: Avy jump to character.
+- `M-$`: Jinx spell-correct word at point.
 
-## LSP (Programming Buffers with Eglot)
+## Project Management (Projectile)
+
+- `C-c p`: Projectile command map (project switching, file search, grep).
+
+## LSP (Eglot)
 
 In buffers where `eglot` is active:
 
 - `C-c l a`: Code actions
+- `C-c l d`: Find definitions (`xref-find-definitions`)
+- `C-c l D`: Find references (`xref-find-references`)
 - `C-c l f`: Format buffer
 - `C-c l r`: Rename symbol
-- `C-c l d`: Go to declaration
-- `C-c l i`: Go to implementation
-- `C-c l t`: Go to type definition
-- `C-c l s`: Workspace symbols (`consult-eglot-symbols`)
+- `C-c l i`: Find implementation
+- `C-c l t`: Find type definition
+
+## Git
+
+- `C-x g`: Open Magit status.
+
+`diff-hl` shows change indicators in the gutter for `prog-mode` and `dired-mode` buffers.
+
+## Debugging (DAP Mode)
+
+- `C-c d b`: Toggle breakpoint
+- `C-c d d`: Start debugging
+- `C-c d n`: Next (step over)
+- `C-c d c`: Continue
+- `C-c d s`: Step in
+- `C-c d o`: Step out
+- `C-c d r`: Restart debug session
+- `C-c d q`: Disconnect
 
 ## Research and Writing (Org + Citar)
 
 - `C-c a`: Open agenda
 - `C-c c`: Capture (todo/idea/paper/journal templates)
-- `C-c l`: Store link
+- `C-c C-c`: Execute babel source block
 - `C-c b i`: Insert citation (`citar`)
 - `C-c b o`: Open reference entry
 - `C-c b n`: Open citation notes
-- `C-c b a`: Add PDF/file to citation library
+- `C-c N`: Org-noter (PDF annotation alongside org notes)
+
+### Org-roam (Zettelkasten)
+
+- `C-c n f`: Find node
+- `C-c n i`: Insert node link
+- `C-c n b`: Toggle backlinks buffer
+- `C-c n c`: Capture to node
+- `C-c n d`: Daily note (today)
 
 Recommended structure:
 - `~/org/inbox.org`, `projects.org`, `research.org`, `reading.org`, `journal.org`
@@ -52,16 +84,24 @@ Recommended structure:
 
 ## Functional Programming REPL Layer (`C-c f`)
 
-- `C-c f h`: Open Haskell REPL
-- `C-c f H`: Load current Haskell file into REPL
-- `C-c f o`: Open OCaml REPL (`utop`/`ocaml`)
-- `C-c f O`: Load current OCaml file into REPL
-- `C-c f r`: Open Racket REPL
-- `C-c f e`: Open Elixir REPL (`iex`)
-- `C-c f s`: Open Standard ML REPL
-- `C-c f l`: Build Lean project with `lake build`
-- `C-c f c`: Step Coq proof forward (Proof General)
-- `C-c f a`: Type-check/load current Agda file (`agda2-load`)
+- `C-c f h`: Haskell REPL (`haskell-interactive-switch` / `ghci`)
+- `C-c f o`: OCaml REPL (`utop`)
+- `C-c f s`: SML REPL (`sml-run` / `sml`)
+- `C-c f r`: Racket REPL (`racket-repl` / `racket`)
+- `C-c f l`: Common Lisp REPL (`sly` / `sbcl`)
+- `C-c f e`: Emacs Lisp REPL (`ielm`)
+- `C-c f n`: Lean 4 REPL (`lean4-repl`)
+- `C-c f c`: Coq proof (`proof-shell-start`)
+- `C-c f a`: Agda type-check/load (`agda2-mode`)
+
+Typical OCaml loop:
+1. Open `.ml` file.
+2. `C-c f o` to start REPL.
+3. Edit code, then re-run `C-c f o` to reload.
+
+Typical paper-note loop:
+1. `C-c c` then select `p` (paper note).
+2. In notes, `C-c b i` to insert citations.
 
 ## Agda Mode Setup
 
@@ -79,21 +119,3 @@ File extensions enabled:
 - `.agda`
 - `.lagda`
 - `.lagda.md`
-
-Typical OCaml loop:
-1. Open `.ml` file.
-2. `C-c f o` to start REPL.
-3. `C-c f O` after edits to reload.
-
-Typical paper-note loop:
-1. `C-c b a` to attach paper.
-2. `C-c c` then select `p` (paper note).
-3. In notes, `C-c b i` to insert citations.
-
-## Additional FP Languages To Add Next
-
-- Idris 2: dependent types and totality checking.
-- F*: verification-oriented functional programming.
-- Common Lisp (`sly`): REPL-first macro-heavy workflow.
-- Clojure (`clojure-mode` + CIDER): hosted Lisp with strong tooling.
-- Purescript: typed FP with JavaScript runtime.

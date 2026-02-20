@@ -17,7 +17,6 @@ require("lazy").setup({
   -- Import plugins from lua/naamanu/plugins
   spec = {
     { import = "naamanu.plugins" },
-    { import = "naamanu.plugins.lsp" },
   },
   -- Configure lazy.nvim
   checker = {

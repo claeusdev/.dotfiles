@@ -1,72 +1,39 @@
 return {
-  "nvim-treesitter/nvim-treesitter",
-  build = ":TSUpdate",
-  event = { "BufReadPost", "BufNewFile" },
-  dependencies = {
-    "nvim-treesitter/nvim-treesitter-textobjects",
-    "nvim-treesitter/nvim-treesitter-context",
-    "windwp/nvim-ts-autotag",
-  },
-  config = function()
-    require("treesitter-context").setup({ enable = true })
-    require("nvim-ts-autotag").setup()
-    require("nvim-treesitter.configs").setup({
+  -- Treesitter
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter-textobjects",
+    },
+    opts = {
       ensure_installed = {
-        -- Web
-        "typescript",
-        "tsx",
-        "javascript",
-        "html",
-        "css",
-        -- Systems
-        "rust",
-        "go",
         "c",
         "cpp",
-        -- Scripting
+        "rust",
+        "python",
+        "ocaml",
+        "ocaml_interface",
+        "haskell",
+        "racket",
+        "scheme",
+        "commonlisp",
+        "nix",
+        "lean",
         "lua",
         "vim",
         "vimdoc",
         "bash",
-        "python",
-        -- Data
         "json",
         "yaml",
         "toml",
         "markdown",
         "markdown_inline",
-        -- Functional (ML family)
-        "ocaml",
-        "ocaml_interface",
-        "rescript",
-        "haskell",
-        "elm",
-        "gleam",
-        "purescript",
-        -- Functional (Lisp family)
-        "clojure",
-        "racket",
-        "scheme",
-        "commonlisp",
-        -- Functional (BEAM)
-        "erlang",
-        "elixir",
-        "heex",
-        -- Functional (Other)
-        "scala",
-        "nix",
-        -- Research
-        "julia",
         "latex",
       },
-      auto_install = true,
-      highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = false,
-      },
-      indent = {
-        enable = true,
-      },
+      highlight = { enable = true },
+      indent = { enable = true },
       incremental_selection = {
         enable = true,
         keymaps = {
@@ -89,7 +56,6 @@ return {
         },
         move = {
           enable = true,
-          set_jumps = true,
           goto_next_start = {
             ["]f"] = "@function.outer",
             ["]c"] = "@class.outer",
@@ -100,6 +66,18 @@ return {
           },
         },
       },
-    })
-  end,
+    },
+    config = function(_, opts)
+      require("nvim-treesitter.configs").setup(opts)
+    end,
+  },
+
+  -- Treesitter context (sticky headers)
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    event = { "BufReadPre", "BufNewFile" },
+    opts = {
+      max_lines = 3,
+    },
+  },
 }

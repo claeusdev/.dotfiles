@@ -56,146 +56,120 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 
 ## Neovim Keybindings
 
-**Leader Key:** The Neovim leader key is set to `<Space>`.
+**Leader Key:** `<Space>` | **Local Leader:** `,`
 
 ### General
 
-| Mode | Keybinding   | Description               |
-| :--- | :----------- | :------------------------ |
-| n    | `<Esc>`      | Clear search highlights   |
-| n    | `<leader>bn` | Next buffer               |
-| n    | `<leader>bp` | Previous buffer           |
-| n    | `<leader>bd` | Delete buffer (Snacks)    |
-| v    | `<`          | Indent left               |
-| v    | `>`          | Indent right              |
-| v    | `J`          | Move text down            |
-| v    | `K`          | Move text up              |
-| n    | `<C-d>`      | Scroll down and center    |
-| n    | `<C-u>`      | Scroll up and center      |
-| n    | `n`          | Next search result        |
-| n    | `N`          | Previous search result    |
-| x    | `<leader>p`  | Paste without yanking     |
-| n    | `<C-s>`      | Save file                 |
-| n    | `<leader>q`  | Quit                      |
-| n    | `<leader>sv` | Split window vertically   |
-| n    | `<leader>sh` | Split window horizontally |
-| n    | `<leader>se` | Make splits equal size    |
-| n    | `<leader>sx` | Close current split       |
+| Mode | Keybinding     | Description               |
+| :--- | :------------- | :------------------------ |
+| n    | `<Esc>`        | Clear search highlights   |
+| n    | `<C-h/j/k/l>` | Move to left/down/up/right window |
+| n    | `<C-Up>`       | Increase window height    |
+| n    | `<C-Down>`     | Decrease window height    |
+| n    | `<C-Left>`     | Decrease window width     |
+| n    | `<C-Right>`    | Increase window width     |
+| n    | `<leader>bn`   | Next buffer               |
+| n    | `<leader>bp`   | Previous buffer           |
+| n    | `<leader>bd`   | Delete buffer             |
+| v    | `<`            | Indent left               |
+| v    | `>`            | Indent right              |
+| v    | `J`            | Move text down            |
+| v    | `K`            | Move text up              |
+| n    | `<C-d>`        | Scroll down and center    |
+| n    | `<C-u>`        | Scroll up and center      |
+| n    | `n`            | Next search result        |
+| n    | `N`            | Previous search result    |
+| x    | `<leader>p`    | Paste without yanking     |
+| n    | `<C-s>`        | Save file                 |
+| n    | `<leader>q`    | Quit                      |
+| n    | `<leader>sv`   | Split window vertically   |
+| n    | `<leader>sh`   | Split window horizontally |
+| n    | `<leader>se`   | Make splits equal size    |
+| n    | `<leader>sx`   | Close current split       |
 
-### Smart Splits (Neovim + tmux Navigation & Resizing)
+### Completion (blink.cmp)
 
-| Mode | Keybinding          | Description                       |
-| :--- | :------------------ | :-------------------------------- |
-| n    | `<C-h>`             | Move to left split/pane           |
-| n    | `<C-j>`             | Move to below split/pane          |
-| n    | `<C-k>`             | Move to above split/pane          |
-| n    | `<C-l>`             | Move to right split/pane          |
-| n    | `<A-h>`             | Resize split/pane left            |
-| n    | `<A-j>`             | Resize split/pane down            |
-| n    | `<A-k>`             | Resize split/pane up              |
-| n    | `<A-l>`             | Resize split/pane right           |
-| n    | `<leader><leader>h` | Swap buffer left                  |
-| n    | `<leader><leader>j` | Swap buffer down                  |
-| n    | `<leader><leader>k` | Swap buffer up                    |
-| n    | `<leader><leader>l` | Swap buffer right                 |
+| Mode | Keybinding  | Description                    |
+| :--- | :---------- | :----------------------------- |
+| i    | `<C-j>`     | Select next completion item    |
+| i    | `<C-k>`     | Select previous completion item |
+| i    | `<Tab>`     | Select next item               |
+| i    | `<S-Tab>`   | Select previous item           |
+| i    | `<CR>`      | Confirm completion             |
+| i    | `<C-Space>` | Trigger completion             |
+| i    | `<C-e>`     | Cancel completion              |
+| i    | `<C-b>`     | Scroll docs up                 |
+| i    | `<C-f>`     | Scroll docs down               |
 
-These keybindings work seamlessly across both Neovim splits and tmux panes.
+### Editor
 
-### Completion (nvim-cmp & luasnip)
+| Mode    | Keybinding  | Plugin       | Description                    |
+| :------ | :---------- | :----------- | :----------------------------- |
+| n       | `gcc`       | Comment.nvim | Toggle comment on current line |
+| v       | `gc`        | Comment.nvim | Toggle line comment            |
+| v       | `gb`        | Comment.nvim | Toggle block comment           |
+| n       | `<leader>u` | undotree     | Toggle Undotree                |
+| n       | `<leader>z` | zen-mode     | Toggle Zen Mode                |
+| n, x, o | `s`         | flash.nvim   | Flash jump                     |
+| n, x, o | `S`         | flash.nvim   | Flash Treesitter               |
+| o       | `r`         | flash.nvim   | Remote Flash                   |
+| o, x    | `R`         | flash.nvim   | Treesitter Search              |
 
-| Mode | Keybinding  | Description                                  |
-| :--- | :---------- | :------------------------------------------- |
-| i    | `<C-k>`     | Select previous completion item              |
-| i    | `<C-j>`     | Select next completion item                  |
-| i    | `<C-b>`     | Scroll completion docs up                    |
-| i    | `<C-f>`     | Scroll completion docs down                  |
-| i    | `<C-Space>` | Trigger completion                           |
-| i    | `<C-e>`     | Abort completion                             |
-| i    | `<CR>`      | Confirm completion                           |
-| i, s | `<Tab>`     | Select next item or expand/jump snippet      |
-| i, s | `<S-Tab>`   | Select previous item or jump back in snippet |
+### Mini.ai (Enhanced Text Objects)
 
-### Editor (Comment.nvim, nvim-autopairs, vim-illuminate, undotree, refactoring.nvim)
+| Mode | Text Object | Description                 |
+| :--- | :---------- | :-------------------------- |
+| o, v | `af/if`     | Around/inside function      |
+| o, v | `ac/ic`     | Around/inside class         |
+| o, v | `ab/ib`     | Around/inside block         |
+| o, v | `ad/id`     | Around/inside digits        |
+| o, v | `ae/ie`     | Around/inside function call |
 
-| Mode | Keybinding   | Plugin          | Description                    |
-| :--- | :----------- | :-------------- | :----------------------------- |
-| n    | `gcc`        | Comment.nvim    | Toggle comment on current line |
-| v    | `gbc`        | Comment.nvim    | Toggle block comment           |
-| n    | `gc`         | Comment.nvim    | Comment line                   |
-| v    | `gb`         | Comment.nvim    | Block comment                  |
-| n    | `gcO`        | Comment.nvim    | Comment above                  |
-| n    | `gco`        | Comment.nvim    | Comment below                  |
-| n    | `gcA`        | Comment.nvim    | Comment to end of line         |
-| i    | `<M-e>`      | nvim-autopairs  | Fast wrap                      |
-| n    | `]]`         | vim-illuminate  | Next reference                 |
-| n    | `[[`         | vim-illuminate  | Prev reference                 |
-| n    | `<leader>u`  | undotree        | Toggle Undotree                |
-| v    | `<leader>re` | refactoring.nvim | Extract Function              |
-| v    | `<leader>rf` | refactoring.nvim | Extract Function To File      |
-| v    | `<leader>rv` | refactoring.nvim | Extract Variable              |
-| n, v | `<leader>ri` | refactoring.nvim | Inline Variable               |
-
-### Git (gitsigns.nvim & lazygit.nvim)
+### Git
 
 | Mode | Keybinding   | Plugin       | Description       |
 | :--- | :----------- | :----------- | :---------------- |
 | n    | `]h`         | gitsigns     | Next git hunk     |
 | n    | `[h`         | gitsigns     | Previous git hunk |
 | n    | `<leader>gs` | gitsigns     | Stage hunk        |
+| v    | `<leader>gs` | gitsigns     | Stage hunk (visual) |
 | n    | `<leader>gr` | gitsigns     | Reset hunk        |
+| v    | `<leader>gr` | gitsigns     | Reset hunk (visual) |
 | n    | `<leader>gS` | gitsigns     | Stage buffer      |
 | n    | `<leader>gu` | gitsigns     | Undo stage hunk   |
 | n    | `<leader>gR` | gitsigns     | Reset buffer      |
 | n    | `<leader>gp` | gitsigns     | Preview hunk      |
-| n    | `<leader>gD` | gitsigns     | Diff this         |
+| n    | `<leader>gb` | gitsigns     | Blame line        |
+| n    | `<leader>gd` | gitsigns     | Diff this         |
+| n    | `<leader>gD` | gitsigns     | Diff this ~       |
 | n    | `<leader>gg` | lazygit.nvim | Open LazyGit      |
+| n    | `<leader>go` | diffview     | Open Diffview     |
+| n    | `<leader>gc` | diffview     | Close Diffview    |
+| n    | `<leader>gh` | diffview     | File history      |
 
-### Git Advanced (diffview.nvim & git-conflict.nvim)
-
-| Mode | Keybinding    | Plugin           | Description            |
-| :--- | :------------ | :--------------- | :--------------------- |
-| n    | `<leader>gdo` | diffview.nvim    | Open Diffview          |
-| n    | `<leader>gdc` | diffview.nvim    | Close Diffview         |
-| n    | `<leader>gdh` | diffview.nvim    | File History (current) |
-| n    | `<leader>gdH` | diffview.nvim    | File History (all)     |
-| n    | `<leader>gdf` | diffview.nvim    | Toggle Files Panel     |
-| n    | `co`          | git-conflict.nvim | Choose ours           |
-| n    | `ct`          | git-conflict.nvim | Choose theirs         |
-| n    | `cb`          | git-conflict.nvim | Choose both           |
-| n    | `c0`          | git-conflict.nvim | Choose none           |
-| n    | `]x`          | git-conflict.nvim | Next conflict         |
-| n    | `[x`          | git-conflict.nvim | Prev conflict         |
-
-### NvimTree & Oil
+### File Explorer (Oil)
 
 | Mode | Keybinding   | Description                 |
 | :--- | :----------- | :-------------------------- |
-| n    | `<leader>ee` | Toggle file explorer        |
-| n    | `<leader>ef` | Find file in explorer       |
-| n    | `<leader>ec` | Collapse file explorer      |
-| n    | `<leader>er` | Refresh file explorer       |
 | n    | `-`          | Open parent directory (Oil) |
-| n    | `<leader>eo` | Open Oil file explorer      |
+| n    | `<leader>e`  | Open file explorer (Oil)    |
 
 ### Telescope
 
-| Mode | Keybinding   | Description                                            |
-| :--- | :----------- | :----------------------------------------------------- |
-| i    | `<C-k>`      | Move selection previous (in Telescope)                 |
-| i    | `<C-j>`      | Move selection next (in Telescope)                     |
-| i    | `<C-q>`      | Send selected to quickfix list and open (in Telescope) |
-| n    | `<leader>ff` | Find files by frecency (Telescope)                     |
-| n    | `<leader>fF` | Find all files (Telescope)                             |
-| n    | `<leader>fr` | Find recent files (Telescope)                          |
-| n    | `<leader>fg` | Live grep (Telescope)                                  |
-| n    | `<leader>fc` | Find string under cursor (Telescope)                   |
-| n    | `<leader>fb` | Find buffers (Telescope)                               |
-| n    | `<leader>fh` | Find help (Telescope)                                  |
-| n    | `<leader>fk` | Find keymaps (Telescope)                               |
-| n    | `<leader>ft` | Find colorschemes (Telescope)                          |
-| n    | `<leader>fu` | Undo tree browser (Telescope)                          |
+| Mode | Keybinding   | Description            |
+| :--- | :----------- | :--------------------- |
+| n    | `<leader>ff` | Find files             |
+| n    | `<leader>fr` | Recent files           |
+| n    | `<leader>fg` | Live grep              |
+| n    | `<leader>fc` | Find string under cursor |
+| n    | `<leader>fb` | Find buffers           |
+| n    | `<leader>fh` | Help tags              |
+| n    | `<leader>fk` | Keymaps                |
+| n    | `<leader>fd` | Diagnostics            |
+| n    | `<leader>fs` | Document symbols       |
+| n    | `<leader>fS` | Workspace symbols      |
 
-**Extensions:** `telescope-ui-select` replaces all `vim.ui.select` prompts (code actions, etc.) with Telescope dropdown UI.
+**Extensions:** `telescope-fzf-native` for fast fuzzy matching, `telescope-ui-select` replaces `vim.ui.select` prompts with Telescope UI.
 
 ### Harpoon (Quick File Navigation)
 
@@ -211,38 +185,11 @@ These keybindings work seamlessly across both Neovim splits and tmux panes.
 | n    | `<leader>hp` | Previous Harpoon file  |
 | n    | `<leader>hn` | Next Harpoon file      |
 
-### Flash (Navigation)
-
-| Mode    | Keybinding | Description         |
-| :------ | :--------- | :------------------ |
-| n, x, o | `s`        | Flash jump          |
-| n, x, o | `S`        | Flash Treesitter    |
-| o       | `r`        | Remote Flash        |
-| o, x    | `R`        | Treesitter Search   |
-| c       | `<C-s>`    | Toggle Flash Search |
-
-### Marks (Visual Marks in Gutter)
-
-| Mode | Keybinding | Description                       |
-| :--- | :--------- | :-------------------------------- |
-| n    | `m{a-z}`   | Set mark (standard Vim)           |
-| n    | `m,`       | Set next available lowercase mark |
-| n    | `m;`       | Toggle next available mark        |
-| n    | `m:`       | Preview mark                      |
-| n    | `m]`       | Jump to next mark                 |
-| n    | `m[`       | Jump to previous mark             |
-| n    | `dm{a-z}`  | Delete a specific mark            |
-| n    | `dm-`      | Delete marks on current line      |
-| n    | `dm<space>`| Delete all marks in buffer        |
-
-Marks appear as icons in the sign column (gutter) for visual feedback.
-
 ### Treesitter
 
 | Mode          | Keybinding  | Description                      |
 | :------------ | :---------- | :------------------------------- |
-| Normal/Visual | `<C-space>` | Initialize incremental selection |
-| Normal/Visual | `<C-space>` | Increment selection (node)       |
+| Normal/Visual | `<C-space>` | Initialize/increment selection   |
 | Normal/Visual | `<bs>`      | Decrement selection (node)       |
 | Normal/Visual | `af`        | Select around function           |
 | Normal/Visual | `if`        | Select inside function           |
@@ -253,71 +200,39 @@ Marks appear as icons in the sign column (gutter) for visual feedback.
 | Normal        | `[f`        | Go to previous function start    |
 | Normal        | `[c`        | Go to previous class start       |
 
-### Mini.ai (Enhanced Text Objects)
-
-| Mode | Text Object | Description                 |
-| :--- | :---------- | :-------------------------- |
-| o, v | `af/if`     | Around/inside function      |
-| o, v | `ac/ic`     | Around/inside class         |
-| o, v | `ao/io`     | Around/inside block/loop    |
-| o, v | `aq/iq`     | Around/inside quotes        |
-| o, v | `ab/ib`     | Around/inside brackets      |
-| o, v | `at/it`     | Around/inside HTML tags     |
-| o, v | `ad/id`     | Around/inside digits        |
-| o, v | `au/iu`     | Around/inside function call |
-
 ### LSP
 
-| Mode | Keybinding   | Description                                 |
-| :--- | :----------- | :------------------------------------------ |
-| n    | `gr`         | Show LSP references                         |
-| n    | `gD`         | Go to declaration                           |
-| n    | `gd`         | Show LSP definitions                        |
-| n    | `gi`         | Show LSP implementations                    |
-| n    | `gt`         | Show LSP type definitions                   |
-| n, v | `<leader>la` | See available code actions                  |
-| n    | `<leader>lr` | Smart rename                                |
-| n    | `<leader>ld` | Show buffer diagnostics                     |
-| n    | `<leader>lD` | Show line diagnostics                       |
-| n    | `[d`         | Go to previous diagnostic                   |
-| n    | `]d`         | Go to next diagnostic                       |
-| n    | `K`          | Show documentation for what is under cursor |
-| n    | `<leader>ls` | Restart LSP                                 |
+| Mode | Keybinding   | Description          |
+| :--- | :----------- | :------------------- |
+| n    | `gd`         | Go to definition     |
+| n    | `gD`         | Go to declaration    |
+| n    | `gr`         | Go to references     |
+| n    | `gi`         | Go to implementation |
+| n    | `gt`         | Go to type definition |
+| n    | `K`          | Hover documentation  |
+| n    | `<leader>la` | Code action          |
+| n    | `<leader>lr` | Rename               |
+| n    | `<leader>ld` | Line diagnostics     |
+| n    | `<leader>ls` | Signature help       |
 
 ### Formatting & Linting
 
 | Mode | Keybinding   | Description              |
 | :--- | :----------- | :----------------------- |
-| n, v | `<leader>mp` | Format file or selection |
+| n, v | `<leader>cf` | Format buffer            |
 | n    | `<leader>ll` | Trigger linting          |
+
+Format on save is enabled by default.
 
 ### Trouble (Diagnostics)
 
 | Mode | Keybinding   | Description                          |
 | :--- | :----------- | :----------------------------------- |
-| n    | `<leader>xx` | Toggle Trouble (diagnostics list)    |
+| n    | `<leader>xx` | Toggle diagnostics (Trouble)         |
 | n    | `<leader>xX` | Buffer diagnostics (Trouble)         |
+| n    | `<leader>xQ` | Quickfix list (Trouble)              |
 | n    | `<leader>cs` | Symbols (Trouble)                    |
 | n    | `<leader>cl` | LSP references/definitions (Trouble) |
-| n    | `<leader>xL` | Location List (Trouble)              |
-| n    | `<leader>xQ` | Quickfix List (Trouble)              |
-
-### Search & Replace (Spectre)
-
-| Mode | Keybinding   | Description                     |
-| :--- | :----------- | :------------------------------ |
-| n    | `<leader>sr` | Open Spectre (search & replace) |
-| n    | `<leader>sw` | Search current word             |
-| v    | `<leader>sw` | Search selection                |
-| n    | `<leader>sp` | Search in current file          |
-
-### Session Management
-
-| Mode | Keybinding   | Description                   |
-| :--- | :----------- | :---------------------------- |
-| n    | `<leader>qs` | Restore session (current dir) |
-| n    | `<leader>ql` | Restore last session          |
-| n    | `<leader>qd` | Don't save current session    |
 
 ### Debugging (DAP)
 
@@ -326,106 +241,48 @@ Marks appear as icons in the sign column (gutter) for visual feedback.
 | n    | `<leader>db` | Toggle breakpoint       |
 | n    | `<leader>dB` | Conditional breakpoint  |
 | n    | `<leader>dc` | Continue                |
-| n    | `<leader>dC` | Run to cursor           |
 | n    | `<leader>di` | Step into               |
-| n    | `<leader>do` | Step out                |
-| n    | `<leader>dO` | Step over               |
-| n    | `<leader>dp` | Pause                   |
-| n    | `<leader>dt` | Terminate               |
+| n    | `<leader>do` | Step over               |
+| n    | `<leader>dO` | Step out                |
 | n    | `<leader>dr` | Toggle REPL             |
 | n    | `<leader>dl` | Run last                |
 | n    | `<leader>du` | Toggle DAP UI           |
 | n, v | `<leader>de` | Eval expression         |
-| n    | `<leader>dw` | Widgets                 |
-| n    | `<leader>dj` | Down (stack)            |
-| n    | `<leader>dk` | Up (stack)              |
-| n    | `<leader>dg` | Go to line (no execute) |
-| n    | `<leader>ds` | Session                 |
-
-### Testing (neotest)
-
-| Mode | Keybinding   | Description          |
-| :--- | :----------- | :------------------- |
-| n    | `<leader>tt` | Run Nearest Test     |
-| n    | `<leader>tf` | Run File Tests       |
-| n    | `<leader>ts` | Toggle Test Summary  |
-| n    | `<leader>to` | Show Test Output     |
-| n    | `<leader>tp` | Toggle Output Panel  |
-| n    | `<leader>td` | Debug Nearest Test   |
-| n    | `<leader>tS` | Stop Test            |
-
-### Zen Mode
-
-| Mode | Keybinding  | Description      |
-| :--- | :---------- | :--------------- |
-| n    | `<leader>z` | Toggle Zen Mode  |
-
-### LaTeX (vimtex)
-
-**Prefix**: `<localleader>l` (localleader = `,`)
-
-| Mode | Keybinding        | Description             |
-| :--- | :---------------- | :---------------------- |
-| n    | `,ll`             | Compile (continuous)    |
-| n    | `,lv`             | View PDF                |
-| n    | `,lk`             | Stop compilation        |
-| n    | `,lc`             | Clean auxiliary files   |
-| n    | `,lt`             | Open ToC                |
-
-PDF viewer: Skim on macOS, zathura on Linux.
-
-### Markdown Preview
-
-| Command                  | Description                  |
-| :----------------------- | :--------------------------- |
-| `:MarkdownPreview`       | Open preview in browser      |
-| `:MarkdownPreviewStop`   | Stop preview                 |
-| `:MarkdownPreviewToggle` | Toggle preview               |
-
-### Snacks (Utilities)
-
-| Mode | Keybinding   | Description                  |
-| :--- | :----------- | :--------------------------- |
-| n    | `<leader>.`  | Toggle scratch buffer        |
-| n    | `<leader>S`  | Select scratch buffer        |
-| n    | `<leader>n`  | Notification history         |
-| n    | `<leader>bd` | Delete buffer                |
-| n    | `<leader>gb` | Git blame line               |
-| n    | `<leader>gB` | Git browse (open in browser) |
-| n    | `<leader>un` | Dismiss all notifications    |
-| n    | `<C-/>`      | Toggle terminal              |
 
 ---
 
 ## Emacs Keybindings
 
-Emacs uses **Evil mode** for Vim-like keybindings, plus Emacs-style bindings for IDE features.
-
 ### General
 
 | Keybinding | Description                   |
 | :--------- | :---------------------------- |
-| `C-` `     | Toggle vterm terminal         |
 | `ESC`      | Keyboard escape/quit          |
 | `M-o`      | Switch to other window        |
 | `C-c w`    | Delete window                 |
 | `C-c r`    | Replace string                |
 | `C-.`      | Embark actions menu           |
 | `M-.`      | Embark dwim (do what I mean)  |
+| `C-h B`    | Embark bindings               |
 | `C-x C-s`  | Save file                     |
 | `C-x C-f`  | Find file                     |
-| `C-x b`    | Switch buffer (with consult)  |
+| `C-x b`    | Switch buffer (consult)       |
 | `C-g`      | Cancel/quit current operation |
 
-### File Management & Navigation
+### Search & Navigation
 
 | Keybinding | Description                     |
 | :--------- | :------------------------------ |
+| `M-s l`    | Consult line search             |
+| `M-s r`    | Consult ripgrep                 |
+| `M-s f`    | Consult find file               |
+| `M-y`      | Consult yank from kill ring     |
+| `M-g g`    | Consult go to line              |
+| `M-g i`    | Consult imenu                   |
+| `C-c j`    | Avy jump to character           |
 | `M-0`      | Select Treemacs window          |
 | `C-x t t`  | Toggle Treemacs file explorer   |
-| `M-s`      | Consult line search             |
-| `M-y`      | Consult yank from kill ring     |
-| `C-c j`    | Avy jump to character (2 chars) |
+| `M-$`      | Jinx spell-correct              |
 
 ### Projectile (Project Management)
 
@@ -442,80 +299,93 @@ Emacs uses **Evil mode** for Vim-like keybindings, plus Emacs-style bindings for
 
 ### LSP (Eglot)
 
-Active when editing a file with LSP support.
+Active in `eglot-mode-map` when an LSP server is attached.
 
-| Keybinding | Description                      |
-| :--------- | :------------------------------- |
-| `C-c l a`  | Code actions                     |
-| `C-c l f`  | Format buffer                    |
-| `C-c l r`  | Rename symbol                    |
-| `C-c l d`  | Find declaration                 |
-| `C-c l i`  | Find implementation              |
-| `C-c l t`  | Find type definition             |
-| `C-c l s`  | Search symbols (consult-eglot)   |
-| `M-.`      | Go to definition (default Emacs) |
-| `M-,`      | Pop back from definition         |
+| Keybinding | Description            |
+| :--------- | :--------------------- |
+| `C-c l a`  | Code actions           |
+| `C-c l d`  | Find definitions       |
+| `C-c l D`  | Find references        |
+| `C-c l f`  | Format buffer          |
+| `C-c l r`  | Rename symbol          |
+| `C-c l i`  | Find implementation    |
+| `C-c l t`  | Find type definition   |
+| `M-.`      | Go to definition       |
+| `M-,`      | Pop back from definition |
 
-### Git (Magit)
+### Git (Magit & diff-hl)
 
-| Keybinding | Description       |
-| :--------- | :---------------- |
-| `C-x g`    | Open Magit status |
+| Keybinding | Description                         |
+| :--------- | :---------------------------------- |
+| `C-x g`    | Open Magit status                   |
 
-**In Magit**: Press `?` to see all commands (staging, committing, pushing, pulling, branching, etc.)
+`diff-hl` shows change indicators in the gutter for `prog-mode` and `dired-mode` buffers. Press `?` in Magit to see all commands.
 
 ### Debugging (DAP Mode)
 
-| Keybinding | Description      |
-| :--------- | :--------------- |
-| `C-c d b`  | Add breakpoint   |
-| `C-c d d`  | Start debugging  |
-| `C-c d n`  | Next (step over) |
-| `C-c d c`  | Continue         |
+| Keybinding | Description       |
+| :--------- | :---------------- |
+| `C-c d b`  | Toggle breakpoint |
+| `C-c d d`  | Start debugging   |
+| `C-c d n`  | Next (step over)  |
+| `C-c d c`  | Continue          |
+| `C-c d s`  | Step in           |
+| `C-c d o`  | Step out          |
+| `C-c d r`  | Restart debug     |
+| `C-c d q`  | Disconnect        |
 
 ### Completion (Vertico & Corfu)
 
 **Vertico** (minibuffer completion):
 
-- `C-n` or `Down` - Next completion
-- `C-p` or `Up` - Previous completion
-- `RET` - Select completion
-- `C-j` - Select without exiting
+- `C-n` or `Down` — Next completion
+- `C-p` or `Up` — Previous completion
+- `RET` — Select completion
 
 **Corfu** (in-buffer completion):
 
 - Triggers automatically after 2 characters
-- `C-n` / `C-p` - Navigate completions
-- `RET` - Accept completion
-- `C-g` - Cancel
+- `C-n` / `C-p` — Navigate completions
+- `RET` — Accept completion
+- `C-g` — Cancel
 
 ### FP / Research REPLs
 
 **Prefix**: `C-c f` opens the REPL command map
 
-| Keybinding | Description             |
-| :--------- | :---------------------- |
-| `C-c f h`  | Open Haskell REPL       |
-| `C-c f H`  | Load file into Haskell  |
-| `C-c f o`  | Open OCaml REPL         |
-| `C-c f O`  | Load file into OCaml    |
-| `C-c f j`  | Open Julia REPL         |
-| `C-c f J`  | Load file into Julia    |
-| `C-c f r`  | Open Racket REPL        |
-| `C-c f e`  | Open Elixir REPL        |
-| `C-c f s`  | Open SML REPL           |
-| `C-c f l`  | Lean build              |
-| `C-c f c`  | Coq proof step          |
-| `C-c f a`  | Agda type-check/load    |
+| Keybinding | Description                  |
+| :--------- | :--------------------------- |
+| `C-c f h`  | Haskell REPL (ghci)          |
+| `C-c f o`  | OCaml REPL (utop)            |
+| `C-c f s`  | SML REPL                     |
+| `C-c f r`  | Racket REPL                  |
+| `C-c f l`  | Common Lisp REPL (sly/sbcl)  |
+| `C-c f e`  | Emacs Lisp REPL (ielm)       |
+| `C-c f n`  | Lean 4 REPL                  |
+| `C-c f c`  | Coq proof (Proof General)    |
+| `C-c f a`  | Agda type-check/load         |
 
 ### Org Mode
 
-| Keybinding | Description                          |
-| :--------- | :----------------------------------- |
-| `C-c a`    | Org agenda                           |
-| `C-c c`    | Org capture                          |
-| `C-c l`    | Store link                           |
-| `C-c C-c`  | Execute babel source block           |
+| Keybinding | Description                |
+| :--------- | :------------------------- |
+| `C-c a`    | Org agenda                 |
+| `C-c c`    | Org capture                |
+| `C-c C-c`  | Execute babel source block |
+
+### Org Citations (Citar, in org-mode)
+
+| Keybinding | Description        |
+| :--------- | :----------------- |
+| `C-c b o`  | Open reference     |
+| `C-c b i`  | Insert citation    |
+| `C-c b n`  | Open citation notes |
+
+### Org-noter (in org-mode)
+
+| Keybinding | Description |
+| :--------- | :---------- |
+| `C-c N`    | Org-noter   |
 
 ### Org-roam (Zettelkasten Notes)
 
@@ -525,7 +395,7 @@ Active when editing a file with LSP support.
 | :--------- | :----------------------- |
 | `C-c n f`  | Find node                |
 | `C-c n i`  | Insert node link         |
-| `C-c n l`  | Toggle backlinks buffer  |
+| `C-c n b`  | Toggle backlinks buffer  |
 | `C-c n c`  | Capture to node          |
 | `C-c n d`  | Daily note (today)       |
 
@@ -551,8 +421,6 @@ Active when editing a file with LSP support.
 | `C-a + p`        | Previous window                                |
 | `C-a + n`        | Next window                                    |
 | `C-a + T`        | Open sesh session picker (fuzzy)               |
-| `C-h/j/k/l`     | Seamless Neovim/tmux pane navigation           |
-| `A-h/j/k/l`     | Seamless Neovim/tmux pane resizing             |
 | `C-a + [`        | Enter copy mode                                |
 | `v`              | Begin selection (in copy mode)                 |
 | `C-v`            | Rectangle selection (in copy mode)             |

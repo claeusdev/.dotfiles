@@ -17,6 +17,7 @@
   (add-to-list 'eglot-server-programs '(racket-mode . ("racket-langserver")))
   (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
   (add-to-list 'eglot-server-programs '(coq-mode . ("coq-lsp")))
+  (add-to-list 'eglot-server-programs '((rust-mode rust-ts-mode) . ("rust-analyzer")))
 
   ;; LSP keybindings
   :bind (:map eglot-mode-map

@@ -1,114 +1,79 @@
 return {
+  -- Autopairs
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
-    dependencies = { "hrsh7th/nvim-cmp" },
-    config = function()
-      local autopairs = require("nvim-autopairs")
-      autopairs.setup({
-        check_ts = true,
-        ts_config = {
-          lua = { "string", "source" },
-          javascript = { "string", "template_string" },
-        },
-        disable_filetype = { "TelescopePrompt", "spectre_panel" },
-        fast_wrap = {
-          map = "<M-e>",
-          chars = { "{", "[", "(", '"', "'" },
-          pattern = [=[[%'%"%)%>%]%)%}%,]]=],
-          end_key = "$",
-          keys = "qwertyuiopzxcvbnmasdfghjkl",
-          check_comma = true,
-          highlight = "Search",
-          highlight_grey = "Comment",
-        },
-      })
+    opts = {},
+  },
 
-      -- Make autopairs work with cmp
-      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-      local cmp = require("cmp")
-      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-    end,
-  },
-  {
-    "numToStr/Comment.nvim",
-    event = { "BufReadPre", "BufNewFile" },
-    config = function()
-      require("Comment").setup({
-        padding = true,
-        sticky = true,
-        ignore = "^$",
-        toggler = {
-          line = "gcc",
-          block = "gbc",
-        },
-        opleader = {
-          line = "gc",
-          block = "gb",
-        },
-        extra = {
-          above = "gcO",
-          below = "gco",
-          eol = "gcA",
-        },
-        mappings = {
-          basic = true,
-          extra = true,
-        },
-      })
-    end,
-  },
+  -- Surround
   {
     "kylechui/nvim-surround",
     version = "*",
-    event = { "BufReadPre", "BufNewFile" },
-    config = function()
-      require("nvim-surround").setup({})
-    end,
+    event = "VeryLazy",
+    opts = {},
   },
+
+  -- Comment
   {
-    "RRethy/vim-illuminate",
-    event = { "BufReadPost", "BufNewFile" },
-    opts = {
-      delay = 200,
-      large_file_cutoff = 2000,
-      large_file_overrides = { providers = { "lsp" } },
-    },
-    config = function(_, opts)
-      require("illuminate").configure(opts)
-      vim.keymap.set("n", "]]", function() require("illuminate").goto_next_reference(false) end, { desc = "Next reference" })
-      vim.keymap.set("n", "[[", function() require("illuminate").goto_prev_reference(false) end, { desc = "Prev reference" })
-    end,
+    "numToStr/Comment.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    opts = {},
   },
+
+  -- Todo comments
+  {
+    "folke/todo-comments.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {},
+  },
+
+  -- Flash (quick motions)
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    opts = {},
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+    },
+  },
+
+  -- Undotree
   {
     "mbbill/undotree",
-    cmd = "UndotreeToggle",
     keys = {
-      { "<leader>u", "<cmd>UndotreeToggle<cr>", desc = "Toggle Undotree" },
+      { "<leader>u", "<cmd>UndotreeToggle<CR>", desc = "Toggle undotree" },
     },
   },
+
+  -- Zen mode
   {
-    "NvChad/nvim-colorizer.lua",
-    event = { "BufReadPost", "BufNewFile" },
-    opts = {
-      user_default_options = {
-        css = true,
-        tailwind = true,
-        mode = "virtualtext",
-        virtualtext_inline = true,
-      },
-      filetypes = { "css", "scss", "html", "javascript", "typescript", "javascriptreact", "typescriptreact", "lua" },
-    },
-  },
-  {
-    "ThePrimeagen/refactoring.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
+    "folke/zen-mode.nvim",
     keys = {
-      { "<leader>re", function() require("refactoring").refactor("Extract Function") end, desc = "Extract Function", mode = "v" },
-      { "<leader>rf", function() require("refactoring").refactor("Extract Function To File") end, desc = "Extract Function To File", mode = "v" },
-      { "<leader>rv", function() require("refactoring").refactor("Extract Variable") end, desc = "Extract Variable", mode = "v" },
-      { "<leader>ri", function() require("refactoring").refactor("Inline Variable") end, desc = "Inline Variable", mode = { "n", "v" } },
+      { "<leader>z", "<cmd>ZenMode<CR>", desc = "Toggle zen mode" },
     },
     opts = {},
+  },
+
+  -- Mini.ai (textobjects)
+  {
+    "echasnovski/mini.ai",
+    event = "VeryLazy",
+    config = function()
+      local ai = require("mini.ai")
+      ai.setup({
+        custom_textobjects = {
+          f = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }),
+          c = ai.gen_spec.treesitter({ a = "@class.outer", i = "@class.inner" }),
+          b = ai.gen_spec.treesitter({ a = "@block.outer", i = "@block.inner" }),
+          d = { "%f[%d]%d+" },
+          e = ai.gen_spec.function_call(),
+        },
+      })
+    end,
   },
 }

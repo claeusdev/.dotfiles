@@ -45,10 +45,10 @@ autocmd("BufWritePre", {
 -- Set tab width for specific filetypes
 autocmd("FileType", {
   group = augroup("filetype-settings", { clear = true }),
-  pattern = { "go", "rust" },
+  pattern = { "rust", "c", "cpp" },
   callback = function()
     vim.opt_local.tabstop = 4
     vim.opt_local.shiftwidth = 4
   end,
-  desc = "Set tab width for Go and Rust",
+  desc = "Set tab width for Rust, C, and C++",
 })

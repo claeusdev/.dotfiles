@@ -28,6 +28,40 @@
                               (setq c-basic-offset 4)
                               (my/eglot-ensure-when-executable "clangd"))))
 
+;; --- Python ---
+(if (my/treesit-available-p 'python)
+    (use-package python
+      :ensure nil
+      :mode ("\\.py\\'" . python-ts-mode)
+      :custom (python-indent-offset 4))
+  (use-package python
+    :ensure nil
+    :mode ("\\.py\\'" . python-mode)
+    :custom (python-indent-offset 4)))
+
+;; Ruff + ty via eglot-python-preset (handles multi-server for eglot)
+(use-package eglot-python-preset
+  :after eglot
+  :custom
+  (eglot-python-preset-lsp-server 'ty)
+  :config
+  (eglot-python-preset-setup))
+
+;; --- Rust ---
+(if (my/treesit-available-p 'rust)
+    (use-package rust-ts-mode
+      :ensure nil
+      :mode "\\.rs\\'"
+      :hook (rust-ts-mode . (lambda () (my/eglot-ensure-when-executable "rust-analyzer"))))
+  (use-package rust-mode
+    :mode "\\.rs\\'"
+    :custom (rust-format-on-save t)
+    :hook (rust-mode . (lambda () (my/eglot-ensure-when-executable "rust-analyzer")))))
+
+(use-package cargo
+  :hook ((rust-mode . cargo-minor-mode)
+         (rust-ts-mode . cargo-minor-mode)))
+
 ;; --- OCaml ---
 (use-package tuareg
   :hook (tuareg-mode . (lambda () (my/eglot-ensure-when-executable "ocamllsp"))))

@@ -8,7 +8,7 @@
         modus-themes-bold-constructs t
         modus-themes-org-blocks 'gray-background)
   :config
-  (load-theme 'modus-operandi :no-confirm))
+  (load-theme 'modus-vivendi :no-confirm))
 
 ;; Font
 (let ((font-height (if (eq system-type 'darwin) 165 140)))
@@ -22,6 +22,18 @@
 
 ;; Nerd icons
 (use-package nerd-icons)
+
+;; Doom modeline
+(use-package doom-modeline
+  :custom
+  (doom-modeline-height 28)
+  (doom-modeline-bar-width 4)
+  (doom-modeline-project-detection 'projectile)
+  (doom-modeline-buffer-file-name-style 'relative-from-project)
+  (doom-modeline-icon t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-minor-modes nil)
+  :init (doom-modeline-mode 1))
 
 (provide 'el-theme)
 ;;; el-theme.el ends here

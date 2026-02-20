@@ -62,5 +62,25 @@
 (use-package editorconfig
   :config (editorconfig-mode 1))
 
+;; --- Writing & Focus ---
+
+;; Olivetti — centered writing mode
+(use-package olivetti
+  :custom (olivetti-body-width 90)
+  :hook ((org-mode . olivetti-mode)
+         (markdown-mode . olivetti-mode)))
+
+;; Jinx — fast spell-checking
+(use-package jinx
+  :hook ((text-mode . jinx-mode)
+         (org-mode . jinx-mode))
+  :bind ("M-$" . jinx-correct))
+
+;; Writegood — highlight weak writing patterns
+(use-package writegood-mode
+  :hook ((org-mode . writegood-mode)
+         (markdown-mode . writegood-mode)
+         (LaTeX-mode . writegood-mode)))
+
 (provide 'el-tools)
 ;;; el-tools.el ends here

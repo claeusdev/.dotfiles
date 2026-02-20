@@ -53,7 +53,7 @@ opt.updatetime = 250
 opt.timeoutlen = 300
 
 -- Completion
-opt.completeopt = "menu,menuone,noselect"
+opt.completeopt = "menu,menuone,noinsert"
 
 -- Scrolling
 opt.scrolloff = 8
@@ -61,7 +61,7 @@ opt.sidescrolloff = 8
 
 -- Folding (using treesitter)
 opt.foldmethod = "expr"
-opt.foldexpr = "nvim_treesitter#foldexpr()"
+opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 opt.foldenable = false
 
 -- Show invisible characters
@@ -71,11 +71,3 @@ opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 -- File encoding
 opt.fileencoding = "utf-8"
 
--- Suppress lspconfig deprecation warnings (must be set early)
-local notify = vim.notify
-vim.notify = function(msg, ...)
-  if type(msg) == "string" and (msg:match("lspconfig.*deprecated") or msg:match("deprecated.*lspconfig")) then
-    return
-  end
-  notify(msg, ...)
-end
