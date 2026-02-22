@@ -1,305 +1,137 @@
 # Installation Guide
 
-This directory contains scripts to set up your development environment.
+## One-Command Setup
 
-## Quick Start
-
-### 1. Clone and Set Up Dotfiles
-
-```bash
-git clone <your-repo-url> ~/.dotfiles
-cd ~/.dotfiles
-./setup.sh
+```sh
+bash <(curl -s https://raw.githubusercontent.com/naamanu/.dotfiles/main/setup.sh)
 ```
 
-This will:
-- Create symlinks for your dotfiles (tmux, git, nvim, fish, ghostty, starship, emacs)
-- Initialize git submodules
-- Back up any existing configs to `~/.dotfiles_old/`
+This single command will:
 
-### 2. Install Development Tools
+1. **Install chezmoi** (dotfile manager)
+2. **Clone and deploy dotfiles** (`chezmoi init --apply naamanu`)
+3. **Install development tools** (platform-appropriate: `install-tools-linux.sh` or `install-tools-mac.sh`)
+4. **Post-install setup**: TPM (tmux plugin manager), set fish as default shell
 
-Choose the script for your operating system:
+The script is idempotent — safe to re-run on an already-configured machine.
 
-#### macOS
-```bash
-./install-tools-mac.sh
+## Manual Step-by-Step Alternative
+
+### 1. Install chezmoi and deploy dotfiles
+
+```sh
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+export PATH="$HOME/.local/bin:$PATH"
+chezmoi init --apply naamanu
 ```
 
-#### Linux (Ubuntu/Debian/Fedora/Arch)
-```bash
-./install-tools-linux.sh
+### 2. Install development tools
+
+macOS:
+```sh
+bash "$(chezmoi source-path)/install-tools-mac.sh"
 ```
 
-## What Gets Installed
-
-### Core Development Tools
-- **Build tools**: gcc, make, cmake
-- **Version control**: git, gh (GitHub CLI), lazygit
-- **Package managers**: Homebrew (macOS), nvm (Node.js)
-
-### Shell & Terminal
-- **ghostty**: Modern GPU-accelerated terminal emulator
-- **fish**: Modern, user-friendly shell with excellent autocompletion
-- **tmux**: Terminal multiplexer for session management
-- **starship**: Beautiful, fast, and customizable cross-shell prompt
-- **zoxide**: Smart directory navigation (cd replacement)
-
-### Modern CLI Utilities
-- **neovim**: Hyperextensible Vim-based text editor
-- **ripgrep** (`rg`): Extremely fast grep alternative
-- **fd**: Fast and user-friendly find alternative
-- **fzf**: Command-line fuzzy finder
-- **bat**: Cat clone with syntax highlighting
-- **eza**: Modern ls replacement with colors and icons
-- **btop**: Beautiful process/system monitor
-- **jq**: JSON processor
-- **yq**: YAML processor
-- **tree**: Directory tree viewer
-- **lazydocker**: Terminal UI for Docker
-
-### Programming Languages
-- **Node.js**: JavaScript runtime (via nvm)
-- **Python 3**: Python programming language
-- **Rust**: Systems programming language
-- **Go**: Google's programming language
-- **Lua**: Lightweight scripting language
-
-### Language Servers & Formatters
-- **LSP servers**: TypeScript, Python (Pyright), Rust, Go, Lua
-- **Formatters**: Prettier, Black, Stylua, shfmt
-- **Linters**: ESLint, Ruff, ShellCheck
-
-### Databases
-- **PostgreSQL**: Advanced relational database
-- **SQLite**: Lightweight embedded database
-- **Redis**: In-memory data store (macOS only)
-
-### Container & Cloud Tools
-- **Docker**: Container platform
-- **lazydocker**: Docker terminal UI
-- **kubectl**: Kubernetes CLI (macOS)
-- **k9s**: Kubernetes terminal UI (macOS)
-- **terraform**: Infrastructure as code (macOS)
-- **AWS CLI**: Amazon Web Services CLI (macOS)
-
-### Fonts
-- **JetBrains Mono Nerd Font**: Programming font with icons
-- **Fira Code Nerd Font**: Programming font with ligatures (macOS)
-- **Hack Nerd Font**: Programming font (macOS)
-
-### macOS Specific
-- **Rectangle**: Window management
-- **Raycast**: Spotlight replacement with plugins
-
-## Post-Installation
-
-### 1. Launch Ghostty
-The installation scripts automatically configure Ghostty with:
-- Inconsolata Nerd Font
-- Fish shell integration
-- Dark theme with transparency
-- Useful keybindings
-
-Just launch Ghostty and you're ready to go!
-
-### 2. Verify Fish Shell Configuration
-Open a new terminal and verify modern tools are working:
-```bash
-# Test eza (modern ls)
-ls
-
-# Test bat (cat with syntax highlighting)
-cat ~/.config/fish/config.fish
-
-# Test zoxide (smart cd)
-z ~  # or just 'cd' somewhere, then 'z' to jump back
-
-# Test starship prompt
-# You should see a beautiful prompt with git info, language versions, etc.
+Linux (Ubuntu/Debian/Fedora/Arch):
+```sh
+bash "$(chezmoi source-path)/install-tools-linux.sh"
 ```
 
-### 3. Configure Git
-```bash
-git config --global user.name "Your Name"
-git config --global user.email "your.email@example.com"
+### 3. Post-install setup
+
+```sh
+# Clone TPM
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+# Set fish as default shell
+chsh -s "$(which fish)"
+
+# Install Neovim plugins
+nvim '+Lazy sync' +qa
+
+# Install tmux plugins (inside tmux)
+# prefix + I
 ```
 
-### 4. Set Fish as Default Shell
-```bash
-# macOS
-chsh -s /opt/homebrew/bin/fish
+## What's Managed by Chezmoi
 
-# Linux
-chsh -s $(which fish)
-```
+Chezmoi manages all configuration files. The install-tools scripts only install packages — they never write config files.
 
-### 5. Install Neovim Plugins
-```bash
-nvim +Lazy sync +qa
-```
+| Config | Source path in chezmoi |
+| :--- | :--- |
+| fish shell | `dot_config/fish/` |
+| ghostty | `dot_config/ghostty/` |
+| starship | `dot_config/starship.toml` |
+| neovim | `dot_config/nvim/` |
+| tmux | `dot_tmux.conf` |
+| git | `dot_gitconfig` |
+| emacs | `dot_emacs.d/` |
 
-### 6. Restart Terminal
-Log out and back in, or open a new terminal window (or use Ghostty!) to apply all changes.
+To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 
-### 7. Docker Setup (Linux)
-After installation, log out and back in for Docker group permissions to take effect.
+## What the Install Scripts Provide
 
-## Using Modern CLI Tools
+### Both Platforms
+- Core: build tools, git, curl, wget, cmake
+- Shell: fish, tmux, starship, zoxide
+- CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, btop
+- Languages: Node.js, Python (uv), Rust, Go, Lua
+- FP/Research: OCaml, SML, Lisp, Racket, Coq, Agda
+- LSP/Formatters: language servers, prettier, stylua, shellcheck
+- Git: gh, lazygit, git-delta
+- Databases: PostgreSQL, SQLite
+- Containers: Docker, lazydocker
+- Fonts: JetBrains Mono, Inconsolata (Nerd Font patched)
 
-The installation configures your shell with aliases for modern replacements of classic Unix tools:
+### macOS Only
+- Homebrew (installed automatically)
+- Cloud/DevOps: awscli, terraform, kubectl, k9s
+- Apps: Rectangle, Ghostty (cask), Raycast
 
-### File Listing (eza)
-```bash
-ls          # List files with icons
-ll          # Long format with details
-la          # List all files including hidden
-lt          # Tree view
-tree        # Also aliased to eza --tree
-```
+## Post-Install Checklist
 
-### File Viewing (bat)
-```bash
-cat file.txt           # View file with syntax highlighting
-bat file.txt           # Same thing
-bat --style=plain      # Plain output without decorations
-```
-
-### File Finding (fd & ripgrep)
-```bash
-fd pattern              # Find files/directories
-fd "\.js$"              # Find all .js files
-rg "search term"        # Search file contents (replaces grep)
-rg -i "case insensitive" # Case-insensitive search
-```
-
-### Smart Navigation (zoxide)
-```bash
-z workspace            # Jump to most-used directory matching "workspace"
-z proj work            # Jump to directory matching "proj" and "work"
-zi                     # Interactive directory picker
-```
-
-After using `cd` to navigate a few times, zoxide learns your patterns and `z` becomes very powerful!
-
-### Git Shortcuts
-The fish config includes many git aliases:
-```bash
-g          # git
-gs         # git status
-ga         # git add
-gc         # git commit
-gcm        # git commit -m "message"
-gp         # git push
-gl         # git pull
-glog       # Pretty git log with graph
-gd         # git diff
-gco        # git checkout
-gb         # git branch
-```
-
-### Lazygit & Lazydocker
-```bash
-lazygit    # Terminal UI for git
-lazydocker # Terminal UI for Docker
-```
-
-## Customization
-
-### Add More Tools
-
-#### macOS
-Edit `install-tools-mac.sh` and add:
-```bash
-brew install your-package-name
-```
-
-#### Linux
-Edit `install-tools-linux.sh` and add:
-```bash
-$PKG_INSTALL your-package-name
-```
-
-### Add More Dotfiles
-Edit `setup.sh` and add files to the `files` variable:
-```bash
-files="tmux.conf gitconfig your-new-file"
-```
+- [ ] Restart terminal (or log out/in)
+- [ ] `nvim '+Lazy sync' +qa` — install Neovim plugins
+- [ ] Open tmux, press `prefix + I` — install tmux plugins
+- [ ] Log out/in for Docker group changes (Linux)
+- [ ] `gh auth login` — authenticate GitHub CLI
 
 ## Troubleshooting
 
 ### macOS: Command not found after installation
-Run:
-```bash
+```sh
 source ~/.zprofile
 ```
 
 ### Linux: Docker permission denied
-Log out and back in, then verify with:
-```bash
+Log out and back in, then:
+```sh
 docker run hello-world
 ```
 
 ### Neovim: Plugins not loading
-Try:
-```bash
-nvim +Lazy clean +Lazy sync
+```sh
+nvim '+Lazy clean' '+Lazy sync'
 ```
 
-### Fish: Not showing starship prompt
-Add to `~/.config/fish/config.fish`:
-```fish
-starship init fish | source
+## Updating
+
+Pull the latest dotfiles and re-apply:
+```sh
+chezmoi update
 ```
 
-## Uninstallation
-
-To remove symlinks and restore original configs:
-```bash
-cd ~/.dotfiles
-# Remove symlinks
-rm ~/.tmux.conf ~/.gitconfig
-rm -rf ~/.config/nvim ~/.config/fish ~/.emacs.d
-
-# Restore backups
-mv ~/.dotfiles_old/* ~/
-```
-
-## Additional Resources
-
-- [Neovim Keybindings](config/nvim/nvim.readme) - Complete keybinding reference
-- [Fish Shell Documentation](https://fishshell.com/docs/current/)
-- [Tmux Cheat Sheet](https://tmuxcheatsheet.com/)
-- [Lazygit Documentation](https://github.com/jesseduffield/lazygit)
-
-## Support
-
-If you encounter issues:
-1. Check the script output for errors
-2. Verify your OS is supported (macOS, Ubuntu, Debian, Fedora, Arch)
-3. Ensure you have sudo/admin privileges
-4. Check that you have an internet connection
-
-## Updates
-
-To update installed tools:
-
-### macOS
-```bash
+Update installed packages:
+```sh
+# macOS
 brew update && brew upgrade
-```
 
-### Linux (Ubuntu/Debian)
-```bash
+# Ubuntu/Debian
 sudo apt update && sudo apt upgrade
-```
 
-### Linux (Fedora)
-```bash
+# Fedora
 sudo dnf upgrade
-```
 
-### Linux (Arch)
-```bash
+# Arch
 sudo pacman -Syu
 ```

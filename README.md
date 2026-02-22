@@ -41,10 +41,17 @@ git add -A && git commit -m "message" && git push
 exit
 ```
 
-**Setting up on a new machine:**
+**Setting up on a new machine (full bootstrap — chezmoi + tools + post-setup):**
 ```sh
-chezmoi init --apply https://github.com/naamanu/.dotfiles.git
+bash <(curl -s https://raw.githubusercontent.com/naamanu/.dotfiles/main/setup.sh)
 ```
+
+Or deploy dotfiles only (no tool installation):
+```sh
+chezmoi init --apply naamanu
+```
+
+See [INSTALL.md](INSTALL.md) for details and manual alternatives.
 
 ---
 

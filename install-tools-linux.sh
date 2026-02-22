@@ -351,126 +351,8 @@ fi
 fc-cache -fv
 
 echo ""
-echo "Setting up fzf key bindings..."
-if [ -f /usr/share/doc/fzf/examples/key-bindings.bash ]; then
-    echo "source /usr/share/doc/fzf/examples/key-bindings.bash" >> ~/.bashrc
-fi
-
-echo ""
-echo "Setting up fish shell configuration..."
-# Create fish config directory if it doesn't exist
-mkdir -p ~/.config/fish
-
-# Initialize starship for fish
-if command -v starship &> /dev/null; then
-    echo "starship init fish | source" >> ~/.config/fish/config.fish
-fi
-
-# Initialize zoxide for fish
-if command -v zoxide &> /dev/null; then
-    echo "zoxide init fish | source" >> ~/.config/fish/config.fish
-fi
-
-# Set up fish aliases and functions
-cat >> ~/.config/fish/config.fish << 'EOF'
-
-# Modern CLI tool aliases
-if command -v eza &> /dev/null
-    alias ls='eza --icons'
-    alias ll='eza -l --icons'
-    alias la='eza -la --icons'
-    alias lt='eza --tree --icons'
-end
-
-if command -v bat &> /dev/null
-    alias cat='bat'
-else if command -v batcat &> /dev/null
-    alias cat='batcat'
-    alias bat='batcat'
-end
-
-if command -v fd &> /dev/null
-    # fd is already available
-else if command -v fdfind &> /dev/null
-    alias fd='fdfind'
-end
-
-# Ripgrep alias
-if command -v rg &> /dev/null
-    alias grep='rg'
-end
-
-# Git aliases
-alias g='git'
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gp='git push'
-alias gl='git pull'
-alias glog='git log --oneline --graph --decorate'
-
-# Directory navigation
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-
-# Useful shortcuts
-alias c='clear'
-alias h='history'
-alias vim='nvim'
-alias v='nvim'
-
-# Add local bin to PATH
-set -gx PATH $HOME/.local/bin $PATH
-
-EOF
-
-echo ""
-echo "Setting up ghostty terminal configuration..."
-mkdir -p ~/.config/ghostty
-cat > ~/.config/ghostty/config << 'EOF'
-# Ghostty Terminal Configuration
-
-# Font configuration
-font-family = "Inconsolata Nerd Font"
-font-size = 14
-font-thicken = true
-
-# Window configuration
-window-padding-x = 8
-window-padding-y = 8
-window-decoration = true
-window-theme = dark
-
-# Theme and colors
-theme = dark
-background-opacity = 0.95
-unfocused-split-opacity = 0.7
-
-# Shell
-shell-integration = fish
-shell-integration-features = cursor,sudo,title
-
-# Keybindings
-keybind = ctrl+shift+c=copy_to_clipboard
-keybind = ctrl+shift+v=paste_from_clipboard
-keybind = ctrl+shift+t=new_tab
-keybind = ctrl+shift+w=close_surface
-keybind = ctrl+tab=next_tab
-keybind = ctrl+shift+tab=previous_tab
-
-# Performance
-copy-on-select = true
-
-# Cursor
-cursor-style = block
-cursor-style-blink = true
-
-EOF
-
-echo ""
 echo "========================================="
-echo "Installation complete!"
+echo "Tool installation complete!"
 echo "========================================="
 echo ""
 echo "Installed tools:"
@@ -485,11 +367,6 @@ echo "  - Databases: postgresql, sqlite"
 echo "  - Containers: docker, lazydocker"
 echo "  * Some target-stack packages are optional and distro-repository dependent."
 echo ""
-echo "Next steps:"
-echo "  1. Log out and back in for group changes to take effect (Docker)"
-echo "  2. Restart your terminal or run: source ~/.bashrc"
-echo "  3. Install Neovim plugins: nvim +Lazy sync +qa"
-echo "  4. Set fish as default shell: chsh -s \$(which fish)"
-echo "  5. Configure git: git config --global user.name 'Your Name'"
-echo "  6. Configure git: git config --global user.email 'your.email@example.com'"
+echo "Note: Shell and app configs are managed by chezmoi."
+echo "  Run 'chezmoi apply' to deploy configuration files."
 echo ""
