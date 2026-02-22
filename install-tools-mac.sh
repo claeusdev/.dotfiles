@@ -40,6 +40,7 @@ echo ""
 echo "Installing shell and terminal tools..."
 brew install fish              # Modern shell
 brew install tmux              # Terminal multiplexer
+brew install emacs             # Text editor
 brew install starship          # Cross-shell prompt
 brew install zoxide            # Smart directory jumper
 brew install direnv            # Environment variable manager

@@ -73,7 +73,7 @@ fi
 
 echo ""
 echo "Installing shell and terminal tools..."
-$PKG_INSTALL fish tmux
+$PKG_INSTALL fish tmux emacs
 
 # Install starship (cross-platform prompt)
 if ! command -v starship &> /dev/null; then
