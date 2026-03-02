@@ -71,9 +71,18 @@ opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 -- File encoding
 opt.fileencoding = "utf-8"
 
+-- Add mise shims to PATH so nvim can find mise-managed tools (ruby, etc.)
+local mise_shims = vim.fn.expand("~/.local/share/mise/shims")
+if vim.fn.isdirectory(mise_shims) == 1 then
+  vim.env.PATH = mise_shims .. ":" .. vim.env.PATH
+end
+
 -- Disable unused providers
 vim.g.loaded_perl_provider = 0
 
 -- Python provider: dedicated uv venv
 vim.g.python3_host_prog = vim.fn.expand("~/.local/share/nvim/venv/bin/python")
+
+-- Ruby provider: mise-managed ruby
+vim.g.ruby_host_prog = vim.fn.expand("~/.local/share/mise/installs/ruby/3.4.8/bin/neovim-ruby-host")
 
