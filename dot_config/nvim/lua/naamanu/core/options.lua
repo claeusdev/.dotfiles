@@ -71,3 +71,9 @@ opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 -- File encoding
 opt.fileencoding = "utf-8"
 
+-- Disable unused providers
+vim.g.loaded_perl_provider = 0
+
+-- Python provider: dedicated uv venv
+vim.g.python3_host_prog = vim.fn.expand("~/.local/share/nvim/venv/bin/python")
+
