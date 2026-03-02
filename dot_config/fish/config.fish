@@ -121,6 +121,11 @@ switch (uname)
         test -d "$HOME/.local/share/coursier/bin" && set -gx PATH "$PATH:$HOME/.local/share/coursier/bin"
 end
 
+# mise (version manager)
+if command -q mise
+    mise activate fish | source
+end
+
 # Starship prompt
 if command -q starship
     starship init fish | source
