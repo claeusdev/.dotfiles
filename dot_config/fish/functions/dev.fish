@@ -15,8 +15,8 @@ function dev --description "Open dev workspace: two vim panes on left, claude on
     # Create detached session
     tmux new-session -d -s $session -c $cwd
 
-    # Split right for claude (~40% width), left gets ~60%
-    tmux split-window -v -p 40 -t "$session:1" -c $cwd
+    # Split right for claude
+    tmux split-window -v -t "$session:1" -c $cwd
 
     # Split left pane into top/bottom for two vim panes
     tmux split-window -h -t "$session:1.1" -c $cwd
@@ -25,6 +25,9 @@ function dev --description "Open dev workspace: two vim panes on left, claude on
     tmux send-keys -t "$session:1.1" "nvim" Enter
     tmux send-keys -t "$session:1.3" "nvim" Enter
     tmux send-keys -t "$session:1.2" "claude" Enter
+
+    # Force 60:40 split in favour of left
+    tmux resize-pane -t "$session:1.2" -x 40%
 
     # Focus top-left
     tmux select-pane -t "$session:1.1"
