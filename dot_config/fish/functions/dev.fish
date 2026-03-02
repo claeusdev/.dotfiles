@@ -16,7 +16,7 @@ function dev --description "Open dev workspace: two vim panes on left, claude on
     tmux new-session -d -s $session -c $cwd
 
     # Split right for claude (40%), left (60%) gets vim
-    tmux split-window -v -t "$session:1" -c $cwd
+    tmux split-window -h -t "$session:1" -c $cwd
     tmux resize-pane -t "$session:1.2" -x 40%
 
     # pane 1.1 = left (vim), pane 1.2 = right (claude)
