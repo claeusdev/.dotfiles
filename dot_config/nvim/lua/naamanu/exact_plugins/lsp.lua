@@ -33,7 +33,6 @@ return {
         "ruby-lsp",
         "rubocop",
         -- Formatters
-        "clang-format",
         "stylua",
         "shfmt",
         "prettier",
