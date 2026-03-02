@@ -31,6 +31,14 @@ return {
         "markdown",
         "markdown_inline",
         "latex",
+        "ruby",
+        "typescript",
+        "tsx",
+        "javascript",
+        "html",
+        "css",
+        "graphql",
+        "dockerfile",
       },
       highlight = { enable = true },
       indent = { enable = true },
@@ -70,6 +78,13 @@ return {
     config = function(_, opts)
       require("nvim-treesitter.configs").setup(opts)
     end,
+  },
+
+  -- Auto-close/rename HTML and JSX tags
+  {
+    "windwp/nvim-ts-autotag",
+    event = "InsertEnter",
+    opts = {},
   },
 
   -- Treesitter context (sticky headers)

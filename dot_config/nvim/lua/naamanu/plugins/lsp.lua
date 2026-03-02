@@ -23,6 +23,15 @@ return {
         "ocaml-lsp",
         "haskell-language-server",
         "nil",
+        "typescript-language-server",
+        "eslint-lsp",
+        "tailwindcss-language-server",
+        "graphql-language-service-cli",
+        "yaml-language-server",
+        "dockerfile-language-server",
+        "docker-compose-language-service",
+        "ruby-lsp",
+        "rubocop",
         -- Formatters
         "clang-format",
         "stylua",
@@ -51,6 +60,9 @@ return {
     name = "native-lsp",
     lazy = false,
     priority = 900,
+    dependencies = {
+      "b0o/schemastore.nvim",
+    },
     config = function()
       local lsp = vim.lsp
 
@@ -111,6 +123,50 @@ return {
         },
       })
 
+      lsp.config("ts_ls", {
+        init_options = {
+          preferences = {
+            includeInlayParameterNameHints = "all",
+            includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+            includeInlayFunctionParameterTypeHints = true,
+            includeInlayVariableTypeHints = true,
+            includeInlayPropertyDeclarationTypeHints = true,
+            includeInlayFunctionLikeReturnTypeHints = true,
+            includeInlayEnumMemberValueHints = true,
+          },
+        },
+        single_file_support = true,
+      })
+
+      lsp.config("eslint", {
+        settings = {
+          codeActionOnSave = {
+            enable = true,
+            mode = "all",
+          },
+        },
+      })
+
+      lsp.config("tailwindcss", {})
+
+      lsp.config("graphql", {})
+
+      lsp.config("yamlls", {
+        settings = {
+          yaml = {
+            schemaStore = { enable = false, url = "" },
+            schemas = require("schemastore").yaml.schemas(),
+            validate = { enable = true },
+          },
+        },
+      })
+
+      lsp.config("dockerls", {})
+
+      lsp.config("docker_compose_language_service", {})
+
+      lsp.config("ruby_lsp", {})
+
       -- Enable Mason-installable servers
       lsp.enable({
         "clangd",
@@ -121,6 +177,14 @@ return {
         "ocamllsp",
         "hls",
         "nil_ls",
+        "ts_ls",
+        "eslint",
+        "tailwindcss",
+        "graphql",
+        "yamlls",
+        "dockerls",
+        "docker_compose_language_service",
+        "ruby_lsp",
       })
 
       -- Non-Mason servers (conditionally enabled if binary exists)

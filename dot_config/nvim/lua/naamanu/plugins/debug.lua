@@ -25,9 +25,41 @@ return {
 
     -- Mason DAP
     require("mason-nvim-dap").setup({
-      ensure_installed = { "codelldb" },
+      ensure_installed = { "codelldb", "js-debug-adapter" },
       automatic_installation = true,
     })
+
+    -- Node.js / js-debug-adapter
+    local js_debug_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js"
+    dap.adapters["pwa-node"] = {
+      type = "server",
+      host = "localhost",
+      port = "${port}",
+      executable = {
+        command = "node",
+        args = { js_debug_path, "${port}" },
+      },
+    }
+
+    for _, ft in ipairs({ "javascript", "typescript" }) do
+      dap.configurations[ft] = {
+        {
+          type = "pwa-node",
+          request = "launch",
+          name = "Launch file",
+          program = "${file}",
+          cwd = "${workspaceFolder}",
+        },
+        {
+          type = "pwa-node",
+          request = "attach",
+          name = "Attach to process (port 9229)",
+          processId = require("dap.utils").pick_process,
+          port = 9229,
+          cwd = "${workspaceFolder}",
+        },
+      }
+    end
 
     -- DAP UI
     dapui.setup()
