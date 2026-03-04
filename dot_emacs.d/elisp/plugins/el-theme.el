@@ -8,7 +8,7 @@
         modus-themes-bold-constructs t
         modus-themes-org-blocks 'gray-background)
   :config
-  (load-theme 'modus-vivendi :no-confirm))
+  (load-theme 'modus-operandi :no-confirm))
 
 ;; Font
 (let ((font-height (if (eq system-type 'darwin) 165 140)))

@@ -2,7 +2,7 @@
 
 **Package manager**: use-package (MELPA, GNU ELPA, NonGNU ELPA)
 **LSP client**: Eglot (built-in, Emacs 29+)
-**Theme**: modus-vivendi
+**Theme**: modus-operandi
 **Config**: `~/.emacs.d/`
 
 ---
@@ -50,7 +50,7 @@ elisp/
 
 | Package | Config |
 | :--- | :--- |
-| modus-themes | modus-vivendi, italic + bold constructs |
+| modus-themes | modus-operandi, italic + bold constructs |
 | nerd-icons | Icon font |
 | rainbow-delimiters | Coloured brackets in prog-mode |
 | doom-modeline | Height 28, project-relative filenames |

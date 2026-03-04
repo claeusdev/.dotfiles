@@ -2,7 +2,7 @@
 
 **Plugin manager**: lazy.nvim
 **Leader**: `<Space>` | **Local leader**: `,`
-**Theme**: modus-vivendi
+**Theme**: modus-operandi
 **Config**: `~/.config/nvim/lua/naamanu/`
 
 ---

@@ -13,6 +13,6 @@ return {
   },
   config = function(_, opts)
     require("modus-themes").setup(opts)
-    vim.cmd.colorscheme("modus_vivendi")
+    vim.cmd.colorscheme("modus_operandi")
   end,
 }
