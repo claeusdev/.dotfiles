@@ -10,16 +10,33 @@ return {
       preset = "none",
       ["<C-j>"] = { "select_next", "fallback" },
       ["<C-k>"] = { "select_prev", "fallback" },
-      ["<Tab>"] = { "select_next", "fallback" },
-      ["<S-Tab>"] = { "select_prev", "fallback" },
+      ["<Tab>"] = { "snippet_forward", "select_next", "fallback" },
+      ["<S-Tab>"] = { "snippet_backward", "select_prev", "fallback" },
       ["<CR>"] = { "accept", "fallback" },
       ["<C-Space>"] = { "show", "fallback" },
       ["<C-e>"] = { "cancel", "fallback" },
       ["<C-b>"] = { "scroll_documentation_up", "fallback" },
       ["<C-f>"] = { "scroll_documentation_down", "fallback" },
     },
+    snippets = {
+      expand = function(snippet) vim.snippet.expand(snippet) end,
+      active = function(filter)
+        if filter and filter.direction then
+          return vim.snippet.active({ direction = filter.direction })
+        end
+        return vim.snippet.active()
+      end,
+      jump = function(direction) vim.snippet.jump(direction) end,
+    },
     sources = {
-      default = { "lsp", "path", "snippets", "buffer" },
+      default = { "lazydev", "lsp", "path", "snippets", "buffer" },
+      providers = {
+        lazydev = {
+          name = "LazyDev",
+          module = "lazydev.integrations.blink",
+          score_offset = 100,
+        },
+      },
     },
     completion = {
       documentation = {

@@ -67,6 +67,40 @@ return {
     -- Virtual text
     require("nvim-dap-virtual-text").setup()
 
+    -- C/C++/Rust via codelldb
+    local codelldb_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb"
+    if vim.fn.executable(codelldb_path) == 1 then
+      dap.adapters.codelldb = {
+        type = "server",
+        port = "${port}",
+        executable = {
+          command = codelldb_path,
+          args = { "--port", "${port}" },
+        },
+      }
+
+      for _, ft in ipairs({ "c", "cpp", "rust" }) do
+        dap.configurations[ft] = {
+          {
+            type = "codelldb",
+            request = "launch",
+            name = "Launch executable",
+            program = function()
+              return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+            end,
+            cwd = "${workspaceFolder}",
+          },
+          {
+            type = "codelldb",
+            request = "attach",
+            name = "Attach to process",
+            pid = require("dap.utils").pick_process,
+            cwd = "${workspaceFolder}",
+          },
+        }
+      end
+    end
+
     -- Python DAP
     local ok, dap_python = pcall(require, "dap-python")
     if ok then

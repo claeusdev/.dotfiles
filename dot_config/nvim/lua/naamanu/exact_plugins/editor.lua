@@ -59,6 +59,18 @@ return {
     opts = {},
   },
 
+  -- Neogen (documentation generation)
+  {
+    "danymat/neogen",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    keys = {
+      { "<leader>cn", function() require("neogen").generate() end, desc = "Generate docs" },
+    },
+    opts = {
+      snippet_engine = "nvim",
+    },
+  },
+
   -- Mini.ai (textobjects)
   {
     "echasnovski/mini.ai",

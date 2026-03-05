@@ -27,6 +27,7 @@ lua/naamanu/
     lsp.lua
     linting.lua
     navigation.lua
+    testing.lua
     treesitter.lua
     ui.lua
 ```
@@ -37,16 +38,17 @@ lua/naamanu/
 
 | Category | Plugin(s) |
 | :--- | :--- |
-| Completion | blink.cmp, friendly-snippets |
-| LSP | mason, mason-tool-installer, fidget, schemastore |
+| Completion | blink.cmp, friendly-snippets (native vim.snippet engine) |
+| LSP | mason, mason-tool-installer, fidget, schemastore, lazydev.nvim |
 | Formatting | conform.nvim |
 | Linting | nvim-lint |
+| Testing | neotest, neotest-python, neotest-vitest, neotest-rust |
 | Debugging | nvim-dap, nvim-dap-ui, nvim-dap-virtual-text, mason-nvim-dap, nvim-dap-python |
 | Git | gitsigns, lazygit.nvim, diffview.nvim |
 | Navigation | oil.nvim, harpoon v2, telescope.nvim |
 | Treesitter | nvim-treesitter, nvim-treesitter-textobjects (main), nvim-ts-autotag, nvim-treesitter-context |
-| Editor | nvim-autopairs, nvim-surround, Comment.nvim, todo-comments, flash.nvim, undotree, zen-mode, mini.ai |
-| UI | lualine, which-key, trouble.nvim |
+| Editor | nvim-autopairs, nvim-surround, Comment.nvim, todo-comments, flash.nvim, undotree, zen-mode, mini.ai, neogen |
+| UI | lualine, which-key, trouble.nvim, aerial.nvim |
 | Theme | modus-themes.nvim |
 
 ### LSP servers (auto-installed via mason)
@@ -140,12 +142,14 @@ Language overrides: C/C++/Rust use 4-space tabs.
 
 | Key | Action |
 | :--- | :--- |
-| `<C-j>` / `<Tab>` | Next item |
-| `<C-k>` / `<S-Tab>` | Previous item |
+| `<C-j>` / `<Tab>` | Snippet forward / next item |
+| `<C-k>` / `<S-Tab>` | Snippet backward / prev item |
 | `<CR>` | Accept |
 | `<C-Space>` | Open menu |
 | `<C-e>` | Cancel |
 | `<C-b>` / `<C-f>` | Scroll docs up/down |
+
+**Sources:** lazydev (Neovim Lua API, prioritized), LSP, path, snippets (friendly-snippets), buffer. Snippets use native `vim.snippet`.
 
 ### Find — Telescope `<leader>f`
 
@@ -183,6 +187,11 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>lr` | Rename |
 | `<leader>ld` | Line diagnostics |
 | `<leader>ls` | Signature help |
+| `<leader>lh` | Toggle inlay hints |
+| `<leader>lc` | Run code lens |
+| `<leader>lC` | Refresh code lens |
+
+**Inlay hints** auto-enabled for supporting servers (rust-analyzer, ts_ls, lua_ls). Toggle per-buffer with `<leader>lh`. **Code lens** auto-refreshes on `BufEnter`/`InsertLeave`. **Lazydev** provides full Neovim Lua API completions in `*.lua` files.
 
 ### Formatting & Linting
 
@@ -190,6 +199,13 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | :--- | :--- | :--- |
 | n, v | `<leader>cf` | Format buffer/selection |
 | n | `<leader>ll` | Trigger lint |
+
+### Code Outline — aerial `<leader>co`
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>co` | Toggle code outline sidebar |
+| `{` / `}` | Previous / next symbol |
 
 ### Trouble `<leader>x`
 
@@ -214,6 +230,21 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | n | `<leader>gg` | LazyGit |
 | n | `<leader>go` / `gc` / `gh` | Diffview open/close/history |
 
+### Testing — neotest `<leader>t`
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>tt` | Run nearest test |
+| `<leader>tf` | Run file tests |
+| `<leader>ts` | Toggle test summary |
+| `<leader>to` | Test output |
+| `<leader>tp` | Toggle output panel |
+| `<leader>tS` | Stop test |
+| `<leader>td` | Debug nearest test |
+| `[t` / `]t` | Previous / next failed test |
+
+**Adapters:** Python, Vitest (JS/TS), Rust.
+
 ### Debugging — nvim-dap `<leader>d`
 
 | Key | Action |
@@ -224,6 +255,8 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>dr` / `dl` | Toggle REPL / run last |
 | `<leader>du` | Toggle DAP UI |
 | `<leader>de` | Eval expression |
+
+**Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). DAP UI auto-opens/closes.
 
 ### Treesitter
 
@@ -245,6 +278,7 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | o, x | `R` | flash.nvim | Treesitter search |
 | n | `<leader>u` | undotree | Toggle undotree |
 | n | `<leader>z` | zen-mode | Toggle zen mode |
+| n | `<leader>cn` | neogen | Generate documentation |
 | n | `gcc` | Comment.nvim | Toggle line comment |
 | v | `gc` / `gb` | Comment.nvim | Line/block comment |
 

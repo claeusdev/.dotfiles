@@ -36,8 +36,32 @@ return {
         { "<leader>h", group = "harpoon" },
         { "<leader>l", group = "lsp" },
         { "<leader>s", group = "split" },
+        { "<leader>t", group = "test" },
         { "<leader>x", group = "trouble" },
       },
+    },
+  },
+
+  -- Aerial (code outline)
+  {
+    "stevearc/aerial.nvim",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons",
+    },
+    keys = {
+      { "<leader>co", "<cmd>AerialToggle!<CR>", desc = "Code outline (Aerial)" },
+      { "{", "<cmd>AerialPrev<CR>", desc = "Previous symbol" },
+      { "}", "<cmd>AerialNext<CR>", desc = "Next symbol" },
+    },
+    opts = {
+      backends = { "treesitter", "lsp" },
+      layout = {
+        min_width = 30,
+        default_direction = "prefer_right",
+      },
+      show_guides = true,
+      filter_kind = false,
     },
   },
 

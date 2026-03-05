@@ -53,6 +53,17 @@ return {
     opts = {},
   },
 
+  -- Lazydev (Lua/Neovim API completions)
+  {
+    "folke/lazydev.nvim",
+    ft = "lua",
+    opts = {
+      library = {
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      },
+    },
+  },
+
   -- Native LSP configuration (no plugin needed, uses vim.lsp.config/enable)
   {
     dir = ".",
@@ -85,6 +96,11 @@ return {
           ["rust-analyzer"] = {
             checkOnSave = { command = "clippy" },
             cargo = { allFeatures = true },
+            inlayHints = {
+              bindingModeHints = { enable = true },
+              closureReturnTypeHints = { enable = "always" },
+              lifetimeElisionHints = { enable = "always" },
+            },
           },
         },
       })
@@ -95,7 +111,7 @@ return {
             runtime = { version = "LuaJIT" },
             workspace = { checkThirdParty = false },
             telemetry = { enable = false },
-            diagnostics = { globals = { "vim" } },
+            hint = { enable = true },
           },
         },
       })
@@ -225,8 +241,29 @@ return {
           map("<leader>ld", vim.diagnostic.open_float, "Line diagnostics")
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
 
-          -- Disable hover for ruff (defer to ty)
+          -- Inlay hints (Neovim 0.10+)
           local client = vim.lsp.get_client_by_id(event.data.client_id)
+          if client and client.supports_method("textDocument/inlayHint") then
+            vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
+            map("<leader>lh", function()
+              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }), { bufnr = event.buf })
+            end, "Toggle inlay hints")
+          end
+
+          -- Code lens
+          if client and client.supports_method("textDocument/codeLens") then
+            map("<leader>lc", vim.lsp.codelens.run, "Run code lens")
+            map("<leader>lC", vim.lsp.codelens.refresh, "Refresh code lens")
+            vim.lsp.codelens.refresh({ bufnr = event.buf })
+            vim.api.nvim_create_autocmd({ "BufEnter", "InsertLeave" }, {
+              buffer = event.buf,
+              callback = function()
+                vim.lsp.codelens.refresh({ bufnr = event.buf })
+              end,
+            })
+          end
+
+          -- Disable hover for ruff (defer to ty)
           if client and client.name == "ruff" then
             client.server_capabilities.hoverProvider = false
           end
