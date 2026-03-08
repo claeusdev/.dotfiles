@@ -27,7 +27,7 @@
 | History limit | 100,000 lines |
 | Display time | 2000ms |
 | Escape time | 0ms |
-| Mouse | off |
+| Mouse | on |
 | Window/pane base index | 1 |
 | Renumber windows | on |
 | Activity alerts | on (silent) |
