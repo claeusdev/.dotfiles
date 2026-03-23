@@ -44,7 +44,7 @@ fi
 
 echo ""
 echo "Initializing dotfiles with chezmoi..."
-chezmoi init --apply naamanu
+chezmoi init --apply --ssh naamanu
 
 CHEZMOI_SOURCE="$(chezmoi source-path)"
 
