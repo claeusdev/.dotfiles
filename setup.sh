@@ -85,7 +85,7 @@ if [ "$PLATFORM" = "mac" ]; then
 
     echo ""
     echo "Installing programming languages and runtimes..."
-    brew install node python@3.12 go rust lua
+    brew install node go rust lua uv
 
     echo ""
     echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
@@ -286,7 +286,10 @@ elif [ "$PLATFORM" = "linux" ]; then
         nvm install --lts
     fi
 
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    if ! command -v uv &> /dev/null; then
+        echo "Installing uv..."
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+    fi
 
     if ! command -v rustc &> /dev/null; then
         echo "Installing Rust..."

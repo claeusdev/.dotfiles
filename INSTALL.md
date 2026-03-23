@@ -37,7 +37,7 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - Core: build tools, git, curl, wget, cmake
 - Shell: fish, tmux, starship, zoxide
 - CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, btop
-- Languages: Node.js, Python, Rust, Go, Lua
+- Languages: Node.js, Python (uv), Rust, Go, Lua
 - FP/Research: OCaml, SML, Lisp, Racket, Coq, Agda
 - LSP/Formatters: language servers, prettier, stylua, shellcheck
 - Git: gh, lazygit, git-delta
