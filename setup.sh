@@ -9,7 +9,7 @@
 #
 ############################
 
-set -e
+FAILED_PACKAGES=()
 
 echo "========================================="
 echo "  Dotfiles Bootstrap"
@@ -67,41 +67,54 @@ if [ "$PLATFORM" = "mac" ]; then
         brew update
     fi
 
+    # Helper: install brew packages, track failures, never exit
+    brew_install() {
+        for pkg in "$@"; do
+            brew install "$pkg" || FAILED_PACKAGES+=("$pkg")
+        done
+    }
+
+    brew_cask_install() {
+        for pkg in "$@"; do
+            brew install --cask "$pkg" || FAILED_PACKAGES+=("cask:$pkg")
+        done
+    }
+
     echo ""
     echo "Installing core development tools..."
-    brew install git curl wget make cmake gcc
+    brew_install git curl wget make cmake gcc
 
     echo ""
     echo "Installing shell and terminal tools..."
-    brew install fish tmux emacs starship zoxide direnv
+    brew_install fish tmux emacs starship zoxide direnv
 
     echo ""
     echo "Installing modern CLI utilities..."
-    brew install neovim ripgrep fd fzf bat eza jq yq htop btop tree tldr diff-so-fancy
+    brew_install neovim ripgrep fd fzf bat eza jq yq htop btop tree tldr diff-so-fancy
 
     echo ""
     echo "Installing version control tools..."
-    brew install gh lazygit git-delta
+    brew_install gh lazygit git-delta
 
     echo ""
     echo "Installing programming languages and runtimes..."
-    brew install node go rust lua uv
+    brew_install node go rust lua uv
 
     echo ""
     echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
-    brew install llvm bear
-    brew install ocaml opam dune ocaml-lsp ocamlformat merlin
-    brew install smlnj sbcl racket
-    brew install coq agda
+    brew_install llvm bear
+    brew_install ocaml opam dune ocaml-lsp ocamlformat merlin
+    brew_install smlnj sbcl racket
+    brew_install coq agda
 
     if brew info isabelle > /dev/null 2>&1; then
-        brew install isabelle
+        brew_install isabelle
     else
         echo "Skipping Isabelle (formula not available in this Homebrew setup)."
     fi
 
     if brew info coq-lsp > /dev/null 2>&1; then
-        brew install coq-lsp
+        brew_install coq-lsp
     else
         echo "Skipping coq-lsp (install via OPAM if needed: opam install coq-lsp)."
     fi
@@ -116,37 +129,32 @@ if [ "$PLATFORM" = "mac" ]; then
 
     echo ""
     echo "Installing language servers and formatters..."
-    brew install lua-language-server stylua black ruff prettier shfmt shellcheck
+    brew_install lua-language-server stylua black ruff prettier shfmt shellcheck
 
     echo ""
     echo "Installing database tools..."
-    brew install postgresql@16 sqlite redis
+    brew_install postgresql@16 sqlite redis
 
     echo ""
     echo "Installing Docker and container tools..."
-    brew install --cask docker
-    brew install lazydocker
+    brew_cask_install docker
+    brew_install lazydocker
 
     echo ""
     echo "Installing cloud and DevOps tools..."
-    brew install awscli terraform kubectl k9s
+    brew_install awscli terraform kubectl k9s
 
     echo ""
     echo "Installing productivity tools..."
-    brew install --cask rectangle
-    brew install --cask ghostty
-    brew install --cask raycast
+    brew_cask_install rectangle ghostty raycast
 
     echo ""
     echo "Installing fonts..."
-    brew install --cask font-jetbrains-mono-nerd-font
-    brew install --cask font-fira-code-nerd-font
-    brew install --cask font-hack-nerd-font
-    brew install --cask font-inconsolata-nerd-font
+    brew_cask_install font-jetbrains-mono-nerd-font font-fira-code-nerd-font font-hack-nerd-font font-inconsolata-nerd-font
 
     echo ""
     echo "Setting up fzf key bindings..."
-    $(brew --prefix)/opt/fzf/install --key-bindings --completion --no-update-rc
+    "$(brew --prefix)"/opt/fzf/install --key-bindings --completion --no-update-rc || true
 
 elif [ "$PLATFORM" = "linux" ]; then
 
@@ -172,6 +180,10 @@ elif [ "$PLATFORM" = "linux" ]; then
         exit 1
     fi
 
+    install_pkg() {
+        $PKG_INSTALL "$@" || FAILED_PACKAGES+=("$@")
+    }
+
     install_optional_pkg() {
         local pkg="$1"
         $PKG_INSTALL "$pkg" > /dev/null 2>&1 || {
@@ -188,33 +200,33 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo ""
     echo "Installing core development tools..."
     if [ "$PKG_MGR" = "apt" ]; then
-        $PKG_INSTALL build-essential git curl wget cmake pkg-config libssl-dev
+        install_pkg build-essential git curl wget cmake pkg-config libssl-dev
     elif [ "$PKG_MGR" = "dnf" ]; then
-        $PKG_INSTALL gcc gcc-c++ make git curl wget cmake openssl-devel
+        install_pkg gcc gcc-c++ make git curl wget cmake openssl-devel
     elif [ "$PKG_MGR" = "pacman" ]; then
-        $PKG_INSTALL base-devel git curl wget cmake openssl
+        install_pkg base-devel git curl wget cmake openssl
     fi
 
     echo ""
     echo "Installing shell and terminal tools..."
-    $PKG_INSTALL fish tmux emacs
+    install_pkg fish tmux emacs
 
     if ! command -v starship &> /dev/null; then
         echo "Installing starship..."
-        curl -sS https://starship.rs/install.sh | sh -s -- -y
+        curl -sS https://starship.rs/install.sh | sh -s -- -y || FAILED_PACKAGES+=(starship)
     fi
 
     echo ""
     echo "Installing modern CLI utilities..."
     if [ "$PKG_MGR" = "apt" ]; then
-        $PKG_INSTALL neovim ripgrep fd-find fzf bat htop tree jq
+        install_pkg neovim ripgrep fd-find fzf bat htop tree jq
         mkdir -p ~/.local/bin
         ln -sf /usr/bin/batcat ~/.local/bin/bat 2>/dev/null || true
         ln -sf /usr/bin/fdfind ~/.local/bin/fd 2>/dev/null || true
     elif [ "$PKG_MGR" = "dnf" ]; then
-        $PKG_INSTALL neovim ripgrep fd-find fzf bat htop tree jq
+        install_pkg neovim ripgrep fd-find fzf bat htop tree jq
     elif [ "$PKG_MGR" = "pacman" ]; then
-        $PKG_INSTALL neovim ripgrep fd fzf bat htop tree jq
+        install_pkg neovim ripgrep fd fzf bat htop tree jq
     fi
 
     if ! command -v eza &> /dev/null; then
@@ -224,19 +236,19 @@ elif [ "$PLATFORM" = "linux" ]; then
             echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
             sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
             sudo apt update
-            sudo apt install -y eza
+            sudo apt install -y eza || FAILED_PACKAGES+=(eza)
         else
-            $PKG_INSTALL eza
+            install_pkg eza
         fi
     fi
 
     if ! command -v btop &> /dev/null; then
-        $PKG_INSTALL btop
+        install_pkg btop
     fi
 
     if ! command -v zoxide &> /dev/null; then
         echo "Installing zoxide..."
-        curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+        curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash || FAILED_PACKAGES+=(zoxide)
     fi
 
     echo ""
@@ -246,12 +258,12 @@ elif [ "$PLATFORM" = "linux" ]; then
             curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
             echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
             sudo apt update
-            sudo apt install -y gh
+            sudo apt install -y gh || FAILED_PACKAGES+=(gh)
         fi
     elif [ "$PKG_MGR" = "dnf" ]; then
-        $PKG_INSTALL gh
+        install_pkg gh
     elif [ "$PKG_MGR" = "pacman" ]; then
-        $PKG_INSTALL github-cli
+        install_pkg github-cli
     fi
 
     if ! command -v lazygit &> /dev/null; then
@@ -268,10 +280,10 @@ elif [ "$PLATFORM" = "linux" ]; then
         if [ "$PKG_MGR" = "apt" ]; then
             DELTA_VERSION=$(curl -s "https://api.github.com/repos/dandavison/delta/releases/latest" | grep -Po '"tag_name": "\K[^"]*')
             curl -Lo delta.deb "https://github.com/dandavison/delta/releases/latest/download/git-delta_${DELTA_VERSION}_amd64.deb"
-            sudo dpkg -i delta.deb
-            rm delta.deb
+            sudo dpkg -i delta.deb || FAILED_PACKAGES+=(git-delta)
+            rm -f delta.deb
         else
-            $PKG_INSTALL git-delta
+            install_pkg git-delta
         fi
     fi
 
@@ -288,7 +300,7 @@ elif [ "$PLATFORM" = "linux" ]; then
 
     if ! command -v uv &> /dev/null; then
         echo "Installing uv..."
-        curl -LsSf https://astral.sh/uv/install.sh | sh
+        curl -LsSf https://astral.sh/uv/install.sh | sh || FAILED_PACKAGES+=(uv)
     fi
 
     if ! command -v rustc &> /dev/null; then
@@ -312,11 +324,11 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo ""
     echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
     if [ "$PKG_MGR" = "apt" ]; then
-        $PKG_INSTALL clang clangd lldb bear ocaml opam
+        install_pkg clang clangd lldb bear ocaml opam
     elif [ "$PKG_MGR" = "dnf" ]; then
-        $PKG_INSTALL clang clang-tools-extra lldb bear ocaml opam
+        install_pkg clang clang-tools-extra lldb bear ocaml opam
     elif [ "$PKG_MGR" = "pacman" ]; then
-        $PKG_INSTALL clang llvm lldb bear ocaml opam
+        install_pkg clang llvm lldb bear ocaml opam
     fi
 
     install_optional_pkg dune
@@ -339,11 +351,11 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo ""
     echo "Installing language servers and formatters..."
     if command -v npm &> /dev/null; then
-        npm install -g prettier eslint_d typescript-language-server
+        npm install -g prettier eslint_d typescript-language-server || true
     fi
 
     if command -v cargo &> /dev/null; then
-        cargo install stylua
+        cargo install stylua || true
         cargo install millet || true
     fi
 
@@ -351,16 +363,16 @@ elif [ "$PLATFORM" = "linux" ]; then
         raco pkg install --auto racket-langserver || true
     fi
 
-    $PKG_INSTALL shellcheck
+    install_pkg shellcheck
 
     echo ""
     echo "Installing database tools..."
     if [ "$PKG_MGR" = "apt" ]; then
-        $PKG_INSTALL postgresql postgresql-contrib sqlite3
+        install_pkg postgresql postgresql-contrib sqlite3
     elif [ "$PKG_MGR" = "dnf" ]; then
-        $PKG_INSTALL postgresql postgresql-server sqlite
+        install_pkg postgresql postgresql-server sqlite
     elif [ "$PKG_MGR" = "pacman" ]; then
-        $PKG_INSTALL postgresql sqlite
+        install_pkg postgresql sqlite
     fi
 
     echo ""
@@ -372,7 +384,7 @@ elif [ "$PLATFORM" = "linux" ]; then
             sudo usermod -aG docker "$USER"
             rm get-docker.sh
         else
-            $PKG_INSTALL docker docker-compose
+            install_pkg docker docker-compose
             sudo systemctl start docker
             sudo systemctl enable docker
             sudo usermod -aG docker "$USER"
@@ -381,7 +393,7 @@ elif [ "$PLATFORM" = "linux" ]; then
 
     if ! command -v lazydocker &> /dev/null; then
         echo "Installing lazydocker..."
-        curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash
+        curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash || FAILED_PACKAGES+=(lazydocker)
     fi
 
     echo ""
@@ -389,7 +401,7 @@ elif [ "$PLATFORM" = "linux" ]; then
     if ! command -v ghostty &> /dev/null; then
         if [ "$PKG_MGR" = "apt" ]; then
             sudo apt install -y libgtk-4-dev libadwaita-1-dev git
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)" || FAILED_PACKAGES+=(ghostty)
         elif [ "$PKG_MGR" = "pacman" ]; then
             echo "Note: Install ghostty from AUR using your AUR helper"
             echo "Example: yay -S ghostty"
@@ -463,6 +475,15 @@ echo "  - chezmoi installed and dotfiles deployed"
 echo "  - Development tools installed ($PLATFORM)"
 echo "  - TPM (Tmux Plugin Manager) installed"
 echo "  - Default shell set to fish"
+
+if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
+    echo ""
+    echo "Failed to install:"
+    for pkg in "${FAILED_PACKAGES[@]}"; do
+        echo "  - $pkg"
+    done
+fi
+
 echo ""
 echo "Manual next steps:"
 echo "  1. Restart your terminal (or log out and back in)"
