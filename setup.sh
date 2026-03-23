@@ -46,17 +46,372 @@ echo ""
 echo "Initializing dotfiles with chezmoi..."
 chezmoi init --apply --ssh naamanu
 
-CHEZMOI_SOURCE="$(chezmoi source-path)"
-
-# ── 4. Install development tools ──────────────────────────────
+# ── 4. Install development tools ─────────────────────────────
 
 echo ""
-if [ "$PLATFORM" = "linux" ]; then
-    echo "Running Linux tool installer..."
-    bash "$CHEZMOI_SOURCE/install-tools-linux.sh"
-elif [ "$PLATFORM" = "mac" ]; then
-    echo "Running macOS tool installer..."
-    bash "$CHEZMOI_SOURCE/install-tools-mac.sh"
+echo "Installing development tools..."
+
+if [ "$PLATFORM" = "mac" ]; then
+
+    # ── macOS: Homebrew ───────────────────────────────────────
+
+    if ! command -v brew &> /dev/null; then
+        echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        if [[ $(uname -m) == 'arm64' ]]; then
+            echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
+    else
+        echo "Homebrew already installed. Updating..."
+        brew update
+    fi
+
+    echo ""
+    echo "Installing core development tools..."
+    brew install git curl wget make cmake gcc
+
+    echo ""
+    echo "Installing shell and terminal tools..."
+    brew install fish tmux emacs starship zoxide direnv
+
+    echo ""
+    echo "Installing modern CLI utilities..."
+    brew install neovim ripgrep fd fzf bat eza jq yq htop btop tree tldr diff-so-fancy
+
+    echo ""
+    echo "Installing version control tools..."
+    brew install gh lazygit git-delta
+
+    echo ""
+    echo "Installing programming languages and runtimes..."
+    brew install node python@3.12 go rust lua
+
+    echo ""
+    echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
+    brew install llvm bear
+    brew install ocaml opam dune ocaml-lsp ocamlformat merlin
+    brew install smlnj sbcl racket
+    brew install coq agda
+
+    if brew info isabelle > /dev/null 2>&1; then
+        brew install isabelle
+    else
+        echo "Skipping Isabelle (formula not available in this Homebrew setup)."
+    fi
+
+    if brew info coq-lsp > /dev/null 2>&1; then
+        brew install coq-lsp
+    else
+        echo "Skipping coq-lsp (install via OPAM if needed: opam install coq-lsp)."
+    fi
+
+    if command -v cargo &> /dev/null; then
+        cargo install millet || true
+    fi
+
+    if command -v raco &> /dev/null; then
+        raco pkg install --auto racket-langserver || true
+    fi
+
+    echo ""
+    echo "Installing language servers and formatters..."
+    brew install lua-language-server stylua black ruff prettier shfmt shellcheck
+
+    echo ""
+    echo "Installing database tools..."
+    brew install postgresql@16 sqlite redis
+
+    echo ""
+    echo "Installing Docker and container tools..."
+    brew install --cask docker
+    brew install lazydocker
+
+    echo ""
+    echo "Installing cloud and DevOps tools..."
+    brew install awscli terraform kubectl k9s
+
+    echo ""
+    echo "Installing productivity tools..."
+    brew install --cask rectangle
+    brew install --cask ghostty
+    brew install --cask raycast
+
+    echo ""
+    echo "Installing fonts..."
+    brew install --cask font-jetbrains-mono-nerd-font
+    brew install --cask font-fira-code-nerd-font
+    brew install --cask font-hack-nerd-font
+    brew install --cask font-inconsolata-nerd-font
+
+    echo ""
+    echo "Setting up fzf key bindings..."
+    $(brew --prefix)/opt/fzf/install --key-bindings --completion --no-update-rc
+
+elif [ "$PLATFORM" = "linux" ]; then
+
+    # ── Linux: apt / dnf / pacman ─────────────────────────────
+
+    if command -v apt &> /dev/null; then
+        PKG_MGR="apt"
+        PKG_UPDATE="sudo apt update"
+        PKG_INSTALL="sudo apt install -y"
+        echo "Detected package manager: apt (Debian/Ubuntu)"
+    elif command -v dnf &> /dev/null; then
+        PKG_MGR="dnf"
+        PKG_UPDATE="sudo dnf check-update || true"
+        PKG_INSTALL="sudo dnf install -y"
+        echo "Detected package manager: dnf (Fedora)"
+    elif command -v pacman &> /dev/null; then
+        PKG_MGR="pacman"
+        PKG_UPDATE="sudo pacman -Sy"
+        PKG_INSTALL="sudo pacman -S --noconfirm"
+        echo "Detected package manager: pacman (Arch)"
+    else
+        echo "Error: No supported package manager found (apt, dnf, or pacman)"
+        exit 1
+    fi
+
+    install_optional_pkg() {
+        local pkg="$1"
+        $PKG_INSTALL "$pkg" > /dev/null 2>&1 || {
+            echo "Skipping optional package: $pkg (not available)."
+            return 0
+        }
+        echo "Installed optional package: $pkg"
+    }
+
+    echo ""
+    echo "Updating package lists..."
+    $PKG_UPDATE
+
+    echo ""
+    echo "Installing core development tools..."
+    if [ "$PKG_MGR" = "apt" ]; then
+        $PKG_INSTALL build-essential git curl wget cmake pkg-config libssl-dev
+    elif [ "$PKG_MGR" = "dnf" ]; then
+        $PKG_INSTALL gcc gcc-c++ make git curl wget cmake openssl-devel
+    elif [ "$PKG_MGR" = "pacman" ]; then
+        $PKG_INSTALL base-devel git curl wget cmake openssl
+    fi
+
+    echo ""
+    echo "Installing shell and terminal tools..."
+    $PKG_INSTALL fish tmux emacs
+
+    if ! command -v starship &> /dev/null; then
+        echo "Installing starship..."
+        curl -sS https://starship.rs/install.sh | sh -s -- -y
+    fi
+
+    echo ""
+    echo "Installing modern CLI utilities..."
+    if [ "$PKG_MGR" = "apt" ]; then
+        $PKG_INSTALL neovim ripgrep fd-find fzf bat htop tree jq
+        mkdir -p ~/.local/bin
+        ln -sf /usr/bin/batcat ~/.local/bin/bat 2>/dev/null || true
+        ln -sf /usr/bin/fdfind ~/.local/bin/fd 2>/dev/null || true
+    elif [ "$PKG_MGR" = "dnf" ]; then
+        $PKG_INSTALL neovim ripgrep fd-find fzf bat htop tree jq
+    elif [ "$PKG_MGR" = "pacman" ]; then
+        $PKG_INSTALL neovim ripgrep fd fzf bat htop tree jq
+    fi
+
+    if ! command -v eza &> /dev/null; then
+        echo "Installing eza..."
+        if [ "$PKG_MGR" = "apt" ]; then
+            wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+            echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+            sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+            sudo apt update
+            sudo apt install -y eza
+        else
+            $PKG_INSTALL eza
+        fi
+    fi
+
+    if ! command -v btop &> /dev/null; then
+        $PKG_INSTALL btop
+    fi
+
+    if ! command -v zoxide &> /dev/null; then
+        echo "Installing zoxide..."
+        curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+    fi
+
+    echo ""
+    echo "Installing version control tools..."
+    if [ "$PKG_MGR" = "apt" ]; then
+        if ! command -v gh &> /dev/null; then
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install -y gh
+        fi
+    elif [ "$PKG_MGR" = "dnf" ]; then
+        $PKG_INSTALL gh
+    elif [ "$PKG_MGR" = "pacman" ]; then
+        $PKG_INSTALL github-cli
+    fi
+
+    if ! command -v lazygit &> /dev/null; then
+        echo "Installing lazygit..."
+        LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+        curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+        tar xf lazygit.tar.gz lazygit
+        sudo install lazygit /usr/local/bin
+        rm lazygit lazygit.tar.gz
+    fi
+
+    if ! command -v delta &> /dev/null; then
+        echo "Installing git-delta..."
+        if [ "$PKG_MGR" = "apt" ]; then
+            DELTA_VERSION=$(curl -s "https://api.github.com/repos/dandavison/delta/releases/latest" | grep -Po '"tag_name": "\K[^"]*')
+            curl -Lo delta.deb "https://github.com/dandavison/delta/releases/latest/download/git-delta_${DELTA_VERSION}_amd64.deb"
+            sudo dpkg -i delta.deb
+            rm delta.deb
+        else
+            $PKG_INSTALL git-delta
+        fi
+    fi
+
+    echo ""
+    echo "Installing programming languages and runtimes..."
+
+    if ! command -v node &> /dev/null; then
+        echo "Installing Node.js via nvm..."
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install --lts
+    fi
+
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    if ! command -v rustc &> /dev/null; then
+        echo "Installing Rust..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source "$HOME/.cargo/env"
+    fi
+
+    if ! command -v go &> /dev/null; then
+        echo "Installing Go..."
+        GO_VERSION="1.21.5"
+        wget "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz"
+        sudo rm -rf /usr/local/go
+        sudo tar -C /usr/local -xzf "go${GO_VERSION}.linux-amd64.tar.gz"
+        rm "go${GO_VERSION}.linux-amd64.tar.gz"
+        echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.profile
+    fi
+
+    $PKG_INSTALL lua5.4 || $PKG_INSTALL lua || true
+
+    echo ""
+    echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
+    if [ "$PKG_MGR" = "apt" ]; then
+        $PKG_INSTALL clang clangd lldb bear ocaml opam
+    elif [ "$PKG_MGR" = "dnf" ]; then
+        $PKG_INSTALL clang clang-tools-extra lldb bear ocaml opam
+    elif [ "$PKG_MGR" = "pacman" ]; then
+        $PKG_INSTALL clang llvm lldb bear ocaml opam
+    fi
+
+    install_optional_pkg dune
+    install_optional_pkg ocaml-dune
+    install_optional_pkg smlnj
+    install_optional_pkg sbcl
+    install_optional_pkg racket
+    install_optional_pkg coq
+    install_optional_pkg agda
+    install_optional_pkg isabelle
+
+    if command -v opam &> /dev/null; then
+        if [ ! -d "$HOME/.opam" ]; then
+            opam init -a --disable-sandboxing --shell-setup || true
+        fi
+        eval "$(opam env 2>/dev/null)" || true
+        opam install -y ocaml-lsp-server ocamlformat merlin coq-lsp || true
+    fi
+
+    echo ""
+    echo "Installing language servers and formatters..."
+    if command -v npm &> /dev/null; then
+        npm install -g prettier eslint_d typescript-language-server
+    fi
+
+    if command -v cargo &> /dev/null; then
+        cargo install stylua
+        cargo install millet || true
+    fi
+
+    if command -v raco &> /dev/null; then
+        raco pkg install --auto racket-langserver || true
+    fi
+
+    $PKG_INSTALL shellcheck
+
+    echo ""
+    echo "Installing database tools..."
+    if [ "$PKG_MGR" = "apt" ]; then
+        $PKG_INSTALL postgresql postgresql-contrib sqlite3
+    elif [ "$PKG_MGR" = "dnf" ]; then
+        $PKG_INSTALL postgresql postgresql-server sqlite
+    elif [ "$PKG_MGR" = "pacman" ]; then
+        $PKG_INSTALL postgresql sqlite
+    fi
+
+    echo ""
+    echo "Installing Docker..."
+    if ! command -v docker &> /dev/null; then
+        if [ "$PKG_MGR" = "apt" ]; then
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            sudo usermod -aG docker "$USER"
+            rm get-docker.sh
+        else
+            $PKG_INSTALL docker docker-compose
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker "$USER"
+        fi
+    fi
+
+    if ! command -v lazydocker &> /dev/null; then
+        echo "Installing lazydocker..."
+        curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash
+    fi
+
+    echo ""
+    echo "Installing Ghostty terminal..."
+    if ! command -v ghostty &> /dev/null; then
+        if [ "$PKG_MGR" = "apt" ]; then
+            sudo apt install -y libgtk-4-dev libadwaita-1-dev git
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mkasberg/ghostty-ubuntu/HEAD/install.sh)"
+        elif [ "$PKG_MGR" = "pacman" ]; then
+            echo "Note: Install ghostty from AUR using your AUR helper"
+            echo "Example: yay -S ghostty"
+        fi
+    fi
+
+    echo ""
+    echo "Installing fonts..."
+    mkdir -p ~/.local/share/fonts
+
+    if [ ! -f ~/.local/share/fonts/JetBrainsMonoNerdFont-Regular.ttf ]; then
+        echo "Installing JetBrains Mono Nerd Font..."
+        wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip
+        unzip -o JetBrainsMono.zip -d ~/.local/share/fonts/
+        rm JetBrainsMono.zip
+    fi
+
+    if [ ! -f ~/.local/share/fonts/InconsolataNerdFont-Regular.ttf ]; then
+        echo "Installing Inconsolata Nerd Font..."
+        wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Inconsolata.zip
+        unzip -o Inconsolata.zip -d ~/.local/share/fonts/
+        rm Inconsolata.zip
+    fi
+
+    fc-cache -fv
 fi
 
 # ── 5. Post-install setup ─────────────────────────────────────
@@ -75,10 +430,13 @@ fi
 # Set fish as default shell
 FISH_PATH="$(command -v fish 2>/dev/null || true)"
 if [ -n "$FISH_PATH" ]; then
-    CURRENT_SHELL="$(getent passwd "$USER" 2>/dev/null | cut -d: -f7 || dscl . -read /Users/"$USER" UserShell 2>/dev/null | awk '{print $2}' || true)"
+    if [ "$PLATFORM" = "mac" ]; then
+        CURRENT_SHELL="$(dscl . -read /Users/"$USER" UserShell 2>/dev/null | awk '{print $2}' || true)"
+    else
+        CURRENT_SHELL="$(getent passwd "$USER" 2>/dev/null | cut -d: -f7 || true)"
+    fi
     if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
         echo "Setting fish as default shell..."
-        # Ensure fish is in /etc/shells
         if ! grep -qxF "$FISH_PATH" /etc/shells 2>/dev/null; then
             echo "$FISH_PATH" | sudo tee -a /etc/shells > /dev/null
         fi
@@ -107,5 +465,7 @@ echo "Manual next steps:"
 echo "  1. Restart your terminal (or log out and back in)"
 echo "  2. Install Neovim plugins:  nvim '+Lazy sync' +qa"
 echo "  3. Install tmux plugins:    prefix + I  (inside tmux)"
-echo "  4. Log out/in for Docker group changes (Linux)"
+if [ "$PLATFORM" = "linux" ]; then
+echo "  4. Log out/in for Docker group changes"
+fi
 echo ""

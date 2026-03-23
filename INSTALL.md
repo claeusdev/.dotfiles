@@ -9,53 +9,15 @@ bash <(curl -s https://raw.githubusercontent.com/naamanu/.dotfiles/main/setup.sh
 This single command will:
 
 1. **Install chezmoi** (dotfile manager)
-2. **Clone and deploy dotfiles** (`chezmoi init --apply naamanu`)
-3. **Install development tools** (platform-appropriate: `install-tools-linux.sh` or `install-tools-mac.sh`)
+2. **Clone and deploy dotfiles** via SSH
+3. **Install development tools** (platform-appropriate)
 4. **Post-install setup**: TPM (tmux plugin manager), set fish as default shell
 
 The script is idempotent — safe to re-run on an already-configured machine.
 
-## Manual Step-by-Step Alternative
-
-### 1. Install chezmoi and deploy dotfiles
-
-```sh
-sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
-export PATH="$HOME/.local/bin:$PATH"
-chezmoi init --apply naamanu
-```
-
-### 2. Install development tools
-
-macOS:
-```sh
-bash "$(chezmoi source-path)/install-tools-mac.sh"
-```
-
-Linux (Ubuntu/Debian/Fedora/Arch):
-```sh
-bash "$(chezmoi source-path)/install-tools-linux.sh"
-```
-
-### 3. Post-install setup
-
-```sh
-# Clone TPM
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-
-# Set fish as default shell
-chsh -s "$(which fish)"
-
-# Install Neovim plugins
-nvim '+Lazy sync' +qa
-
-# Install tmux plugins (inside tmux)
-# prefix + I
-```
-
 ## What's Managed by Chezmoi
 
-Chezmoi manages all configuration files. The install-tools scripts only install packages — they never write config files.
+Chezmoi manages all configuration files. The setup script only installs packages — it never writes config files.
 
 | Config | Source path in chezmoi |
 | :--- | :--- |
@@ -69,13 +31,13 @@ Chezmoi manages all configuration files. The install-tools scripts only install 
 
 To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 
-## What the Install Scripts Provide
+## What Gets Installed
 
 ### Both Platforms
 - Core: build tools, git, curl, wget, cmake
 - Shell: fish, tmux, starship, zoxide
 - CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, btop
-- Languages: Node.js, Python (uv), Rust, Go, Lua
+- Languages: Node.js, Python, Rust, Go, Lua
 - FP/Research: OCaml, SML, Lisp, Racket, Coq, Agda
 - LSP/Formatters: language servers, prettier, stylua, shellcheck
 - Git: gh, lazygit, git-delta
