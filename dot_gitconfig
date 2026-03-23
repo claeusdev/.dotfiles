@@ -6,7 +6,7 @@
 [pull]
 	rebase = true
 [core]
-	editor = vim
+	editor = nvim
 	# Exclude machine-specific configs from global .gitconfig
 	excludesfile = ~/.gitignore_global
 [alias]
@@ -40,6 +40,11 @@
 [push]
 	# Push to the same branch you are on
 	default = current
+	autoSetupRemote = true
 [fetch]
 	# Prune remote branches that no longer exist
 	prune = true
+[rerere]
+	enabled = true
+[diff]
+	algorithm = histogram

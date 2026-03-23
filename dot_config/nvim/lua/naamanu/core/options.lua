@@ -25,7 +25,7 @@ opt.cursorline = true
 
 -- Appearance
 opt.termguicolors = true
-opt.background = "light"
+opt.background = "dark"
 opt.signcolumn = "yes"
 opt.colorcolumn = "100"
 
@@ -80,9 +80,12 @@ end
 -- Disable unused providers
 vim.g.loaded_perl_provider = 0
 
--- Python provider: dedicated uv venv
-vim.g.python3_host_prog = vim.fn.expand("~/.local/share/nvim/venv/bin/python")
+-- Python provider: dedicated uv venv (created by setup.sh)
+local python_venv = vim.fn.expand("~/.local/share/nvim/venv/bin/python")
+if vim.fn.filereadable(python_venv) == 1 then
+  vim.g.python3_host_prog = python_venv
+end
 
--- Ruby provider: mise-managed ruby
-vim.g.ruby_host_prog = vim.fn.expand("~/.local/share/mise/installs/ruby/3.4.8/bin/neovim-ruby-host")
+-- Ruby provider: unused, disable to avoid warnings
+vim.g.loaded_ruby_provider = 0
 

@@ -64,20 +64,9 @@ if command -v rg &> /dev/null
 end
 
 # ======================
-# Git Aliases
+# Git Alias
 # ======================
 alias g='git'
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gcm='git commit -m'
-alias gp='git push'
-alias gl='git pull'
-alias glog='git log --oneline --graph --decorate'
-alias gra='git remote add origin'
-alias gd='git diff'
-alias gco='git checkout'
-alias gb='git branch'
 
 # ======================
 # Navigation Aliases

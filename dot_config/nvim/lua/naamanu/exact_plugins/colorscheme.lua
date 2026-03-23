@@ -1,18 +1,26 @@
 return {
-  "miikanissi/modus-themes.nvim",
+  "catppuccin/nvim",
+  name = "catppuccin",
   priority = 1000,
   lazy = false,
   opts = {
-    style = "auto",
-    variant = "default",
-    dim_inactive = false,
+    flavour = "mocha",
+    dim_inactive = { enabled = false },
     styles = {
-      comments = { italic = true },
-      keywords = { italic = true },
+      comments = { "italic" },
+      keywords = { "italic" },
+    },
+    integrations = {
+      cmp = true,
+      gitsigns = true,
+      treesitter = true,
+      mason = true,
+      telescope = { enabled = true },
+      native_lsp = { enabled = true },
     },
   },
   config = function(_, opts)
-    require("modus-themes").setup(opts)
-    vim.cmd.colorscheme("modus_operandi")
+    require("catppuccin").setup(opts)
+    vim.cmd.colorscheme("catppuccin")
   end,
 }

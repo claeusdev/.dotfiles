@@ -59,7 +59,8 @@ if [ "$PLATFORM" = "mac" ]; then
         echo "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         if [[ $(uname -m) == 'arm64' ]]; then
-            echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+            grep -qxF 'eval "$(/opt/homebrew/bin/brew shellenv)"' ~/.zprofile 2>/dev/null || \
+                echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
             eval "$(/opt/homebrew/bin/brew shellenv)"
         fi
     else
@@ -86,7 +87,7 @@ if [ "$PLATFORM" = "mac" ]; then
 
     echo ""
     echo "Installing shell and terminal tools..."
-    brew_install fish tmux emacs starship zoxide direnv
+    brew_install fish tmux emacs starship zoxide direnv fnm sesh
 
     echo ""
     echo "Installing modern CLI utilities..."
@@ -98,7 +99,7 @@ if [ "$PLATFORM" = "mac" ]; then
 
     echo ""
     echo "Installing programming languages and runtimes..."
-    brew_install node go rust lua uv
+    brew_install go rust lua uv
 
     echo ""
     echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
@@ -311,7 +312,7 @@ elif [ "$PLATFORM" = "linux" ]; then
 
     if ! command -v go &> /dev/null; then
         echo "Installing Go..."
-        GO_VERSION="1.21.5"
+        GO_VERSION=$(curl -s 'https://go.dev/VERSION?m=text' | head -1 | sed 's/go//')
         wget "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz"
         sudo rm -rf /usr/local/go
         sudo tar -C /usr/local -xzf "go${GO_VERSION}.linux-amd64.tar.gz"
@@ -440,6 +441,19 @@ if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
     git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
 else
     echo "TPM already installed."
+fi
+
+# Set up Neovim Python provider
+if command -v uv &> /dev/null; then
+    echo "Setting up Neovim Python provider..."
+    uv venv ~/.local/share/nvim/venv
+    ~/.local/share/nvim/venv/bin/pip install pynvim
+fi
+
+# Install Node.js LTS via fnm
+if command -v fnm &> /dev/null; then
+    echo "Installing Node.js LTS via fnm..."
+    fnm install --lts
 fi
 
 # Set fish as default shell
