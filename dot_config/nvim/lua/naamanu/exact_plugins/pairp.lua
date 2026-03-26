@@ -1,6 +1,6 @@
 return {
 	"naamanu/pairp",
-	branch = "feat/chat-window",
+	branch = "main",
 	cmd = "Pairp",
 	keys = {
 		{ "<leader>cc", desc = "Pairp: toggle Claude Code" },
