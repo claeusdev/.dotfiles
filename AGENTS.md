@@ -6,8 +6,9 @@ This repository manages personal development environment dotfiles via [chezmoi](
 - `setup.sh`: one-command bootstrap — installs chezmoi, deploys dotfiles, installs tools, sets fish as default shell.
 - `install-tools-mac.sh`, `install-tools-linux.sh`: OS-specific tool installers (called by `setup.sh`).
 - `dot_config/`: maps to `~/.config/` after `chezmoi apply`:
-  - `dot_config/nvim/` (Neovim; Lua modules under `lua/naamanu/{core,plugins}`)
-  - `dot_config/fish/` (fish shell config, functions, completions)
+  - `dot_config/nvim/` (Neovim; Lua modules under `lua/naamanu/{core,exact_plugins}`)
+  - `dot_config/fish/` (fish shell config, functions, completions; includes `mlenv` and `jk` ML helpers, atuin integration)
+  - `dot_config/aerospace/` (AeroSpace tiling WM config)
   - `dot_config/ghostty/` and `dot_config/starship.toml`
 - `dot_emacs.d/`: maps to `~/.emacs.d/` (`elisp/core`, `elisp/plugins`, `init.el`).
 - `dot_tmux.conf`: maps to `~/.tmux.conf`.

@@ -292,6 +292,73 @@ Format on save is enabled by default.
 
 **Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). DAP UI auto-opens on debug start and auto-closes on termination.
 
+### Notebook (Molten)
+
+| Mode | Keybinding   | Description              |
+| :--- | :----------- | :----------------------- |
+| n    | `<leader>mi` | Initialize Molten kernel |
+| n    | `<leader>me` | Evaluate operator        |
+| n    | `<leader>ml` | Evaluate line            |
+| n    | `<leader>mr` | Re-evaluate cell         |
+| n    | `<leader>md` | Delete cell              |
+| n    | `<leader>mo` | Show output              |
+
+**Requires:** a Jupyter kernel registered for the current project (use the `jk` fish function).
+
+### Task Runner (Overseer)
+
+| Mode | Keybinding   | Description              |
+| :--- | :----------- | :----------------------- |
+| n    | `<leader>or` | Run task                 |
+| n    | `<leader>ot` | Toggle task panel        |
+| n    | `<leader>oa` | Task action              |
+
+### Snacks (Notifications & Utilities)
+
+| Mode | Keybinding   | Description              |
+| :--- | :----------- | :----------------------- |
+| n    | `<leader>n`  | Notification history     |
+| n    | `<leader>nd` | Dismiss notifications    |
+| n    | `<leader>rf` | Rename file              |
+| n, t | `]]`         | Next reference           |
+| n, t | `[[`         | Previous reference       |
+
+**Auto-enabled:** bigfile detection, indent guides, scope highlighting, quickfile, input UI.
+
+---
+
+## AeroSpace Keybindings (macOS Tiling WM)
+
+**Modifier:** `Alt`
+
+### Focus & Move
+
+| Keybinding       | Description              |
+| :--------------- | :----------------------- |
+| `Alt + h/j/k/l`       | Focus left/down/up/right |
+| `Alt + Shift + h/j/k/l` | Move window left/down/up/right |
+
+### Workspaces
+
+| Keybinding       | Description              |
+| :--------------- | :----------------------- |
+| `Alt + 1–6`           | Switch to workspace 1–6 |
+| `Alt + Shift + 1–6`   | Move window to workspace 1–6 |
+
+### Layout
+
+| Keybinding       | Description              |
+| :--------------- | :----------------------- |
+| `Alt + /`              | Toggle horizontal/vertical tiling |
+| `Alt + ,`              | Toggle accordion layout  |
+| `Alt + f`              | Toggle fullscreen        |
+| `Alt + Shift + f`      | Toggle floating/tiling   |
+| `Alt + v`              | Split horizontal         |
+| `Alt + b`              | Split vertical           |
+| `Alt + Shift + -/=`    | Resize smaller/larger    |
+| `Alt + Shift + c`      | Reload config            |
+| `Alt + Shift + ;`      | Enter service mode       |
+
 ---
 
 ## Emacs Keybindings
@@ -407,6 +474,33 @@ Active in `eglot-mode-map` when an LSP server is attached.
 | `C-c f n`  | Lean 4 REPL                  |
 | `C-c f c`  | Coq proof (Proof General)    |
 | `C-c f a`  | Agda type-check/load         |
+
+### Fish Shell — Aliases & Functions
+
+| Alias | Command                  |
+| :---- | :----------------------- |
+| `jl`  | `jupyter lab`            |
+| `nb`  | `jupyter notebook`       |
+| `tb`  | `tensorboard --logdir`   |
+
+| Function | Description                                          |
+| :------- | :--------------------------------------------------- |
+| `mlenv <name> [type]` | Bootstrap a uv ML project (`dl`, `ml`, `llm`) |
+| `jk`     | Register current uv venv as a Jupyter kernel         |
+
+**Shell integrations:** atuin (history search with `Ctrl+R`), zoxide (`z`/`cd`), starship prompt.
+
+### Modern CLI Tools
+
+| Tool | Replaces | Description |
+| :--- | :------- | :---------- |
+| yazi | ranger/nnn | Terminal file manager with image preview |
+| atuin | `Ctrl+R` | Synced shell history search across machines |
+| glow | — | Render markdown in the terminal |
+| dust | du | Disk usage visualizer |
+| procs | ps | Modern process viewer |
+| hyperfine | time | Command benchmarking |
+| tokei | cloc | Code statistics by language |
 
 ### Org Mode
 

@@ -86,6 +86,20 @@ alias vim='nvim'
 alias v='nvim'
 
 # ======================
+# ML/AI & Scientific Tools
+# ======================
+alias jl='jupyter lab'
+alias nb='jupyter notebook'
+alias tb='tensorboard --logdir'
+
+# ======================
+# Atuin (shell history)
+# ======================
+if command -q atuin
+    atuin init fish | source
+end
+
+# ======================
 # Language/Runtime Configs
 # ======================
 

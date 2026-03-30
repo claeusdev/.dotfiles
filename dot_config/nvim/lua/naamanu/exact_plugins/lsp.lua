@@ -42,6 +42,8 @@ return {
         "shellcheck",
         -- DAP
         "codelldb",
+        -- LaTeX
+        "texlab",
       },
     },
   },
@@ -89,9 +91,11 @@ return {
       -- Mason-installable servers
       lsp.config("clangd", {
         cmd = { "clangd", "--background-index", "--clang-tidy" },
+        filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
       })
 
       lsp.config("rust_analyzer", {
+        filetypes = { "rust" },
         settings = {
           ["rust-analyzer"] = {
             checkOnSave = { command = "clippy" },
@@ -106,6 +110,7 @@ return {
       })
 
       lsp.config("lua_ls", {
+        filetypes = { "lua" },
         settings = {
           Lua = {
             runtime = { version = "LuaJIT" },
@@ -116,13 +121,20 @@ return {
         },
       })
 
-      lsp.config("ruff", {})
+      lsp.config("ruff", {
+        filetypes = { "python" },
+      })
 
-      lsp.config("ty", {})
+      lsp.config("ty", {
+        filetypes = { "python" },
+      })
 
-      lsp.config("ocamllsp", {})
+      lsp.config("ocamllsp", {
+        filetypes = { "ocaml", "ocaml.interface", "ocaml.menhir", "ocaml.cram", "ocaml.ocamllex", "ocaml.ocamlyacc" },
+      })
 
       lsp.config("hls", {
+        filetypes = { "haskell", "lhaskell", "cabal" },
         settings = {
           haskell = {
             formattingProvider = "ormolu",
@@ -131,6 +143,7 @@ return {
       })
 
       lsp.config("nil_ls", {
+        filetypes = { "nix" },
         settings = {
           ["nil"] = {
             formatting = { command = { "nixfmt" } },
@@ -139,6 +152,7 @@ return {
       })
 
       lsp.config("ts_ls", {
+        filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
         init_options = {
           preferences = {
             includeInlayParameterNameHints = "all",
@@ -154,6 +168,7 @@ return {
       })
 
       lsp.config("eslint", {
+        filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue", "svelte", "astro", "graphql" },
         settings = {
           codeActionOnSave = {
             enable = true,
@@ -162,11 +177,16 @@ return {
         },
       })
 
-      lsp.config("tailwindcss", {})
+      lsp.config("tailwindcss", {
+        filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
+      })
 
-      lsp.config("graphql", {})
+      lsp.config("graphql", {
+        filetypes = { "graphql", "typescriptreact", "javascriptreact" },
+      })
 
       lsp.config("yamlls", {
+        filetypes = { "yaml", "yaml.docker-compose", "yaml.gitlab" },
         settings = {
           yaml = {
             schemaStore = { enable = false, url = "" },
@@ -176,11 +196,21 @@ return {
         },
       })
 
-      lsp.config("dockerls", {})
+      lsp.config("dockerls", {
+        filetypes = { "dockerfile" },
+      })
 
-      lsp.config("docker_compose_language_service", {})
+      lsp.config("docker_compose_language_service", {
+        filetypes = { "yaml.docker-compose" },
+      })
 
-      lsp.config("ruby_lsp", {})
+      lsp.config("ruby_lsp", {
+        filetypes = { "ruby", "eruby" },
+      })
+
+      lsp.config("texlab", {
+        filetypes = { "tex", "plaintex", "bib" },
+      })
 
       -- Enable Mason-installable servers
       lsp.enable({
@@ -200,15 +230,16 @@ return {
         "dockerls",
         "docker_compose_language_service",
         "ruby_lsp",
+        "texlab",
       })
 
       -- Non-Mason servers (conditionally enabled if binary exists)
       local conditional_servers = {
-        { name = "millet", cmd = "millet-ls" },
-        { name = "racket_langserver", cmd = "racket", config = { cmd = { "racket", "--lib", "racket-langserver" } } },
-        { name = "coq_lsp", cmd = "coq-lsp" },
-        { name = "lean4", cmd = "lean" },
-        { name = "als", cmd = "als" },
+        { name = "millet", cmd = "millet-ls", config = { filetypes = { "sml", "mlb" } } },
+        { name = "racket_langserver", cmd = "racket", config = { cmd = { "racket", "--lib", "racket-langserver" }, filetypes = { "racket", "scheme" } } },
+        { name = "coq_lsp", cmd = "coq-lsp", config = { filetypes = { "coq" } } },
+        { name = "lean4", cmd = "lean", config = { filetypes = { "lean" } } },
+        { name = "als", cmd = "als", config = { filetypes = { "ada" } } },
       }
 
       for _, server in ipairs(conditional_servers) do

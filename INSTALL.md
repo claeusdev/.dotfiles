@@ -23,6 +23,7 @@ Chezmoi manages all configuration files. The setup script only installs packages
 | :--- | :--- |
 | fish shell | `dot_config/fish/` |
 | ghostty | `dot_config/ghostty/` |
+| aerospace | `dot_config/aerospace/` |
 | starship | `dot_config/starship.toml` |
 | neovim | `dot_config/nvim/` |
 | tmux | `dot_tmux.conf` |
@@ -36,10 +37,12 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 ### Both Platforms
 - Core: build tools, git, curl, wget, cmake
 - Shell: fish, tmux, starship, zoxide
-- CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, btop
+- CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, btop, yazi, atuin, glow, dust, procs, hyperfine, tokei
 - Languages: Node.js, Python (uv), Rust, Go, Lua
 - FP/Research: OCaml, SML, Lisp, Racket, Coq, Agda
-- LSP/Formatters: language servers, prettier, stylua, shellcheck
+- ML/AI & Scientific: jupyterlab, ipython, pandoc, typst, ollama
+- MLOps (via uv tool): mlflow, dvc, tensorboard
+- LSP/Formatters: language servers, prettier, stylua, shellcheck, texlab
 - Git: gh, lazygit, git-delta
 - Databases: PostgreSQL, SQLite
 - Containers: Docker, lazydocker
@@ -48,7 +51,10 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 ### macOS Only
 - Homebrew (installed automatically)
 - Cloud/DevOps: awscli, terraform, kubectl, k9s
-- Apps: Rectangle, Ghostty (cask), Raycast
+- LaTeX: MacTeX (mactex-no-gui)
+- Window management: Rectangle, AeroSpace (tiling WM)
+- Menu bar: Ice
+- Apps: Ghostty (cask), Raycast
 
 ## Post-Install Checklist
 
@@ -57,6 +63,8 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - [ ] Open tmux, press `prefix + I` — install tmux plugins
 - [ ] Log out/in for Docker group changes (Linux)
 - [ ] `gh auth login` — authenticate GitHub CLI
+- [ ] `uv tool install jupyterlab --with ipykernel` — verify JupyterLab works
+- [ ] `mlenv test-project ml` — test ML project bootstrapping
 
 ## Troubleshooting
 

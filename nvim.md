@@ -27,6 +27,10 @@ lua/naamanu/
     lsp.lua
     linting.lua
     navigation.lua
+    notebook.lua
+    overseer.lua
+    render-markdown.lua
+    snacks.lua
     testing.lua
     treesitter.lua
     ui.lua
@@ -47,8 +51,11 @@ lua/naamanu/
 | Git | gitsigns, lazygit.nvim, diffview.nvim |
 | Navigation | oil.nvim, harpoon v2, telescope.nvim |
 | Treesitter | nvim-treesitter, nvim-treesitter-textobjects (main), nvim-ts-autotag, nvim-treesitter-context |
+| Notebook | molten-nvim, image.nvim |
+| Task Runner | overseer.nvim |
+| Markdown | render-markdown.nvim |
 | Editor | nvim-autopairs, nvim-surround, Comment.nvim, todo-comments, flash.nvim, undotree, zen-mode, mini.ai, neogen |
-| UI | lualine, which-key, trouble.nvim, aerial.nvim |
+| UI | snacks.nvim (notifier, bigfile, quickfile, words, indent, input, scope), lualine, which-key, trouble.nvim, aerial.nvim |
 | Theme | modus-themes.nvim |
 
 ### LSP servers (auto-installed via mason)
@@ -64,6 +71,7 @@ lua/naamanu/
 - **Tailwind**: tailwindcss-language-server
 - **GraphQL**: graphql-language-service-cli
 - **YAML**: yaml-language-server (schemastore)
+- **LaTeX**: texlab
 - **Docker**: dockerfile-language-server, docker-compose-language-service
 - **Ruby**: ruby-lsp
 - **Conditional** (if binary on PATH): millet-ls, racket_langserver, coq-lsp, lean4, als
@@ -257,6 +265,38 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>de` | Eval expression |
 
 **Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). DAP UI auto-opens/closes.
+
+### Notebook — molten-nvim `<leader>m`
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>mi` | Initialize Molten kernel |
+| `<leader>me` | Evaluate operator |
+| `<leader>ml` | Evaluate line |
+| `<leader>mr` | Re-evaluate cell |
+| `<leader>md` | Delete cell |
+| `<leader>mo` | Show output |
+
+Requires a Jupyter kernel registered for the project. Use the `jk` fish function to register the current uv venv.
+
+### Task Runner — overseer `<leader>o`
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>or` | Run task |
+| `<leader>ot` | Toggle task panel |
+| `<leader>oa` | Task action |
+
+### Snacks — notifications & utilities
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>n` | Notification history |
+| `<leader>nd` | Dismiss notifications |
+| `<leader>rf` | Rename file |
+| `]]` / `[[` | Next/prev reference (word under cursor) |
+
+**Auto-enabled features:** bigfile detection, quickfile, indent guides, scope highlighting, input UI.
 
 ### Treesitter
 

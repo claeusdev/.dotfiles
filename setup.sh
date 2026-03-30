@@ -92,6 +92,7 @@ if [ "$PLATFORM" = "mac" ]; then
     echo ""
     echo "Installing modern CLI utilities..."
     brew_install neovim ripgrep fd fzf bat eza jq yq htop btop tree tldr diff-so-fancy
+    brew_install yazi atuin glow dust procs hyperfine tokei
 
     echo ""
     echo "Installing version control tools..."
@@ -146,8 +147,14 @@ if [ "$PLATFORM" = "mac" ]; then
     brew_install awscli terraform kubectl k9s
 
     echo ""
+    echo "Installing ML/AI & scientific tools..."
+    brew_install jupyterlab ipython pandoc typst ollama
+    brew_cask_install mactex-no-gui
+
+    echo ""
     echo "Installing productivity tools..."
     brew_cask_install rectangle ghostty raycast
+    brew_cask_install nikitabobko/tap/aerospace jordanbaird-ice
 
     echo ""
     echo "Installing fonts..."
@@ -250,6 +257,24 @@ elif [ "$PLATFORM" = "linux" ]; then
     if ! command -v zoxide &> /dev/null; then
         echo "Installing zoxide..."
         curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash || FAILED_PACKAGES+=(zoxide)
+    fi
+
+    echo ""
+    echo "Installing additional modern CLI tools..."
+    install_optional_pkg dust
+    install_optional_pkg procs
+    install_optional_pkg hyperfine
+    install_optional_pkg tokei
+    install_optional_pkg glow
+
+    if ! command -v yazi &> /dev/null; then
+        if command -v cargo &> /dev/null; then
+            cargo install yazi-fm yazi-cli || FAILED_PACKAGES+=(yazi)
+        fi
+    fi
+
+    if ! command -v atuin &> /dev/null; then
+        curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh || FAILED_PACKAGES+=(atuin)
     fi
 
     echo ""
@@ -398,6 +423,27 @@ elif [ "$PLATFORM" = "linux" ]; then
     fi
 
     echo ""
+    echo "Installing ML/AI & scientific tools..."
+    install_pkg pandoc
+    if [ "$PKG_MGR" = "apt" ]; then
+        install_pkg texlive-full
+    elif [ "$PKG_MGR" = "dnf" ]; then
+        install_pkg texlive-scheme-full
+    elif [ "$PKG_MGR" = "pacman" ]; then
+        install_pkg texlive-most
+    fi
+
+    if ! command -v typst &> /dev/null; then
+        if command -v cargo &> /dev/null; then
+            cargo install typst-cli || FAILED_PACKAGES+=(typst)
+        fi
+    fi
+
+    if ! command -v ollama &> /dev/null; then
+        curl -fsSL https://ollama.com/install.sh | sh || FAILED_PACKAGES+=(ollama)
+    fi
+
+    echo ""
     echo "Installing Ghostty terminal..."
     if ! command -v ghostty &> /dev/null; then
         if [ "$PKG_MGR" = "apt" ]; then
@@ -448,6 +494,16 @@ if command -v uv &> /dev/null; then
     echo "Setting up Neovim Python provider..."
     uv venv ~/.local/share/nvim/venv
     ~/.local/share/nvim/venv/bin/pip install pynvim
+fi
+
+# ML/AI & Scientific Python tools (global uv tools)
+if command -v uv &> /dev/null; then
+    echo "Installing ML/AI & Scientific Python tools..."
+    uv tool install jupyterlab --with ipykernel --with jupyterlab-vim || true
+    uv tool install ipython || true
+    uv tool install mlflow || true
+    uv tool install dvc || true
+    uv tool install tensorboard || true
 fi
 
 # Install Node.js LTS via fnm
