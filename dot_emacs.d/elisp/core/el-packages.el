@@ -9,6 +9,10 @@
         ("gnu"      . "https://elpa.gnu.org/packages/")
         ("nongnu"   . "https://elpa.nongnu.org/nongnu/")))
 
+;; Allow unsigned packages — avoids GPG keyring bootstrap issues
+(setq package-gnupghome-dir (expand-file-name "gnupg" package-user-dir))
+(setq package-check-signature 'allow-unsigned)
+
 (package-initialize)
 
 ;; Bootstrap use-package (built into Emacs 29+)
