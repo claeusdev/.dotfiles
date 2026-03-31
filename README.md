@@ -53,6 +53,28 @@ chezmoi init --apply naamanu
 
 See [INSTALL.md](INSTALL.md) for details and manual alternatives.
 
+## Editor docs
+
+- [Emacs setup overview](emacs.md)
+- [Emacs development workflow](emacs-dev-workflow.md)
+- [Emacs Org workflow](emacs-org-workflow.md)
+- [Neovim setup overview](nvim.md)
+- [tmux setup overview](tmux.md)
+
+## Emacs machine setup
+
+Machine-local Emacs overrides belong in:
+
+- `~/.emacs.d/local-pre.el`
+- `~/.emacs.d/local-post.el`
+
+Starter examples are included in the chezmoi source:
+
+- `dot_emacs.d/local-pre.el.example`
+- `dot_emacs.d/local-post.el.example`
+
+Inside Emacs, run `C-c e h` for a quick health check of required and optional external tools.
+
 ---
 
 # Keybindings Documentation

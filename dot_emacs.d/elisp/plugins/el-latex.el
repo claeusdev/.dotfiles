@@ -10,9 +10,14 @@
   (TeX-parse-self t)
   (TeX-master nil) ; query for master file
   (TeX-PDF-mode t)
+  (TeX-save-query nil)
   (TeX-source-correlate-mode t)
   (TeX-source-correlate-start-server t)
+  (TeX-electric-sub-and-superscript t)
   :config
+  (add-hook 'LaTeX-mode-hook #'visual-line-mode)
+  (add-hook 'LaTeX-mode-hook #'flyspell-mode)
+  (add-hook 'LaTeX-mode-hook #'turn-on-reftex)
   ;; Viewer: Skim on macOS, Zathura on Linux
   (cond
    ((eq system-type 'darwin)

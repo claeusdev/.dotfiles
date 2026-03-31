@@ -2,6 +2,17 @@
 
 ;;; Code:
 
+(defun my/font-installed-p (font-name)
+  "Return non-nil if FONT-NAME is available."
+  (member font-name (font-family-list)))
+
+(defconst my/nerd-font-installed-p
+  (or (my/font-installed-p "Inconsolata Nerd Font")
+      (my/font-installed-p "Symbols Nerd Font Mono")
+      (my/font-installed-p "SauceCodePro Nerd Font")
+      (my/font-installed-p "JetBrainsMono Nerd Font"))
+  "Whether a Nerd Font is available for icons.")
+
 (use-package modus-themes
   :init
   (setq modus-themes-italic-constructs t
@@ -12,9 +23,10 @@
 
 ;; Font
 (let ((font-height (if (eq system-type 'darwin) 165 140)))
-  (set-face-attribute 'default nil
-                      :family "Inconsolata Nerd Font"
-                      :height font-height))
+  (when (my/font-installed-p "Inconsolata Nerd Font")
+    (set-face-attribute 'default nil
+                        :family "Inconsolata Nerd Font"
+                        :height font-height)))
 
 ;; Rainbow delimiters
 (use-package rainbow-delimiters
@@ -28,10 +40,10 @@
   :custom
   (doom-modeline-height 28)
   (doom-modeline-bar-width 4)
-  (doom-modeline-project-detection 'projectile)
+  (doom-modeline-project-detection 'project)
   (doom-modeline-buffer-file-name-style 'relative-from-project)
-  (doom-modeline-icon t)
-  (doom-modeline-major-mode-icon t)
+  (doom-modeline-icon my/nerd-font-installed-p)
+  (doom-modeline-major-mode-icon my/nerd-font-installed-p)
   (doom-modeline-minor-modes nil)
   :init (doom-modeline-mode 1))
 

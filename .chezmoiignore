@@ -18,3 +18,4 @@ LICENSE
 .claude/projects/
 .claude/session-env/
 .claude/shell-snapshots/
+.emacs.d/var/

@@ -8,6 +8,7 @@ dot_emacs.d/desktop/
 dot_emacs.d/undo/
 dot_emacs.d/eln-cache/
 dot_emacs.d/auto-save-list/
+dot_emacs.d/var/
 dot_emacs.d/org-roam.db
 dot_emacs.d/#*#
 dot_emacs.d/*~
