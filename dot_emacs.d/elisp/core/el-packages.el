@@ -11,7 +11,8 @@
 
 ;; Allow unsigned packages — avoids GPG keyring bootstrap issues
 (setq package-gnupghome-dir (expand-file-name "gnupg" package-user-dir))
-(setq package-check-signature 'allow-unsigned)
+(make-directory package-gnupghome-dir t)
+(setq package-check-signature nil)
 
 (package-initialize)
 

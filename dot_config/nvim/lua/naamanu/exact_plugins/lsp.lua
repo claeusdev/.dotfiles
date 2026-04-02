@@ -77,6 +77,31 @@ return {
     },
     config = function()
       local lsp = vim.lsp
+      local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+      local function mason_binary(binary)
+        local candidate = mason_bin .. "/" .. binary
+        return vim.fn.executable(candidate) == 1 and candidate or nil
+      end
+      local function available_binary(binary)
+        return mason_binary(binary) or (vim.fn.exepath(binary) ~= "" and vim.fn.exepath(binary) or nil)
+      end
+      local function mason_cmd(binary, extra_args)
+        local executable = available_binary(binary)
+        if not executable then
+          return nil
+        end
+
+        return vim.list_extend({ executable }, extra_args or {})
+      end
+      local function apply_code_action(kind)
+        vim.lsp.buf.code_action({
+          apply = true,
+          context = {
+            only = { kind },
+            diagnostics = {},
+          },
+        })
+      end
 
       -- Diagnostic config
       vim.diagnostic.config({
@@ -90,11 +115,13 @@ return {
 
       -- Mason-installable servers
       lsp.config("clangd", {
-        cmd = { "clangd", "--background-index", "--clang-tidy" },
+        cmd = mason_cmd("clangd", { "--background-index", "--clang-tidy" }),
         filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+        root_markers = { "compile_commands.json", "compile_flags.txt", "CMakeLists.txt", "Makefile", "meson.build", ".git" },
       })
 
       lsp.config("rust_analyzer", {
+        cmd = mason_cmd("rust-analyzer"),
         filetypes = { "rust" },
         settings = {
           ["rust-analyzer"] = {
@@ -110,6 +137,7 @@ return {
       })
 
       lsp.config("lua_ls", {
+        cmd = mason_cmd("lua-language-server"),
         filetypes = { "lua" },
         settings = {
           Lua = {
@@ -122,19 +150,25 @@ return {
       })
 
       lsp.config("ruff", {
+        cmd = mason_cmd("ruff"),
         filetypes = { "python" },
       })
 
       lsp.config("ty", {
+        cmd = mason_cmd("ty"),
         filetypes = { "python" },
       })
 
       lsp.config("ocamllsp", {
-        filetypes = { "ocaml", "ocaml.interface", "ocaml.menhir", "ocaml.cram", "ocaml.ocamllex", "ocaml.ocamlyacc" },
+        cmd = mason_cmd("ocamllsp"),
+        filetypes = { "ocaml", "ocaml.interface", "ocaml.menhir", "ocaml.cram", "ocaml.ocamllex", "ocaml.ocamlyacc", "reason" },
+        root_markers = { "dune-project", "dune-workspace", "dune", ".git" },
       })
 
       lsp.config("hls", {
+        cmd = mason_cmd("haskell-language-server-wrapper"),
         filetypes = { "haskell", "lhaskell", "cabal" },
+        root_markers = { "hie.yaml", "stack.yaml", "cabal.project", "package.yaml", ".git" },
         settings = {
           haskell = {
             formattingProvider = "ormolu",
@@ -143,6 +177,7 @@ return {
       })
 
       lsp.config("nil_ls", {
+        cmd = mason_cmd("nil"),
         filetypes = { "nix" },
         settings = {
           ["nil"] = {
@@ -152,8 +187,11 @@ return {
       })
 
       lsp.config("ts_ls", {
+        cmd = mason_cmd("typescript-language-server", { "--stdio" }),
         filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+        root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
         init_options = {
+          hostInfo = "neovim",
           preferences = {
             includeInlayParameterNameHints = "all",
             includeInlayParameterNameHintsWhenArgumentMatchesName = false,
@@ -168,7 +206,20 @@ return {
       })
 
       lsp.config("eslint", {
+        cmd = mason_cmd("vscode-eslint-language-server", { "--stdio" }),
         filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue", "svelte", "astro", "graphql" },
+        root_markers = {
+          "eslint.config.js",
+          "eslint.config.cjs",
+          "eslint.config.mjs",
+          "eslint.config.ts",
+          ".eslintrc",
+          ".eslintrc.js",
+          ".eslintrc.cjs",
+          ".eslintrc.json",
+          "package.json",
+          ".git",
+        },
         settings = {
           codeActionOnSave = {
             enable = true,
@@ -178,14 +229,17 @@ return {
       })
 
       lsp.config("tailwindcss", {
+        cmd = mason_cmd("tailwindcss-language-server", { "--stdio" }),
         filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
       })
 
       lsp.config("graphql", {
+        cmd = mason_cmd("graphql-lsp", { "server", "-m", "stream" }),
         filetypes = { "graphql", "typescriptreact", "javascriptreact" },
       })
 
       lsp.config("yamlls", {
+        cmd = mason_cmd("yaml-language-server", { "--stdio" }),
         filetypes = { "yaml", "yaml.docker-compose", "yaml.gitlab" },
         settings = {
           yaml = {
@@ -197,41 +251,51 @@ return {
       })
 
       lsp.config("dockerls", {
+        cmd = mason_cmd("dockerfile-language-server-nodejs", { "--stdio" }),
         filetypes = { "dockerfile" },
       })
 
       lsp.config("docker_compose_language_service", {
+        cmd = mason_cmd("docker-compose-langserver", { "--stdio" }),
         filetypes = { "yaml.docker-compose" },
       })
 
       lsp.config("ruby_lsp", {
+        cmd = mason_cmd("ruby-lsp"),
         filetypes = { "ruby", "eruby" },
       })
 
       lsp.config("texlab", {
+        cmd = mason_cmd("texlab"),
         filetypes = { "tex", "plaintex", "bib" },
       })
 
       -- Enable Mason-installable servers
-      lsp.enable({
-        "clangd",
-        "rust_analyzer",
-        "lua_ls",
-        "ruff",
-        "ty",
-        "ocamllsp",
-        "hls",
-        "nil_ls",
-        "ts_ls",
-        "eslint",
-        "tailwindcss",
-        "graphql",
-        "yamlls",
-        "dockerls",
-        "docker_compose_language_service",
-        "ruby_lsp",
-        "texlab",
-      })
+      local mason_servers = {
+        { name = "clangd", binary = "clangd" },
+        { name = "rust_analyzer", binary = "rust-analyzer" },
+        { name = "lua_ls", binary = "lua-language-server" },
+        { name = "ruff", binary = "ruff" },
+        { name = "ty", binary = "ty" },
+        { name = "ocamllsp", binary = "ocamllsp" },
+        { name = "hls", binary = "haskell-language-server-wrapper" },
+        { name = "nil_ls", binary = "nil" },
+        { name = "ts_ls", binary = "typescript-language-server" },
+        { name = "eslint", binary = "vscode-eslint-language-server" },
+        { name = "tailwindcss", binary = "tailwindcss-language-server" },
+        { name = "graphql", binary = "graphql-lsp" },
+        { name = "yamlls", binary = "yaml-language-server" },
+        { name = "dockerls", binary = "dockerfile-language-server-nodejs" },
+        { name = "docker_compose_language_service", binary = "docker-compose-langserver" },
+        { name = "ruby_lsp", binary = "ruby-lsp" },
+        { name = "texlab", binary = "texlab" },
+      }
+
+      for _, server in ipairs(mason_servers) do
+        if available_binary(server.binary) then
+          lsp.enable(server.name)
+        end
+      end
 
       -- Non-Mason servers (conditionally enabled if binary exists)
       local conditional_servers = {
@@ -240,6 +304,15 @@ return {
         { name = "coq_lsp", cmd = "coq-lsp", config = { filetypes = { "coq" } } },
         { name = "lean4", cmd = "lean", config = { filetypes = { "lean" } } },
         { name = "als", cmd = "als", config = { filetypes = { "ada" } } },
+        {
+          name = "rescriptls",
+          cmd = "rescript-language-server",
+          config = {
+            cmd = { "rescript-language-server", "--stdio" },
+            filetypes = { "rescript" },
+            root_markers = { "rescript.json", "bsconfig.json", "package.json", ".git" },
+          },
+        },
       }
 
       for _, server in ipairs(conditional_servers) do
@@ -271,6 +344,10 @@ return {
           map("<leader>lr", vim.lsp.buf.rename, "Rename")
           map("<leader>ld", vim.diagnostic.open_float, "Line diagnostics")
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
+          map("<leader>ci", function() apply_code_action("source.organizeImports") end, "Organize imports")
+          map("<leader>cI", function() apply_code_action("source.addMissingImports") end, "Add missing imports")
+          map("<leader>cu", function() apply_code_action("source.removeUnused") end, "Remove unused imports")
+          map("<leader>cF", function() apply_code_action("source.fixAll") end, "Fix all auto-fixable issues")
 
           -- Inlay hints (Neovim 0.10+)
           local client = vim.lsp.get_client_by_id(event.data.client_id)

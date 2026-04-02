@@ -1,0 +1,17 @@
+;;; local-pre.el.example --- Machine-local settings loaded before shared config -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Copy this file to ~/.emacs.d/local-pre.el for values that should stay local
+;; to one machine, such as fonts, PATH tweaks, or viewer programs.
+
+;;; Code:
+
+;; Example: prefer a local font when it is installed.
+;; (when (member "Iosevka Nerd Font" (font-family-list))
+;;   (set-face-attribute 'default nil :font "Iosevka Nerd Font-14"))
+
+;; Example: extend PATH for machine-local tools.
+;; (setenv "PATH" (concat (expand-file-name "~/.local/bin") path-separator (getenv "PATH")))
+;; (add-to-list 'exec-path (expand-file-name "~/.local/bin"))
+
+;;; local-pre.el.example ends here

@@ -5,6 +5,14 @@
 **Theme**: modus-operandi
 **Config**: `~/.config/nvim/lua/naamanu/`
 
+Tutorial guides:
+
+- [Neovim Tutorials](nvim-tutorials.md)
+- [Neovim Development Workflow](nvim-dev-workflow.md)
+- [Neovim Research Workflow](nvim-research-workflow.md)
+- [Neovim Note-Taking Workflow](nvim-note-taking-workflow.md)
+- [Neovim Starting Projects](nvim-starting-projects.md)
+
 ---
 
 ## Structure
@@ -29,6 +37,7 @@ lua/naamanu/
     navigation.lua
     notebook.lua
     overseer.lua
+    pairp.lua
     render-markdown.lua
     snacks.lua
     testing.lua
@@ -46,13 +55,14 @@ lua/naamanu/
 | LSP | mason, mason-tool-installer, fidget, schemastore, lazydev.nvim |
 | Formatting | conform.nvim |
 | Linting | nvim-lint |
-| Testing | neotest, neotest-python, neotest-vitest, neotest-rust |
+| Testing | neotest, neotest-python, neotest-vitest, neotest-jest, neotest-rust |
 | Debugging | nvim-dap, nvim-dap-ui, nvim-dap-virtual-text, mason-nvim-dap, nvim-dap-python |
 | Git | gitsigns, lazygit.nvim, diffview.nvim |
 | Navigation | oil.nvim, harpoon v2, telescope.nvim |
 | Treesitter | nvim-treesitter, nvim-treesitter-textobjects (main), nvim-ts-autotag, nvim-treesitter-context |
 | Notebook | molten-nvim, image.nvim |
 | Task Runner | overseer.nvim |
+| Claude | pairp |
 | Markdown | render-markdown.nvim |
 | Editor | nvim-autopairs, nvim-surround, Comment.nvim, todo-comments, flash.nvim, undotree, zen-mode, mini.ai, neogen |
 | UI | snacks.nvim (notifier, bigfile, quickfile, words, indent, input, scope), lualine, which-key, trouble.nvim, aerial.nvim |
@@ -65,6 +75,7 @@ lua/naamanu/
 - **Python**: ruff, ty (via eglot preset)
 - **Lua**: lua-language-server
 - **OCaml**: ocaml-lsp
+- **ReasonML**: ocaml-lsp (via `reason` filetype)
 - **Haskell**: haskell-language-server
 - **Nix**: nil
 - **TypeScript/JS**: ts_ls, eslint-lsp
@@ -74,7 +85,7 @@ lua/naamanu/
 - **LaTeX**: texlab
 - **Docker**: dockerfile-language-server, docker-compose-language-service
 - **Ruby**: ruby-lsp
-- **Conditional** (if binary on PATH): millet-ls, racket_langserver, coq-lsp, lean4, als
+- **Conditional** (if binary on PATH): millet-ls, racket_langserver, coq-lsp, lean4, als, rescript-language-server
 
 ### Formatters (conform.nvim)
 
@@ -164,14 +175,25 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | Key | Action |
 | :--- | :--- |
 | `<leader>ff` | Find files |
+| `<leader>fp` | Git files |
 | `<leader>fr` | Recent files |
 | `<leader>fg` | Live grep |
+| `<leader>f/` | Search current buffer |
+| `<leader>f.` | Resume last picker |
 | `<leader>fc` | Grep word under cursor |
 | `<leader>fb` | Buffers |
 | `<leader>fh` | Help tags |
 | `<leader>fk` | Keymaps |
 | `<leader>fd` | Diagnostics |
 | `<leader>fs` / `fS` | Document / workspace symbols |
+
+### Motion
+
+| Key | Action |
+| :--- | :--- |
+| `<leader><leader>` | Flash jump |
+| `<leader>fj` | Flash Treesitter |
+| `<leader>fr` / `fR` | Flash remote / Treesitter search |
 
 ### Navigation
 
@@ -195,6 +217,10 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>lr` | Rename |
 | `<leader>ld` | Line diagnostics |
 | `<leader>ls` | Signature help |
+| `<leader>ci` | Organize imports |
+| `<leader>cI` | Add missing imports |
+| `<leader>cu` | Remove unused imports |
+| `<leader>cF` | Fix all auto-fixable issues |
 | `<leader>lh` | Toggle inlay hints |
 | `<leader>lc` | Run code lens |
 | `<leader>lC` | Refresh code lens |
@@ -213,7 +239,7 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | Key | Action |
 | :--- | :--- |
 | `<leader>co` | Toggle code outline sidebar |
-| `{` / `}` | Previous / next symbol |
+| `[s` / `]s` | Previous / next symbol |
 
 ### Trouble `<leader>x`
 
@@ -251,7 +277,23 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>td` | Debug nearest test |
 | `[t` / `]t` | Previous / next failed test |
 
-**Adapters:** Python, Vitest (JS/TS), Rust.
+**Adapters:** Python, Vitest (JS/TS), Jest (NestJS/React), Rust.
+
+### Tasks — Overseer `<leader>o`
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>or` | Run task/template |
+| `<leader>os` | Run `package.json` script |
+| `<leader>op` | Run current Python file |
+| `<leader>oT` | Run Python tests |
+| `<leader>ob` | Build current project |
+| `<leader>on` | Run current project tests |
+| `<leader>oC` | Compile current C/C++ file |
+| `<leader>ot` | Toggle task panel |
+| `<leader>oa` | Task action |
+
+Project-aware build/test helpers support C/C++ (`cmake`, `meson`, `make`), OCaml (`dune`), ReScript (`rescript build` or `package.json` scripts), and Haskell (`cabal`, `stack`).
 
 ### Debugging — nvim-dap `<leader>d`
 
@@ -262,30 +304,38 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>di` / `do` / `dO` | Step into/over/out |
 | `<leader>dr` / `dl` | Toggle REPL / run last |
 | `<leader>du` | Toggle DAP UI |
+| `<leader>dC` | Debug current C/C++ executable |
+| `<leader>dP` | Debug current Python file |
 | `<leader>de` | Eval expression |
 
-**Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). DAP UI auto-opens/closes.
+**Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). C/C++ launch prefers current-file `.out` binaries plus executables discovered in `build/` and `bin/` before falling back to a manual path prompt. DAP UI auto-opens/closes.
+
+### Claude — Pairp `<leader>c`
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>cc` | Toggle Claude Code window |
 
 ### Notebook — molten-nvim `<leader>m`
 
 | Key | Action |
 | :--- | :--- |
 | `<leader>mi` | Initialize Molten kernel |
+| `<leader>mI` | Show Molten info |
 | `<leader>me` | Evaluate operator |
+| `<leader>mv` | Evaluate visual selection |
 | `<leader>ml` | Evaluate line |
 | `<leader>mr` | Re-evaluate cell |
 | `<leader>md` | Delete cell |
 | `<leader>mo` | Show output |
+| `<leader>mO` | Enter output window |
+| `<leader>mH` | Hide output |
+| `<leader>mn` / `<leader>mp` | Next / previous cell |
+| `<leader>mx` | Interrupt kernel |
+| `<leader>mR` | Restart kernel |
+| `<leader>mX` / `<leader>mL` | Export / import notebook output |
 
-Requires a Jupyter kernel registered for the project. Use the `jk` fish function to register the current uv venv.
-
-### Task Runner — overseer `<leader>o`
-
-| Key | Action |
-| :--- | :--- |
-| `<leader>or` | Run task |
-| `<leader>ot` | Toggle task panel |
-| `<leader>oa` | Task action |
+Requires a Jupyter kernel registered for the project. Use the `jk` fish function to register the current uv venv. `.ipy` files are treated as Python. Molten is configured for image.nvim, virtual text output, faster kernel polling, and output import/export workflows.
 
 ### Snacks — notifications & utilities
 

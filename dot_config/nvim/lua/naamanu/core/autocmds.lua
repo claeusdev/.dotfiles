@@ -1,6 +1,15 @@
 local autocmd = vim.api.nvim_create_autocmd
 local augroup = vim.api.nvim_create_augroup
 
+vim.filetype.add({
+  extension = {
+    re = "reason",
+    rei = "reason",
+    res = "rescript",
+    resi = "rescript",
+  },
+})
+
 -- Highlight when yanking text
 autocmd("TextYankPost", {
   group = augroup("highlight-yank", { clear = true }),

@@ -4,6 +4,9 @@
 
 (use-package dap-mode
   :after eglot
+  :commands (dap-debug dap-debug-restart dap-breakpoint-toggle dap-disconnect)
+  :custom
+  (dap-auto-configure-features '(sessions locals controls tooltip))
   :bind (:map dap-mode-map
          ("C-c d b" . dap-breakpoint-toggle)
          ("C-c d d" . dap-debug)

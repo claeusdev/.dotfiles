@@ -53,6 +53,29 @@ chezmoi init --apply naamanu
 
 See [INSTALL.md](INSTALL.md) for details and manual alternatives.
 
+## Editor docs
+
+- [Emacs setup overview](emacs.md)
+- [Emacs development workflow](emacs-dev-workflow.md)
+- [Emacs Org workflow](emacs-org-workflow.md)
+- [Neovim setup overview](nvim.md)
+- [Neovim tutorials](nvim-tutorials.md)
+- [tmux setup overview](tmux.md)
+
+## Emacs machine setup
+
+Machine-local Emacs overrides belong in:
+
+- `~/.emacs.d/local-pre.el`
+- `~/.emacs.d/local-post.el`
+
+Starter examples are included in the chezmoi source:
+
+- `dot_emacs.d/local-pre.el.example`
+- `dot_emacs.d/local-post.el.example`
+
+Inside Emacs, run `C-c e h` for a quick health check of required and optional external tools.
+
 ---
 
 # Keybindings Documentation
@@ -288,30 +311,50 @@ Format on save is enabled by default.
 | n    | `<leader>dr` | Toggle REPL             |
 | n    | `<leader>dl` | Run last                |
 | n    | `<leader>du` | Toggle DAP UI           |
+| n    | `<leader>dC` | Debug current C/C++ executable |
+| n    | `<leader>dP` | Debug current Python file |
 | n, v | `<leader>de` | Eval expression         |
 
-**Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). DAP UI auto-opens on debug start and auto-closes on termination.
+**Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). C/C++ launch prefers current-file `.out` binaries plus executables discovered in `build/` and `bin/` before falling back to a manual path prompt. DAP UI auto-opens on debug start and auto-closes on termination.
 
 ### Notebook (Molten)
 
 | Mode | Keybinding   | Description              |
 | :--- | :----------- | :----------------------- |
 | n    | `<leader>mi` | Initialize Molten kernel |
+| n    | `<leader>mI` | Show Molten info         |
 | n    | `<leader>me` | Evaluate operator        |
+| v    | `<leader>mv` | Evaluate visual selection |
 | n    | `<leader>ml` | Evaluate line            |
 | n    | `<leader>mr` | Re-evaluate cell         |
 | n    | `<leader>md` | Delete cell              |
 | n    | `<leader>mo` | Show output              |
+| n    | `<leader>mO` | Enter output window      |
+| n    | `<leader>mH` | Hide output              |
+| n    | `<leader>mn` | Next cell                |
+| n    | `<leader>mp` | Previous cell            |
+| n    | `<leader>mx` | Interrupt kernel         |
+| n    | `<leader>mR` | Restart kernel           |
+| n    | `<leader>mX` | Export notebook output   |
+| n    | `<leader>mL` | Import notebook output   |
 
-**Requires:** a Jupyter kernel registered for the current project (use the `jk` fish function).
+**Requires:** a Jupyter kernel registered for the current project (use the `jk` fish function). `.ipy` files are treated as Python.
 
 ### Task Runner (Overseer)
 
 | Mode | Keybinding   | Description              |
 | :--- | :----------- | :----------------------- |
 | n    | `<leader>or` | Run task                 |
+| n    | `<leader>os` | Run package script       |
+| n    | `<leader>op` | Run current Python file  |
+| n    | `<leader>oT` | Run Python tests         |
+| n    | `<leader>ob` | Build current project    |
+| n    | `<leader>on` | Run current project tests |
+| n    | `<leader>oC` | Compile current C/C++ file |
 | n    | `<leader>ot` | Toggle task panel        |
 | n    | `<leader>oa` | Task action              |
+
+**Project-aware helpers:** C/C++ (`cmake`, `meson`, `make`), OCaml (`dune`), ReScript (`rescript build` or `package.json` scripts), and Haskell (`cabal`, `stack`). `.res` and `.resi` files are treated as ReScript.
 
 ### Snacks (Notifications & Utilities)
 
