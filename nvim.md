@@ -29,6 +29,7 @@ lua/naamanu/
     navigation.lua
     notebook.lua
     overseer.lua
+    pairp.lua
     render-markdown.lua
     snacks.lua
     testing.lua
@@ -53,6 +54,7 @@ lua/naamanu/
 | Treesitter | nvim-treesitter, nvim-treesitter-textobjects (main), nvim-ts-autotag, nvim-treesitter-context |
 | Notebook | molten-nvim, image.nvim |
 | Task Runner | overseer.nvim |
+| Claude | pairp |
 | Markdown | render-markdown.nvim |
 | Editor | nvim-autopairs, nvim-surround, Comment.nvim, todo-comments, flash.nvim, undotree, zen-mode, mini.ai, neogen |
 | UI | snacks.nvim (notifier, bigfile, quickfile, words, indent, input, scope), lualine, which-key, trouble.nvim, aerial.nvim |
@@ -65,6 +67,7 @@ lua/naamanu/
 - **Python**: ruff, ty (via eglot preset)
 - **Lua**: lua-language-server
 - **OCaml**: ocaml-lsp
+- **ReasonML**: ocaml-lsp (via `reason` filetype)
 - **Haskell**: haskell-language-server
 - **Nix**: nil
 - **TypeScript/JS**: ts_ls, eslint-lsp
@@ -74,7 +77,7 @@ lua/naamanu/
 - **LaTeX**: texlab
 - **Docker**: dockerfile-language-server, docker-compose-language-service
 - **Ruby**: ruby-lsp
-- **Conditional** (if binary on PATH): millet-ls, racket_langserver, coq-lsp, lean4, als
+- **Conditional** (if binary on PATH): millet-ls, racket_langserver, coq-lsp, lean4, als, rescript-language-server
 
 ### Formatters (conform.nvim)
 
@@ -164,14 +167,25 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | Key | Action |
 | :--- | :--- |
 | `<leader>ff` | Find files |
+| `<leader>fp` | Git files |
 | `<leader>fr` | Recent files |
 | `<leader>fg` | Live grep |
+| `<leader>f/` | Search current buffer |
+| `<leader>f.` | Resume last picker |
 | `<leader>fc` | Grep word under cursor |
 | `<leader>fb` | Buffers |
 | `<leader>fh` | Help tags |
 | `<leader>fk` | Keymaps |
 | `<leader>fd` | Diagnostics |
 | `<leader>fs` / `fS` | Document / workspace symbols |
+
+### Motion
+
+| Key | Action |
+| :--- | :--- |
+| `<leader><leader>` | Flash jump |
+| `<leader>fj` | Flash Treesitter |
+| `<leader>fr` / `fR` | Flash remote / Treesitter search |
 
 ### Navigation
 
@@ -195,6 +209,10 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>lr` | Rename |
 | `<leader>ld` | Line diagnostics |
 | `<leader>ls` | Signature help |
+| `<leader>ci` | Organize imports |
+| `<leader>cI` | Add missing imports |
+| `<leader>cu` | Remove unused imports |
+| `<leader>cF` | Fix all auto-fixable issues |
 | `<leader>lh` | Toggle inlay hints |
 | `<leader>lc` | Run code lens |
 | `<leader>lC` | Refresh code lens |
@@ -213,7 +231,7 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | Key | Action |
 | :--- | :--- |
 | `<leader>co` | Toggle code outline sidebar |
-| `{` / `}` | Previous / next symbol |
+| `[s` / `]s` | Previous / next symbol |
 
 ### Trouble `<leader>x`
 
@@ -265,6 +283,12 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>de` | Eval expression |
 
 **Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). DAP UI auto-opens/closes.
+
+### Claude — Pairp `<leader>c`
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>cc` | Toggle Claude Code window |
 
 ### Notebook — molten-nvim `<leader>m`
 

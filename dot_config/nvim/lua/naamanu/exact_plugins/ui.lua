@@ -55,8 +55,8 @@ return {
     },
     keys = {
       { "<leader>co", "<cmd>AerialToggle!<CR>", desc = "Code outline (Aerial)" },
-      { "{", "<cmd>AerialPrev<CR>", desc = "Previous symbol" },
-      { "}", "<cmd>AerialNext<CR>", desc = "Next symbol" },
+      { "[s", "<cmd>AerialPrev<CR>", desc = "Previous symbol" },
+      { "]s", "<cmd>AerialNext<CR>", desc = "Next symbol" },
     },
     opts = {
       backends = { "treesitter", "lsp" },

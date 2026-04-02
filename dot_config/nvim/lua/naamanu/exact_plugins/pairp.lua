@@ -1,7 +1,15 @@
 return {
 	"naamanu/pairp",
 	branch = "main",
-	cmd = "Pairp",
+	cmd = {
+		"PairpToggle",
+		"PairpSend",
+		"PairpContext",
+		"PairpSendFile",
+		"PairpList",
+		"PairpClose",
+		"PairpSwitch",
+	},
 	keys = {
 		{ "<leader>cc", desc = "Pairp: toggle Claude Code" },
 	},

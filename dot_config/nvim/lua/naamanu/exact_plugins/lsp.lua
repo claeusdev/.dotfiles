@@ -77,6 +77,19 @@ return {
     },
     config = function()
       local lsp = vim.lsp
+      local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+      local function mason_cmd(binary, extra_args)
+        return vim.list_extend({ mason_bin .. "/" .. binary }, extra_args or {})
+      end
+      local function apply_code_action(kind)
+        vim.lsp.buf.code_action({
+          apply = true,
+          context = {
+            only = { kind },
+            diagnostics = {},
+          },
+        })
+      end
 
       -- Diagnostic config
       vim.diagnostic.config({
@@ -130,7 +143,7 @@ return {
       })
 
       lsp.config("ocamllsp", {
-        filetypes = { "ocaml", "ocaml.interface", "ocaml.menhir", "ocaml.cram", "ocaml.ocamllex", "ocaml.ocamlyacc" },
+        filetypes = { "ocaml", "ocaml.interface", "ocaml.menhir", "ocaml.cram", "ocaml.ocamllex", "ocaml.ocamlyacc", "reason" },
       })
 
       lsp.config("hls", {
@@ -152,8 +165,11 @@ return {
       })
 
       lsp.config("ts_ls", {
+        cmd = mason_cmd("typescript-language-server", { "--stdio" }),
         filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+        root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
         init_options = {
+          hostInfo = "neovim",
           preferences = {
             includeInlayParameterNameHints = "all",
             includeInlayParameterNameHintsWhenArgumentMatchesName = false,
@@ -168,7 +184,20 @@ return {
       })
 
       lsp.config("eslint", {
+        cmd = mason_cmd("vscode-eslint-language-server", { "--stdio" }),
         filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue", "svelte", "astro", "graphql" },
+        root_markers = {
+          "eslint.config.js",
+          "eslint.config.cjs",
+          "eslint.config.mjs",
+          "eslint.config.ts",
+          ".eslintrc",
+          ".eslintrc.js",
+          ".eslintrc.cjs",
+          ".eslintrc.json",
+          "package.json",
+          ".git",
+        },
         settings = {
           codeActionOnSave = {
             enable = true,
@@ -240,6 +269,15 @@ return {
         { name = "coq_lsp", cmd = "coq-lsp", config = { filetypes = { "coq" } } },
         { name = "lean4", cmd = "lean", config = { filetypes = { "lean" } } },
         { name = "als", cmd = "als", config = { filetypes = { "ada" } } },
+        {
+          name = "rescriptls",
+          cmd = "rescript-language-server",
+          config = {
+            cmd = { "rescript-language-server", "--stdio" },
+            filetypes = { "rescript" },
+            root_markers = { "rescript.json", "bsconfig.json", "package.json", ".git" },
+          },
+        },
       }
 
       for _, server in ipairs(conditional_servers) do
@@ -271,6 +309,10 @@ return {
           map("<leader>lr", vim.lsp.buf.rename, "Rename")
           map("<leader>ld", vim.diagnostic.open_float, "Line diagnostics")
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
+          map("<leader>ci", function() apply_code_action("source.organizeImports") end, "Organize imports")
+          map("<leader>cI", function() apply_code_action("source.addMissingImports") end, "Add missing imports")
+          map("<leader>cu", function() apply_code_action("source.removeUnused") end, "Remove unused imports")
+          map("<leader>cF", function() apply_code_action("source.fixAll") end, "Fix all auto-fixable issues")
 
           -- Inlay hints (Neovim 0.10+)
           local client = vim.lsp.get_client_by_id(event.data.client_id)

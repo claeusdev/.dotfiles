@@ -50,8 +50,11 @@ return {
     cmd = "Telescope",
     keys = {
       { "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "Find files" },
+      { "<leader>fp", "<cmd>Telescope git_files<CR>", desc = "Git files" },
       { "<leader>fr", "<cmd>Telescope oldfiles<CR>", desc = "Recent files" },
       { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live grep" },
+      { "<leader>f/", "<cmd>Telescope current_buffer_fuzzy_find<CR>", desc = "Search current buffer" },
+      { "<leader>f.", "<cmd>Telescope resume<CR>", desc = "Resume last picker" },
       { "<leader>fc", "<cmd>Telescope grep_string<CR>", desc = "Find string under cursor" },
       { "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "Find buffers" },
       { "<leader>fh", "<cmd>Telescope help_tags<CR>", desc = "Help tags" },
@@ -70,6 +73,9 @@ return {
           find_files = {
             hidden = true,
             file_ignore_patterns = { "%.git/" },
+          },
+          git_files = {
+            show_untracked = true,
           },
         },
       })
