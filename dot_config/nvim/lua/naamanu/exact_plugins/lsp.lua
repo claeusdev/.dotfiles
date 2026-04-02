@@ -105,6 +105,7 @@ return {
       lsp.config("clangd", {
         cmd = { "clangd", "--background-index", "--clang-tidy" },
         filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+        root_markers = { "compile_commands.json", "compile_flags.txt", "CMakeLists.txt", "Makefile", "meson.build", ".git" },
       })
 
       lsp.config("rust_analyzer", {
@@ -144,10 +145,12 @@ return {
 
       lsp.config("ocamllsp", {
         filetypes = { "ocaml", "ocaml.interface", "ocaml.menhir", "ocaml.cram", "ocaml.ocamllex", "ocaml.ocamlyacc", "reason" },
+        root_markers = { "dune-project", "dune-workspace", "dune", ".git" },
       })
 
       lsp.config("hls", {
         filetypes = { "haskell", "lhaskell", "cabal" },
+        root_markers = { "hie.yaml", "stack.yaml", "cabal.project", "package.yaml", ".git" },
         settings = {
           haskell = {
             formattingProvider = "ormolu",

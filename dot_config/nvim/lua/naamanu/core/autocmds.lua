@@ -5,6 +5,8 @@ vim.filetype.add({
   extension = {
     re = "reason",
     rei = "reason",
+    res = "rescript",
+    resi = "rescript",
   },
 })
 

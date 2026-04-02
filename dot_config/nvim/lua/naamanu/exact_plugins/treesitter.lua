@@ -7,6 +7,7 @@ return {
     opts = {
       ensure_installed = {
         "c",
+        "cmake",
         "cpp",
         "rust",
         "python",
@@ -20,6 +21,7 @@ return {
         "nix",
         "lean",
         "lua",
+        "make",
         "vim",
         "vimdoc",
         "bash",

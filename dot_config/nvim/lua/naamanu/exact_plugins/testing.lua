@@ -26,6 +26,12 @@ return {
       adapters = {
         require("neotest-python")({
           dap = { justMyCode = false },
+          runner = function()
+            return tasks.detect_python_test_runner(vim.fn.expand("%:p"))
+          end,
+          python = function(root)
+            return tasks.python_runner_command(root)
+          end,
         }),
         require("neotest-jest")({
           jestCommand = function()

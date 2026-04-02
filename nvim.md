@@ -277,8 +277,15 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | :--- | :--- |
 | `<leader>or` | Run task/template |
 | `<leader>os` | Run `package.json` script |
+| `<leader>op` | Run current Python file |
+| `<leader>oT` | Run Python tests |
+| `<leader>ob` | Build current project |
+| `<leader>on` | Run current project tests |
+| `<leader>oC` | Compile current C/C++ file |
 | `<leader>ot` | Toggle task panel |
 | `<leader>oa` | Task action |
+
+Project-aware build/test helpers support C/C++ (`cmake`, `meson`, `make`), OCaml (`dune`), ReScript (`rescript build` or `package.json` scripts), and Haskell (`cabal`, `stack`).
 
 ### Debugging — nvim-dap `<leader>d`
 
@@ -289,9 +296,11 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>di` / `do` / `dO` | Step into/over/out |
 | `<leader>dr` / `dl` | Toggle REPL / run last |
 | `<leader>du` | Toggle DAP UI |
+| `<leader>dC` | Debug current C/C++ executable |
+| `<leader>dP` | Debug current Python file |
 | `<leader>de` | Eval expression |
 
-**Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). DAP UI auto-opens/closes.
+**Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). C/C++ launch prefers current-file `.out` binaries plus executables discovered in `build/` and `bin/` before falling back to a manual path prompt. DAP UI auto-opens/closes.
 
 ### Claude — Pairp `<leader>c`
 
@@ -304,21 +313,21 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | Key | Action |
 | :--- | :--- |
 | `<leader>mi` | Initialize Molten kernel |
+| `<leader>mI` | Show Molten info |
 | `<leader>me` | Evaluate operator |
+| `<leader>mv` | Evaluate visual selection |
 | `<leader>ml` | Evaluate line |
 | `<leader>mr` | Re-evaluate cell |
 | `<leader>md` | Delete cell |
 | `<leader>mo` | Show output |
+| `<leader>mO` | Enter output window |
+| `<leader>mH` | Hide output |
+| `<leader>mn` / `<leader>mp` | Next / previous cell |
+| `<leader>mx` | Interrupt kernel |
+| `<leader>mR` | Restart kernel |
+| `<leader>mX` / `<leader>mL` | Export / import notebook output |
 
-Requires a Jupyter kernel registered for the project. Use the `jk` fish function to register the current uv venv.
-
-### Task Runner — overseer `<leader>o`
-
-| Key | Action |
-| :--- | :--- |
-| `<leader>or` | Run task |
-| `<leader>ot` | Toggle task panel |
-| `<leader>oa` | Task action |
+Requires a Jupyter kernel registered for the project. Use the `jk` fish function to register the current uv venv. `.ipy` files are treated as Python. Molten is configured for image.nvim, virtual text output, faster kernel polling, and output import/export workflows.
 
 ### Snacks — notifications & utilities
 
