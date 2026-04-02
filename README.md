@@ -59,6 +59,7 @@ See [INSTALL.md](INSTALL.md) for details and manual alternatives.
 - [Emacs development workflow](emacs-dev-workflow.md)
 - [Emacs Org workflow](emacs-org-workflow.md)
 - [Neovim setup overview](nvim.md)
+- [Neovim tutorials](nvim-tutorials.md)
 - [tmux setup overview](tmux.md)
 
 ## Emacs machine setup

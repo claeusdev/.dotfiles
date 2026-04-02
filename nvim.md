@@ -5,6 +5,14 @@
 **Theme**: modus-operandi
 **Config**: `~/.config/nvim/lua/naamanu/`
 
+Tutorial guides:
+
+- [Neovim Tutorials](nvim-tutorials.md)
+- [Neovim Development Workflow](nvim-dev-workflow.md)
+- [Neovim Research Workflow](nvim-research-workflow.md)
+- [Neovim Note-Taking Workflow](nvim-note-taking-workflow.md)
+- [Neovim Starting Projects](nvim-starting-projects.md)
+
 ---
 
 ## Structure
