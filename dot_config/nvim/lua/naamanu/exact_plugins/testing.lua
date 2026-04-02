@@ -4,6 +4,7 @@ return {
     "nvim-neotest/nvim-nio",
     "nvim-lua/plenary.nvim",
     "nvim-treesitter/nvim-treesitter",
+    "nvim-neotest/neotest-jest",
     "nvim-neotest/neotest-python",
     "marilari88/neotest-vitest",
     "rouge8/neotest-rust",
@@ -20,10 +21,21 @@ return {
     { "]t", function() require("neotest").jump.next({ status = "failed" }) end, desc = "Next failed test" },
   },
   config = function()
+    local tasks = require("naamanu.core.tasks")
     require("neotest").setup({
       adapters = {
         require("neotest-python")({
           dap = { justMyCode = false },
+        }),
+        require("neotest-jest")({
+          jestCommand = function()
+            local cmd = tasks.package_script_command("test", vim.fn.expand("%:p"))
+            return cmd and table.concat(cmd, " ") .. " --" or "npm test --"
+          end,
+          env = { CI = true },
+          cwd = function()
+            return tasks.find_package_root(vim.fn.expand("%:p")) or vim.fn.getcwd()
+          end,
         }),
         require("neotest-vitest"),
         require("neotest-rust"),

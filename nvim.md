@@ -47,7 +47,7 @@ lua/naamanu/
 | LSP | mason, mason-tool-installer, fidget, schemastore, lazydev.nvim |
 | Formatting | conform.nvim |
 | Linting | nvim-lint |
-| Testing | neotest, neotest-python, neotest-vitest, neotest-rust |
+| Testing | neotest, neotest-python, neotest-vitest, neotest-jest, neotest-rust |
 | Debugging | nvim-dap, nvim-dap-ui, nvim-dap-virtual-text, mason-nvim-dap, nvim-dap-python |
 | Git | gitsigns, lazygit.nvim, diffview.nvim |
 | Navigation | oil.nvim, harpoon v2, telescope.nvim |
@@ -269,7 +269,16 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>td` | Debug nearest test |
 | `[t` / `]t` | Previous / next failed test |
 
-**Adapters:** Python, Vitest (JS/TS), Rust.
+**Adapters:** Python, Vitest (JS/TS), Jest (NestJS/React), Rust.
+
+### Tasks — Overseer `<leader>o`
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>or` | Run task/template |
+| `<leader>os` | Run `package.json` script |
+| `<leader>ot` | Toggle task panel |
+| `<leader>oa` | Task action |
 
 ### Debugging — nvim-dap `<leader>d`
 
