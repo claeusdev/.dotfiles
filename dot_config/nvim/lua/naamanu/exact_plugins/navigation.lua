@@ -50,7 +50,17 @@ return {
     cmd = "Telescope",
     keys = {
       { "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "Find files" },
-      { "<leader>fp", "<cmd>Telescope git_files<CR>", desc = "Git files" },
+      {
+        "<leader>fp",
+        function()
+          local builtin = require("telescope.builtin")
+          local ok = pcall(builtin.git_files, { show_untracked = true })
+          if not ok then
+            builtin.find_files({ hidden = true })
+          end
+        end,
+        desc = "Project files",
+      },
       { "<leader>fr", "<cmd>Telescope oldfiles<CR>", desc = "Recent files" },
       { "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live grep" },
       { "<leader>f/", "<cmd>Telescope current_buffer_fuzzy_find<CR>", desc = "Search current buffer" },
