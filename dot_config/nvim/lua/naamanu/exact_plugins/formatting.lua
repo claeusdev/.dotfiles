@@ -1,3 +1,12 @@
+local function biome_or_prettier(bufnr)
+  local path = vim.api.nvim_buf_get_name(bufnr)
+  local start = path ~= "" and vim.fs.dirname(path) or vim.fn.getcwd()
+  if vim.fs.find({ "biome.json", "biome.jsonc" }, { upward = true, path = start })[1] then
+    return { "biome" }
+  end
+  return { "prettier" }
+end
+
 return {
   "stevearc/conform.nvim",
   event = { "BufWritePre" },
@@ -24,15 +33,16 @@ return {
       lua = { "stylua" },
       sh = { "shfmt" },
       bash = { "shfmt" },
-      json = { "prettier" },
+      json = biome_or_prettier,
+      jsonc = biome_or_prettier,
       yaml = { "prettier" },
       markdown = { "prettier" },
-      typescript = { "prettier" },
-      typescriptreact = { "prettier" },
-      javascript = { "prettier" },
-      javascriptreact = { "prettier" },
+      typescript = biome_or_prettier,
+      typescriptreact = biome_or_prettier,
+      javascript = biome_or_prettier,
+      javascriptreact = biome_or_prettier,
       html = { "prettier" },
-      css = { "prettier" },
+      css = biome_or_prettier,
       graphql = { "prettier" },
       ruby = { "rubocop" },
     },

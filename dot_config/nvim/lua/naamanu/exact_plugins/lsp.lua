@@ -24,9 +24,11 @@ return {
         "haskell-language-server",
         "nil",
         "vtsls",
+        "biome",
         "eslint-lsp",
         "tailwindcss-language-server",
         "graphql-language-service-cli",
+        "json-lsp",
         "yaml-language-server",
         "dockerfile-language-server",
         "docker-compose-language-service",
@@ -64,6 +66,13 @@ return {
         { path = "${3rd}/luv/library", words = { "vim%.uv" } },
       },
     },
+  },
+
+  -- Live-preview LSP rename
+  {
+    "smjonas/inc-rename.nvim",
+    cmd = "IncRename",
+    opts = {},
   },
 
   -- Native LSP configuration (no plugin needed, uses vim.lsp.config/enable)
@@ -256,6 +265,32 @@ return {
         filetypes = { "graphql", "typescriptreact", "javascriptreact" },
       })
 
+      lsp.config("jsonls", {
+        cmd = mason_cmd("vscode-json-language-server", { "--stdio" }),
+        filetypes = { "json", "jsonc" },
+        init_options = { provideFormatter = false },
+        settings = {
+          json = {
+            schemas = require("schemastore").json.schemas(),
+            validate = { enable = true },
+          },
+        },
+      })
+
+      lsp.config("biome", {
+        cmd = mason_cmd("biome", { "lsp-proxy" }),
+        filetypes = {
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact",
+          "json",
+          "jsonc",
+          "css",
+        },
+        root_markers = { "biome.json", "biome.jsonc" },
+      })
+
       lsp.config("yamlls", {
         cmd = mason_cmd("yaml-language-server", { "--stdio" }),
         filetypes = { "yaml", "yaml.docker-compose", "yaml.gitlab" },
@@ -299,9 +334,11 @@ return {
         { name = "hls", binary = "haskell-language-server-wrapper" },
         { name = "nil_ls", binary = "nil" },
         { name = "vtsls", binary = "vtsls" },
+        { name = "biome", binary = "biome" },
         { name = "eslint", binary = "vscode-eslint-language-server" },
         { name = "tailwindcss", binary = "tailwindcss-language-server" },
         { name = "graphql", binary = "graphql-lsp" },
+        { name = "jsonls", binary = "vscode-json-language-server" },
         { name = "yamlls", binary = "yaml-language-server" },
         { name = "dockerls", binary = "dockerfile-language-server-nodejs" },
         { name = "docker_compose_language_service", binary = "docker-compose-langserver" },
@@ -359,7 +396,9 @@ return {
           map("gt", vim.lsp.buf.type_definition, "Go to type definition")
           map("K", vim.lsp.buf.hover, "Hover documentation")
           map("<leader>la", vim.lsp.buf.code_action, "Code action")
-          map("<leader>lr", vim.lsp.buf.rename, "Rename")
+          vim.keymap.set("n", "<leader>lr", function()
+            return ":IncRename " .. vim.fn.expand("<cword>")
+          end, { buffer = event.buf, expr = true, desc = "LSP: Rename (live preview)" })
           map("<leader>ld", vim.diagnostic.open_float, "Line diagnostics")
           map("<leader>ls", vim.lsp.buf.signature_help, "Signature help")
           map("<leader>ci", function() apply_code_action("source.organizeImports") end, "Organize imports")
