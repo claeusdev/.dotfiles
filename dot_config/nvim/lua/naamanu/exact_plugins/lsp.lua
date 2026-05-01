@@ -23,7 +23,7 @@ return {
         "ocaml-lsp",
         "haskell-language-server",
         "nil",
-        "typescript-language-server",
+        "vtsls",
         "eslint-lsp",
         "tailwindcss-language-server",
         "graphql-language-service-cli",
@@ -186,23 +186,41 @@ return {
         },
       })
 
-      lsp.config("ts_ls", {
-        cmd = mason_cmd("typescript-language-server", { "--stdio" }),
+      lsp.config("vtsls", {
+        cmd = mason_cmd("vtsls", { "--stdio" }),
         filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
         root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
-        init_options = {
-          hostInfo = "neovim",
-          preferences = {
-            includeInlayParameterNameHints = "all",
-            includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-            includeInlayFunctionParameterTypeHints = true,
-            includeInlayVariableTypeHints = true,
-            includeInlayPropertyDeclarationTypeHints = true,
-            includeInlayFunctionLikeReturnTypeHints = true,
-            includeInlayEnumMemberValueHints = true,
+        single_file_support = true,
+        settings = {
+          vtsls = {
+            experimental = {
+              completion = { enableServerSideFuzzyMatch = true },
+            },
+            tsserver = { globalPlugins = {} },
+          },
+          typescript = {
+            updateImportsOnFileMove = { enabled = "always" },
+            inlayHints = {
+              parameterNames = { enabled = "all", suppressWhenArgumentMatchesName = false },
+              parameterTypes = { enabled = true },
+              variableTypes = { enabled = true },
+              propertyDeclarationTypes = { enabled = true },
+              functionLikeReturnTypes = { enabled = true },
+              enumMemberValues = { enabled = true },
+            },
+          },
+          javascript = {
+            updateImportsOnFileMove = { enabled = "always" },
+            inlayHints = {
+              parameterNames = { enabled = "all", suppressWhenArgumentMatchesName = false },
+              parameterTypes = { enabled = true },
+              variableTypes = { enabled = true },
+              propertyDeclarationTypes = { enabled = true },
+              functionLikeReturnTypes = { enabled = true },
+              enumMemberValues = { enabled = true },
+            },
           },
         },
-        single_file_support = true,
       })
 
       lsp.config("eslint", {
@@ -280,7 +298,7 @@ return {
         { name = "ocamllsp", binary = "ocamllsp" },
         { name = "hls", binary = "haskell-language-server-wrapper" },
         { name = "nil_ls", binary = "nil" },
-        { name = "ts_ls", binary = "typescript-language-server" },
+        { name = "vtsls", binary = "vtsls" },
         { name = "eslint", binary = "vscode-eslint-language-server" },
         { name = "tailwindcss", binary = "tailwindcss-language-server" },
         { name = "graphql", binary = "graphql-lsp" },
