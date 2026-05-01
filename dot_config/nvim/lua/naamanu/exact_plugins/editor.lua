@@ -71,6 +71,16 @@ return {
     },
   },
 
+  -- Treesj (split / join)
+  {
+    "Wansmer/treesj",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    keys = {
+      { "<leader>j", function() require("treesj").toggle() end, desc = "Split / join under cursor" },
+    },
+    opts = { use_default_keymaps = false, max_join_length = 200 },
+  },
+
   -- Mini.ai (textobjects)
   {
     "echasnovski/mini.ai",
