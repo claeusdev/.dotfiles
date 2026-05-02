@@ -251,7 +251,7 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 | n    | `<leader>lc` | Run code lens        |
 | n    | `<leader>lC` | Refresh code lens    |
 
-**Inlay hints** are auto-enabled for servers that support them (rust-analyzer, ts_ls, lua_ls). Toggle per-buffer with `<leader>lh`. **Code lens** auto-refreshes on `BufEnter` and `InsertLeave`.
+**Inlay hints** are auto-enabled for servers that support them (rust-analyzer, vtsls, lua_ls). Toggle per-buffer with `<leader>lh`. **Code lens** auto-refreshes on `BufEnter` and `InsertLeave`.
 
 **Lazydev** provides full Neovim Lua API completions when editing `*.lua` files — no manual `diagnostics.globals` needed.
 

@@ -377,7 +377,7 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo ""
     echo "Installing language servers and formatters..."
     if command -v npm &> /dev/null; then
-        npm install -g prettier eslint_d typescript-language-server || true
+        npm install -g prettier eslint typescript || true
     fi
 
     if command -v cargo &> /dev/null; then

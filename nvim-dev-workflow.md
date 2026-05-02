@@ -239,7 +239,7 @@ Current behavior worth knowing:
 
 - Python debugging uses the detected project interpreter when possible.
 - C/C++ debugging looks for current-file `.out` binaries and executables in `build/` and `bin/` before prompting manually.
-- JS and TS launch through `pwa-node`.
+- JS and TS launch through `pwa-node`; TypeScript buffers also get a `tsx` launch profile that prefers the project-local binary.
 
 ---
 

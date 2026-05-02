@@ -22,7 +22,6 @@ return {
         "ty",
         "ocaml-lsp",
         "haskell-language-server",
-        "nil",
         "vtsls",
         "biome",
         "eslint-lsp",
@@ -32,13 +31,10 @@ return {
         "yaml-language-server",
         "dockerfile-language-server",
         "docker-compose-language-service",
-        "ruby-lsp",
-        "rubocop",
         -- Formatters
         "stylua",
         "shfmt",
         "prettier",
-        "nixfmt",
         "ormolu",
         -- Linters
         "shellcheck",
@@ -110,6 +106,58 @@ return {
             diagnostics = {},
           },
         })
+      end
+      local function local_package_binary(root, binary)
+        if not root then
+          return nil
+        end
+
+        local dir = root
+        local home = vim.loop.os_homedir()
+
+        while dir and dir ~= "" do
+          local candidate = dir .. "/node_modules/.bin/" .. binary
+          if vim.fn.executable(candidate) == 1 then
+            return candidate
+          end
+
+          if dir == home then
+            break
+          end
+          local parent = vim.fs.dirname(dir)
+          if not parent or parent == dir then
+            break
+          end
+          dir = parent
+        end
+
+        return nil
+      end
+      local function local_typescript_sdk(root)
+        if not root then
+          return nil
+        end
+
+        local dir = root
+        local home = vim.loop.os_homedir()
+
+        while dir and dir ~= "" do
+          local tsserver = dir .. "/node_modules/typescript/lib/tsserver.js"
+          if vim.fn.filereadable(tsserver) == 1 then
+            return dir .. "/node_modules/typescript/lib"
+          end
+
+          if dir == home then
+            break
+          end
+          local parent = vim.fs.dirname(dir)
+          if not parent or parent == dir then
+            break
+          end
+          dir = parent
+        end
+
+        return nil
       end
 
       -- Diagnostic config
@@ -185,21 +233,21 @@ return {
         },
       })
 
-      lsp.config("nil_ls", {
-        cmd = mason_cmd("nil"),
-        filetypes = { "nix" },
-        settings = {
-          ["nil"] = {
-            formatting = { command = { "nixfmt" } },
-          },
-        },
-      })
-
       lsp.config("vtsls", {
         cmd = mason_cmd("vtsls", { "--stdio" }),
         filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
         root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
         single_file_support = true,
+        on_new_config = function(config, root_dir)
+          local tsdk = local_typescript_sdk(root_dir)
+          if tsdk then
+            config.settings = config.settings or {}
+            config.settings.vtsls = config.settings.vtsls or {}
+            config.settings.vtsls.tsserver = vim.tbl_deep_extend("force", config.settings.vtsls.tsserver or {}, {
+              tsdk = tsdk,
+            })
+          end
+        end,
         settings = {
           vtsls = {
             experimental = {
@@ -244,14 +292,22 @@ return {
           ".eslintrc.js",
           ".eslintrc.cjs",
           ".eslintrc.json",
-          "package.json",
-          ".git",
         },
+        on_new_config = function(config, root_dir)
+          local eslint = local_package_binary(root_dir, "eslint")
+          if eslint then
+            config.settings = config.settings or {}
+            config.settings.nodePath = root_dir .. "/node_modules"
+          end
+        end,
         settings = {
+          quiet = true,
+          format = false,
           codeActionOnSave = {
-            enable = true,
+            enable = false,
             mode = "all",
           },
+          workingDirectory = { mode = "auto" },
         },
       })
 
@@ -313,11 +369,6 @@ return {
         filetypes = { "yaml.docker-compose" },
       })
 
-      lsp.config("ruby_lsp", {
-        cmd = mason_cmd("ruby-lsp"),
-        filetypes = { "ruby", "eruby" },
-      })
-
       lsp.config("texlab", {
         cmd = mason_cmd("texlab"),
         filetypes = { "tex", "plaintex", "bib" },
@@ -332,7 +383,6 @@ return {
         { name = "ty", binary = "ty" },
         { name = "ocamllsp", binary = "ocamllsp" },
         { name = "hls", binary = "haskell-language-server-wrapper" },
-        { name = "nil_ls", binary = "nil" },
         { name = "vtsls", binary = "vtsls" },
         { name = "biome", binary = "biome" },
         { name = "eslint", binary = "vscode-eslint-language-server" },
@@ -342,7 +392,6 @@ return {
         { name = "yamlls", binary = "yaml-language-server" },
         { name = "dockerls", binary = "dockerfile-language-server-nodejs" },
         { name = "docker_compose_language_service", binary = "docker-compose-langserver" },
-        { name = "ruby_lsp", binary = "ruby-lsp" },
         { name = "texlab", binary = "texlab" },
       }
 
@@ -405,6 +454,16 @@ return {
           map("<leader>cI", function() apply_code_action("source.addMissingImports") end, "Add missing imports")
           map("<leader>cu", function() apply_code_action("source.removeUnused") end, "Remove unused imports")
           map("<leader>cF", function() apply_code_action("source.fixAll") end, "Fix all auto-fixable issues")
+          map("<leader>cE", function() apply_code_action("source.fixAll.eslint") end, "Fix ESLint issues")
+          map("<leader>lR", function()
+            local clients = vim.lsp.get_clients({ bufnr = event.buf })
+            for _, attached_client in ipairs(clients) do
+              attached_client:stop(true)
+            end
+            vim.defer_fn(function()
+              vim.cmd("edit")
+            end, 100)
+          end, "Restart LSP clients")
 
           -- Inlay hints (Neovim 0.10+)
           local client = vim.lsp.get_client_by_id(event.data.client_id)
@@ -431,6 +490,17 @@ return {
           -- Disable hover for ruff (defer to ty)
           if client and client.name == "ruff" then
             client.server_capabilities.hoverProvider = false
+          end
+
+          if client and client.name == "eslint" then
+            vim.diagnostic.config({
+              virtual_text = {
+                severity = { min = vim.diagnostic.severity.ERROR },
+              },
+              signs = true,
+              underline = true,
+              severity_sort = true,
+            }, event.buf)
           end
         end,
       })

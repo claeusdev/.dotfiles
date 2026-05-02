@@ -53,7 +53,7 @@ return {
       },
     }
 
-    for _, ft in ipairs({ "javascript", "typescript" }) do
+    for _, ft in ipairs({ "javascript", "javascriptreact", "typescript", "typescriptreact" }) do
       dap.configurations[ft] = {
         {
           type = "pwa-node",
@@ -61,6 +61,21 @@ return {
           name = "Launch file",
           program = "${file}",
           cwd = "${workspaceFolder}",
+        },
+        {
+          type = "pwa-node",
+          request = "launch",
+          name = "Launch TypeScript file via tsx",
+          runtimeExecutable = function()
+            local tsx = tasks.local_package_binary("tsx", vim.api.nvim_buf_get_name(0))
+            return tsx or "tsx"
+          end,
+          args = { "${file}" },
+          cwd = function()
+            return tasks.find_package_root(vim.api.nvim_buf_get_name(0)) or vim.fn.getcwd()
+          end,
+          sourceMaps = true,
+          skipFiles = { "<node_internals>/**", "${workspaceFolder}/node_modules/**" },
         },
         {
           type = "pwa-node",

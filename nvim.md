@@ -77,14 +77,12 @@ lua/naamanu/
 - **OCaml**: ocaml-lsp
 - **ReasonML**: ocaml-lsp (via `reason` filetype)
 - **Haskell**: haskell-language-server
-- **Nix**: nil
-- **TypeScript/JS**: ts_ls, eslint-lsp
+- **TypeScript/JS**: vtsls, eslint-lsp when an ESLint config exists
 - **Tailwind**: tailwindcss-language-server
 - **GraphQL**: graphql-language-service-cli
 - **YAML**: yaml-language-server (schemastore)
 - **LaTeX**: texlab
 - **Docker**: dockerfile-language-server, docker-compose-language-service
-- **Ruby**: ruby-lsp
 - **Conditional** (if binary on PATH): millet-ls, racket_langserver, coq-lsp, lean4, als, rescript-language-server
 
 ### Formatters (conform.nvim)
@@ -96,13 +94,12 @@ lua/naamanu/
 | OCaml | ocamlformat |
 | Python | ruff |
 | Haskell | ormolu |
-| Nix | nixfmt |
 | Lua | stylua |
 | Shell/Bash | shfmt |
-| JSON, YAML, Markdown, TS, JS, HTML, CSS, GraphQL | prettier |
-| Ruby | rubocop |
+| JS, TS, JSX, TSX, Vue, Svelte, Astro, JSON, CSS, SCSS | project-local biome or prettier when configured |
+| YAML, Markdown, HTML, GraphQL | prettier |
 
-Format on save enabled with 3s timeout.
+Format on save enabled with 3s timeout. JS/TS formatting is intentionally project-local: Neovim skips formatting when the project has no Biome/Prettier config and local binary.
 
 ---
 
@@ -225,7 +222,7 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>lc` | Run code lens |
 | `<leader>lC` | Refresh code lens |
 
-**Inlay hints** auto-enabled for supporting servers (rust-analyzer, ts_ls, lua_ls). Toggle per-buffer with `<leader>lh`. **Code lens** auto-refreshes on `BufEnter`/`InsertLeave`. **Lazydev** provides full Neovim Lua API completions in `*.lua` files.
+**Inlay hints** auto-enabled for supporting servers (rust-analyzer, vtsls, lua_ls). Toggle per-buffer with `<leader>lh`. **Code lens** auto-refreshes on `BufEnter`/`InsertLeave`. **Lazydev** provides full Neovim Lua API completions in `*.lua` files.
 
 ### Formatting & Linting
 

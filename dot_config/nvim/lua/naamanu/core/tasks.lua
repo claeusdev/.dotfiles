@@ -86,6 +86,20 @@ local function project_file_contents(root, filename)
   return table.concat(vim.fn.readfile(path), "\n")
 end
 
+local function project_file_json(root, filename)
+  local contents = project_file_contents(root, filename)
+  if contents == "" then
+    return nil
+  end
+
+  local ok, decoded = pcall(vim.json.decode, contents)
+  if not ok or type(decoded) ~= "table" then
+    return nil
+  end
+
+  return decoded
+end
+
 local function build_shell_command(script)
   return { "sh", "-lc", script }
 end
@@ -125,6 +139,118 @@ end
 
 local function package_json_root(startpath)
   return search_root({ "package.json" }, startpath)
+end
+
+local function local_package_binary(root, binary)
+  if not root then
+    return nil
+  end
+
+  local dir = root
+  local home = vim.loop.os_homedir()
+
+  while dir and dir ~= "" do
+    local candidate = dir .. "/node_modules/.bin/" .. binary
+    if vim.fn.executable(candidate) == 1 then
+      return candidate
+    end
+
+    if dir == home then
+      break
+    end
+    local parent = vim.fs.dirname(dir)
+    if not parent or parent == dir then
+      break
+    end
+    dir = parent
+  end
+
+  return nil
+end
+
+local function package_json_has_key(root, key)
+  local package_json = project_file_json(root, "package.json")
+  return package_json and package_json[key] ~= nil
+end
+
+local function package_has_dependency(root, names)
+  local package_json = project_file_json(root, "package.json")
+  if not package_json then
+    return false
+  end
+
+  for _, section in ipairs({ "dependencies", "devDependencies", "peerDependencies", "optionalDependencies" }) do
+    local deps = package_json[section]
+    if type(deps) == "table" then
+      for _, name in ipairs(names) do
+        if deps[name] ~= nil then
+          return true
+        end
+      end
+    end
+  end
+
+  return false
+end
+
+local function prettier_config_root(startpath)
+  local config_root = search_root({
+    ".prettierrc",
+    ".prettierrc.json",
+    ".prettierrc.json5",
+    ".prettierrc.yml",
+    ".prettierrc.yaml",
+    ".prettierrc.js",
+    ".prettierrc.cjs",
+    ".prettierrc.mjs",
+    ".prettierrc.toml",
+    "prettier.config.js",
+    "prettier.config.cjs",
+    "prettier.config.mjs",
+    "prettier.config.ts",
+  }, startpath)
+  if config_root then
+    return config_root
+  end
+
+  local root = package_json_root(startpath)
+  if root and package_json_has_key(root, "prettier") then
+    return root
+  end
+
+  return nil
+end
+
+local function biome_config_root(startpath)
+  local root = search_root({ "biome.json", "biome.jsonc" }, startpath)
+  if root and local_package_binary(root, "biome") then
+    return root
+  end
+
+  return nil
+end
+
+local function eslint_config_root(startpath)
+  local root = search_root({
+    "eslint.config.js",
+    "eslint.config.cjs",
+    "eslint.config.mjs",
+    "eslint.config.ts",
+    ".eslintrc",
+    ".eslintrc.js",
+    ".eslintrc.cjs",
+    ".eslintrc.json",
+  }, startpath)
+  if root then
+    return root
+  end
+
+  local package_root = package_json_root(startpath)
+  if package_root and package_json_has_key(package_root, "eslintConfig") then
+    return package_root
+  end
+
+  return nil
 end
 
 local function python_project_root(startpath)
@@ -384,9 +510,36 @@ local function package_script_task(script, startpath, name)
   })
 end
 
+local function package_has_script(root, script)
+  if not root then
+    return false
+  end
+
+  local package_json = project_file_json(root, "package.json")
+  return package_json
+    and type(package_json.scripts) == "table"
+    and type(package_json.scripts[script]) == "string"
+end
+
+local function package_script_task_if_present(script, startpath, name)
+  local root = package_json_root(startpath)
+  if not root then
+    return nil, "No package.json found in the current project"
+  end
+
+  if not package_has_script(root, script) then
+    return nil, string.format("No package script named '%s' found", script)
+  end
+
+  return package_script_task(script, startpath, name)
+end
+
 local function detect_project_target(startpath)
   local ft = current_filetype(startpath)
 
+  if vim.tbl_contains({ "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue", "svelte", "astro" }, ft) then
+    return "node", package_json_root(startpath)
+  end
   if vim.tbl_contains({ "c", "cpp", "objc", "objcpp", "cuda" }, ft) then
     return "cpp", cpp_project_root(startpath)
   end
@@ -415,6 +568,10 @@ local function detect_project_target(startpath)
   root = haskell_project_root(startpath)
   if root then
     return "haskell", root
+  end
+  root = package_json_root(startpath)
+  if root then
+    return "node", root
   end
 
   return nil, nil
@@ -455,6 +612,33 @@ function M.detect_package_manager(root)
   return detect_package_manager(root)
 end
 
+function M.local_package_binary(binary, startpath)
+  local root = package_json_root(startpath)
+  return local_package_binary(root, binary), root
+end
+
+function M.prettier_config_root(startpath)
+  local root = prettier_config_root(startpath)
+  if root and local_package_binary(root, "prettier") then
+    return root
+  end
+
+  return nil
+end
+
+function M.biome_config_root(startpath)
+  return biome_config_root(startpath)
+end
+
+function M.eslint_config_root(startpath)
+  local root = eslint_config_root(startpath)
+  if root and (local_package_binary(root, "eslint") or package_has_dependency(root, { "eslint" })) then
+    return root
+  end
+
+  return nil
+end
+
 function M.detect_python_runner(startpath)
   return detect_python_runner(python_project_root(startpath))
 end
@@ -469,8 +653,16 @@ function M.package_script_command(script, startpath)
     return nil, nil
   end
 
+  if not package_has_script(root, script) then
+    return nil, root
+  end
+
   local package_manager = detect_package_manager(root)
   return build_package_command(package_manager, script), root
+end
+
+function M.has_package_script(script, startpath)
+  return package_has_script(package_json_root(startpath), script)
 end
 
 function M.python_executable(startpath)
@@ -522,6 +714,16 @@ function M.run_package_script()
       cwd = root,
     }))
   end)
+end
+
+function M.run_named_package_script(script, startpath)
+  local task, err = package_script_task_if_present(script, startpath or vim.api.nvim_buf_get_name(0))
+  if not task then
+    vim.notify(err, vim.log.levels.WARN)
+    return
+  end
+
+  run_task(task)
 end
 
 function M.run_python_file(startpath)
@@ -579,7 +781,15 @@ function M.project_build_command(startpath)
     return nil, "No supported project root found"
   end
 
-  if kind == "cpp" then
+  if kind == "node" then
+    for _, script in ipairs({ "build", "compile" }) do
+      local task = package_script_task_if_present(script, startpath, "node: " .. script)
+      if task then
+        return task
+      end
+    end
+    return nil, "No package build script found"
+  elseif kind == "cpp" then
     local build_system = detect_cpp_build_system(root)
     if build_system == "cmake" then
       local build_dir = root .. "/build"
@@ -663,7 +873,15 @@ function M.project_test_command(startpath)
     return nil, "No supported project root found"
   end
 
-  if kind == "cpp" then
+  if kind == "node" then
+    for _, script in ipairs({ "test", "test:unit", "vitest", "jest" }) do
+      local task = package_script_task_if_present(script, startpath, "node: " .. script)
+      if task then
+        return task
+      end
+    end
+    return nil, "No package test script found"
+  elseif kind == "cpp" then
     local build_system = detect_cpp_build_system(root)
     if build_system == "cmake" then
       if vim.fn.isdirectory(root .. "/build") == 0 then

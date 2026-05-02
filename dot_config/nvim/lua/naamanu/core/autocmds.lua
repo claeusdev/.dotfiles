@@ -61,3 +61,12 @@ autocmd("FileType", {
   end,
   desc = "Set tab width for Rust, C, and C++",
 })
+
+autocmd("FileType", {
+  group = augroup("javascript-commentstring", { clear = true }),
+  pattern = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+  callback = function()
+    vim.opt_local.commentstring = "// %s"
+  end,
+  desc = "Use line comments for JS and TS buffers",
+})

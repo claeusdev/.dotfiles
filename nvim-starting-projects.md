@@ -75,7 +75,7 @@ Example:
 mkdir -p ~/projects/demo-ts
 cd ~/projects/demo-ts
 npm init -y
-npm install -D typescript eslint vitest
+npm install -D typescript eslint prettier vitest
 npx tsc --init
 mkdir -p src tests notes
 touch src/index.ts tests/index.test.ts notes/index.md
@@ -84,7 +84,9 @@ git init
 
 Why this works well here:
 
-- `ts_ls` and `eslint` attach from `package.json` or `tsconfig.json`
+- `vtsls` attaches from `package.json` or `tsconfig.json`
+- `eslint` attaches when the project has an ESLint config
+- formatting uses project-local Biome or Prettier when configured
 - `<leader>ci`, `<leader>cI`, `<leader>cu`, and `<leader>cF` are useful immediately
 - `<leader>os` runs package scripts
 - Neotest works for file and nearest-test workflows
