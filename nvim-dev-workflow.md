@@ -1,289 +1,135 @@
 # Neovim Development Workflow
 
-This guide is a practical walkthrough for using the Neovim setup in this repository as a daily engineering environment.
+This guide describes the daily engineering loop for the current Neovim config in this repository.
 
-It is written for this config, not for Neovim in general.
+The setup is centered on a few tools:
 
-The setup is centered around a few ideas:
-
-- Telescope is the main way to find files, symbols, and text.
-- Oil is the main way to move around the filesystem.
-- LSP is the main way to navigate code semantics.
-- Neotest, Overseer, and DAP are the main execution tools.
-- Git work happens directly in the editor with Gitsigns, LazyGit, and Diffview.
-
----
-
-## 1. The mental model
-
-Think of the editor as four loops.
-
-### Read loop
-
-- find a file with `<leader>ff` or `<leader>fp`
-- jump to symbols with `<leader>fs`
-- search across the repo with `<leader>fg`
-- jump to definitions with `gd`
-- return to broader search when needed
-
-### Edit loop
-
-- keep a few active files open
-- move between them with `<leader>bn` and `<leader>bp`
-- use `gcc`, `gc`, `gb`, surround, and Flash to edit quickly
-- save often with `<C-s>`
-
-### Execute loop
-
-- run tests with `<leader>tt`, `<leader>tf`, or `<leader>oT`
-- run project tasks with `<leader>or`, `<leader>os`, `<leader>ob`, and `<leader>on`
-- debug with `<leader>td`, `<leader>dC`, and `<leader>dP`
-
-### Review loop
-
-- inspect hunks with `]h`, `[h`, and `<leader>gp`
-- stage or reset with `<leader>gs` and `<leader>gr`
-- open LazyGit with `<leader>gg`
-- inspect file history with `<leader>gh`
-
-If you keep those loops in mind, the config becomes much easier to use.
+- Telescope for files, text, diagnostics, and symbols.
+- Oil for filesystem edits.
+- Native LSP for code navigation and actions.
+- Conform and nvim-lint for cleanup.
+- Overseer for scripts, builds, tests, and one-off commands.
+- Gitsigns, LazyGit, and Diffview for review.
 
 ---
 
-## 2. Open a project and get oriented
+## 1. Mental Model
 
-The fastest entry points are:
+Think in four loops.
 
-- `<leader>ff` for all files
-- `<leader>fp` for Git-tracked files
-- `<leader>fr` for recent files
-- `-` to open Oil in the current directory
+### Read
 
-When you first open a repo, use this sequence:
+Use `<leader>ff` or `<leader>fp` for files, `<leader>fg` for text, `<leader>fs` for document symbols, and `gd`/`gr`/`gi` once LSP is attached.
 
-1. `<leader>fp` to jump to a likely entry file.
-2. `<leader>fg` to find an important symbol or concept.
-3. `gd`, `gr`, and `gi` to move semantically once LSP is attached.
-4. `<leader>ha` on the few files you know you will revisit.
+### Edit
 
-That pattern is usually faster than opening a tree and clicking around.
+Use buffer keys (`<leader>bn`, `<leader>bp`, `<leader>bd`), comments (`gcc`, visual `gc`/`gb`), surround, Flash, and `<C-s>` to keep edits quick.
 
----
+### Execute
 
-## 3. Find things quickly
-
-The most important Telescope keys are:
-
-| Key | Use it for |
-| :--- | :--- |
-| `<leader>ff` | broad file search |
-| `<leader>fp` | repo file search, especially in Git repos |
-| `<leader>fr` | recently used files |
-| `<leader>fg` | project-wide content search |
-| `<leader>f/` | search just the current buffer |
-| `<leader>f.` | resume your previous picker |
-| `<leader>fs` | jump to symbols in the current file |
-| `<leader>fS` | jump to workspace symbols |
-| `<leader>fd` | search diagnostics |
-
-Practical rule:
-
-- if you know the filename, use `ff` or `fp`
-- if you know the text, use `fg`
-- if you know the function or class name, use `fs`
-- if you just came from somewhere useful, use `f.`
-
----
-
-## 4. Read and navigate code
-
-Once LSP is attached, the core movement keys are:
+Use Overseer for all execution:
 
 | Key | Action |
 | :--- | :--- |
-| `gd` | definition |
-| `gD` | declaration |
-| `gr` | references |
-| `gi` | implementation |
-| `gt` | type definition |
-| `K` | hover docs |
+| `<leader>or` | Run any task/template |
+| `<leader>os` | Pick a `package.json` script |
+| `<leader>od` / `<leader>ol` / `<leader>oy` / `<leader>of` | Run `dev`, `lint`, `typecheck`, or `format` package scripts |
+| `<leader>op` | Run current Python file |
+| `<leader>oT` | Run Python tests with pytest |
+| `<leader>ob` | Build current project |
+| `<leader>on` | Run current project tests |
+| `<leader>oC` | Compile current C/C++ file |
 
-Useful supporting keys:
+### Review
 
-| Key | Action |
-| :--- | :--- |
-| `<leader>ld` | line diagnostics |
-| `<leader>lh` | toggle inlay hints |
-| `<leader>lc` | run code lens |
-| `<leader>lC` | refresh code lens |
-| `<leader>fs` | document symbols |
-| `<leader>fS` | workspace symbols |
-
-For structural movement inside a file:
-
-- `af`, `if`, `ac`, `ic` for text objects
-- `]f`, `[f`, `]c`, `[c` for function and class jumps
-- `<leader><leader>` for Flash jump
-
-This is the normal reading loop:
-
-1. Use `<leader>fg` or `<leader>fs` to find the target.
-2. Use `gd` or `gi` to descend.
-3. Use buffer switching or Telescope resume to regain context.
+Use `]h`/`[h` to move across hunks, `<leader>gp` to preview, `<leader>gs`/`<leader>gr` to stage/reset, and `<leader>gg` for LazyGit.
 
 ---
 
-## 5. Edit without losing flow
+## 2. Open a Project
 
-This config is tuned for low-friction edits.
+Start from the repository root with `nvim`.
 
-Important keys:
+1. Use `<leader>fp` to pick a likely entry file.
+2. Use `<leader>fg` to find an important symbol or concept.
+3. Use `gd`, `gr`, and `gi` to navigate semantically.
+4. Use `<leader>fb` and `<leader>fr` to return to active or recent files.
 
-| Key | Action |
-| :--- | :--- |
-| `<C-s>` | save |
-| `gcc` | comment line |
-| `gc` / `gb` | comment selection |
-| `s` | Flash jump |
-| `S` | Flash Treesitter |
-| `<leader>u` | Undotree |
-| `<leader>z` | Zen mode |
-
-Practical habits:
-
-- use Harpoon for the 3-5 files you bounce between constantly
-- use `<leader>f/` before large edits to find local repetitions
-- use Undotree when a refactor gets non-linear
+This config is search-first; there is no separate quick-file bookmarking layer.
 
 ---
 
-## 6. Use language intelligence well
+## 3. Code Intelligence
 
-The LSP layer is strongest when you use it for concrete actions, not just hover.
-
-Core code actions:
+Core LSP keys:
 
 | Key | Action |
 | :--- | :--- |
-| `<leader>la` | generic code action |
-| `<leader>lr` | rename symbol |
-| `<leader>ci` | organize imports |
-| `<leader>cI` | add missing imports |
-| `<leader>cu` | remove unused imports |
-| `<leader>cF` | fix all auto-fixable issues |
+| `gd` / `gD` | Definition / declaration |
+| `gr` / `gi` / `gt` | References / implementation / type definition |
+| `K` | Hover docs |
+| `<leader>la` | Code action |
+| `<leader>lr` | Rename with live preview |
+| `<leader>ld` | Line diagnostics |
+| `<leader>lh` | Toggle inlay hints |
+| `<leader>lR` | Restart attached LSP clients |
 
-In practice:
-
-- TypeScript and JavaScript benefit most from the `c...` import and fix keys.
-- Rust and TypeScript benefit from inlay hints.
-- Symbol-heavy codebases benefit from `<leader>fs` and `<leader>fS` more than raw grep.
+For JS/TS, `<leader>ci`, `<leader>cI`, `<leader>cu`, `<leader>cF`, and `<leader>cE` cover import organization and fix-all actions. Python uses Ruff for lint/fix/format and Ty for hover/type intelligence.
 
 ---
 
-## 7. Run tests and tasks
-
-There are two execution systems on purpose.
-
-### Neotest
-
-Use Neotest when your intent is test-focused:
+## 4. Formatting and Linting
 
 | Key | Action |
 | :--- | :--- |
-| `<leader>tt` | nearest test |
-| `<leader>tf` | current file tests |
-| `<leader>ts` | summary |
-| `<leader>to` | output |
-| `<leader>tp` | output panel |
-| `<leader>td` | debug nearest test |
+| `<leader>cf` | Format buffer or selection |
+| `<leader>ll` | Trigger linting |
 
-### Overseer
-
-Use Overseer when your intent is task-focused:
-
-| Key | Action |
-| :--- | :--- |
-| `<leader>or` | run any task/template |
-| `<leader>os` | run `package.json` script |
-| `<leader>op` | run current Python file |
-| `<leader>oT` | run Python tests |
-| `<leader>ob` | build current project |
-| `<leader>on` | run current project tests |
-| `<leader>oC` | compile current C/C++ file |
-
-Rule of thumb:
-
-- use Neotest for single-test and test-file work
-- use Overseer for build, run, compile, and project-level commands
+Format on save is enabled. Prettier handles JS/TS/Vue/JSON/YAML/Markdown/HTML/CSS, Ruff handles Python, and `sql-formatter` handles SQL.
 
 ---
 
-## 8. Debug in place
+## 5. Project Tasks
 
-Use DAP when the problem is about runtime behavior, not just failing assertions.
+Overseer chooses commands from common root markers:
 
-Important keys:
-
-| Key | Action |
+| Project | Build/Test behavior |
 | :--- | :--- |
-| `<leader>db` | breakpoint |
-| `<leader>dB` | conditional breakpoint |
-| `<leader>dc` | continue |
-| `<leader>di` / `<leader>do` / `<leader>dO` | step into / over / out |
-| `<leader>dr` | REPL |
-| `<leader>du` | DAP UI |
-| `<leader>dP` | debug current Python file |
-| `<leader>dC` | debug current C/C++ executable |
+| Node | `package.json` scripts |
+| Python | `uv run python` when `uv.lock`/`pyproject.toml` exists; pytest for tests |
+| C/C++ | CMake, Meson, or Make |
+| Rust | `cargo build`, `cargo test` |
+| OCaml | `dune build`, `dune runtest` |
+| Haskell | Cabal or Stack |
 
-Current behavior worth knowing:
-
-- Python debugging uses the detected project interpreter when possible.
-- C/C++ debugging looks for current-file `.out` binaries and executables in `build/` and `bin/` before prompting manually.
-- JS and TS launch through `pwa-node`.
+Use `<leader>ot` for the task panel and `<leader>oa` for task actions.
 
 ---
 
-## 9. Work with Git continuously
-
-Do not wait until the end of a session to inspect changes.
+## 6. Git Review
 
 Useful keys:
 
 | Key | Action |
 | :--- | :--- |
-| `]h` / `[h` | next / previous hunk |
-| `<leader>gp` | preview hunk |
-| `<leader>gs` | stage hunk |
-| `<leader>gr` | reset hunk |
-| `<leader>gS` | stage buffer |
-| `<leader>gb` | blame line |
+| `]h` / `[h` | Next / previous hunk |
+| `<leader>gp` | Preview hunk |
+| `<leader>gs` / `<leader>gr` | Stage / reset hunk |
+| `<leader>gS` / `<leader>gR` | Stage / reset buffer |
 | `<leader>gg` | LazyGit |
-| `<leader>go` | Diffview open |
-| `<leader>gc` | Diffview close |
-| `<leader>gh` | file history |
+| `<leader>go` / `<leader>gc` / `<leader>gh` | Diffview open / close / file history |
 
-The fastest working pattern is:
-
-1. Edit.
-2. Preview hunks.
-3. Stage selectively.
-4. Open LazyGit when you need branch-level operations.
+The intended flow is edit, format, run the relevant task, then review and stage hunks continuously.
 
 ---
 
-## 10. A normal daily flow
-
-A compact loop for a real work session:
+## 7. Daily Flow
 
 1. Open the repo with `nvim`.
 2. Jump to an entry file with `<leader>fp`.
-3. Search the task or bug with `<leader>fg`.
-4. Navigate semantically with `gd`, `gr`, and `gi`.
-5. Add a few anchor files to Harpoon with `<leader>ha`.
-6. Edit and save with `<C-s>`.
-7. Run nearest or file tests with `<leader>tt` or `<leader>tf`.
-8. Run a project task or build with `<leader>ob`, `<leader>on`, or `<leader>os`.
-9. Debug with `<leader>td`, `<leader>dC`, or `<leader>dP` when needed.
-10. Review and stage hunks as you go.
-
-That is the intended use of this setup: search-driven, keyboard-first, and execution-oriented.
+3. Search the task with `<leader>fg`.
+4. Navigate with `gd`, `gr`, and `gi`.
+5. Edit and save with `<C-s>`.
+6. Format or lint with `<leader>cf` and `<leader>ll` if needed.
+7. Run project work with `<leader>ob`, `<leader>on`, `<leader>os`, `<leader>op`, or `<leader>oT`.
+8. Review changes with Gitsigns and LazyGit.

@@ -6,7 +6,7 @@ The important principle is simple:
 
 - create a project root with the right markers
 - open it in Neovim
-- let LSP, tasks, tests, formatting, and debugging attach to that structure
+- let LSP, tasks, tests, and formatting attach to that structure
 
 Most of the productivity gains come from project shape, not from editor tricks.
 
@@ -22,7 +22,6 @@ Examples:
 - Python: `pyproject.toml`, `uv.lock`, `pytest.ini`, `.venv`
 - C and C++: `CMakeLists.txt`, `Makefile`, `meson.build`, `compile_commands.json`
 - OCaml: `dune-project`, `dune-workspace`, `dune`, `*.opam`
-- ReScript: `rescript.json`, `bsconfig.json`, `package.json`
 - Haskell: `cabal.project`, `*.cabal`, `stack.yaml`, `package.yaml`
 
 If you create the right markers early, the editor behaves correctly much sooner.
@@ -63,7 +62,7 @@ Why this works well here:
 - Overseer prefers `uv run`
 - `<leader>op` runs the current file
 - `<leader>oT` runs tests
-- Molten works well with `*.py`, `*.ipy`, and Markdown notes in the same repo
+- Ruff handles lint/format actions and Ty handles type intelligence
 
 ---
 
@@ -75,7 +74,7 @@ Example:
 mkdir -p ~/projects/demo-ts
 cd ~/projects/demo-ts
 npm init -y
-npm install -D typescript eslint vitest
+npm install -D typescript eslint prettier vitest
 npx tsc --init
 mkdir -p src tests notes
 touch src/index.ts tests/index.test.ts notes/index.md
@@ -84,10 +83,12 @@ git init
 
 Why this works well here:
 
-- `ts_ls` and `eslint` attach from `package.json` or `tsconfig.json`
+- `vtsls` attaches from `package.json` or `tsconfig.json`
+- `eslint` attaches when the project has an ESLint config
+- formatting uses Prettier
 - `<leader>ci`, `<leader>cI`, `<leader>cu`, and `<leader>cF` are useful immediately
 - `<leader>os` runs package scripts
-- Neotest works for file and nearest-test workflows
+- `<leader>os` can run project test scripts such as `test`, `vitest`, or `jest`
 
 ---
 
@@ -109,15 +110,12 @@ Why this matters:
 - `<leader>ob` builds the project
 - `<leader>on` runs project tests when the build directory is ready
 - `<leader>oC` compiles the current file into a local `.out`
-- `<leader>dC` can debug discovered executables from `.out`, `build/`, or `bin/`
 
 If you use CMake seriously, generate `compile_commands.json` early. That improves `clangd` behavior.
 
 ---
 
-## 6. Start an OCaml or ReScript project
-
-### OCaml
+## 6. Start an OCaml project
 
 ```sh
 mkdir -p ~/projects/demo-ocaml/lib ~/projects/demo-ocaml/test
@@ -131,23 +129,6 @@ This setup then gives you:
 - `ocamllsp`
 - `dune build` on `<leader>ob`
 - `dune runtest` on `<leader>on`
-
-### ReScript
-
-```sh
-mkdir -p ~/projects/demo-rescript
-cd ~/projects/demo-rescript
-npm init -y
-npx rescript init
-mkdir -p notes
-git init
-```
-
-This setup then gives you:
-
-- ReScript filetype on `.res` and `.resi`
-- optional ReScript LSP if `rescript-language-server` is installed
-- `rescript build` or package-script-backed build/test tasks
 
 ---
 
@@ -188,7 +169,7 @@ That works well with this Neovim setup because:
 
 - Markdown rendering is already configured
 - Telescope grep searches notes and code together
-- Harpoon can pin notes into the active working set
+- Recent files and buffer switching keep active notes easy to reopen
 
 ---
 
@@ -200,7 +181,7 @@ A strong first-session routine:
 2. Use `<leader>fp` or `<leader>ff` to open the first source file.
 3. Create `notes/index.md`.
 4. Use `<leader>fg` to search for the main entrypoint or TODO markers.
-5. Add the source file and the note to Harpoon.
+5. Use `<leader>fb` and `<leader>fr` to move between active files and recent notes.
 6. Run the relevant build or script command once.
 7. Confirm LSP is attached and navigation works.
 

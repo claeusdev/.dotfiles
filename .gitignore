@@ -19,7 +19,3 @@ dot_config/fish/fish_variables
 
 # Backup files
 *.bak
-
-# Neovim
-lazy-lock.json
-dot_config/nvim/lazy-lock.json

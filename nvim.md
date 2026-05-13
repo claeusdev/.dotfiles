@@ -2,14 +2,13 @@
 
 **Plugin manager**: lazy.nvim
 **Leader**: `<Space>` | **Local leader**: `,`
-**Theme**: modus-operandi
+**Theme**: Modus Vivendi
 **Config**: `~/.config/nvim/lua/naamanu/`
 
 Tutorial guides:
 
 - [Neovim Tutorials](nvim-tutorials.md)
 - [Neovim Development Workflow](nvim-dev-workflow.md)
-- [Neovim Research Workflow](nvim-research-workflow.md)
 - [Neovim Note-Taking Workflow](nvim-note-taking-workflow.md)
 - [Neovim Starting Projects](nvim-starting-projects.md)
 
@@ -17,165 +16,113 @@ Tutorial guides:
 
 ## Structure
 
-```
+```text
 init.lua
 lua/naamanu/
   core/
-    options.lua      — vim settings
-    keymaps.lua      — general keybindings
-    autocmds.lua     — autocommands
-    lazy.lua         — lazy.nvim bootstrap
+    options.lua
+    keymaps.lua
+    autocmds.lua
+    lazy.lua
+    tasks.lua
   exact_plugins/
     colorscheme.lua
     completion.lua
-    debug.lua
     editor.lua
     formatting.lua
     git.lua
-    lsp.lua
+    http.lua
     linting.lua
+    lsp.lua
     navigation.lua
-    notebook.lua
     overseer.lua
-    pairp.lua
     render-markdown.lua
     snacks.lua
-    testing.lua
     treesitter.lua
     ui.lua
 ```
 
 ---
 
-## Plugins
+## Plugin Inventory
 
 | Category | Plugin(s) |
 | :--- | :--- |
-| Completion | blink.cmp, friendly-snippets (native vim.snippet engine) |
-| LSP | mason, mason-tool-installer, fidget, schemastore, lazydev.nvim |
+| Completion | blink.cmp, friendly-snippets, native `vim.snippet` |
+| LSP | native `vim.lsp`, mason, mason-tool-installer, fidget, schemastore, lazydev.nvim, inc-rename |
 | Formatting | conform.nvim |
 | Linting | nvim-lint |
-| Testing | neotest, neotest-python, neotest-vitest, neotest-jest, neotest-rust |
-| Debugging | nvim-dap, nvim-dap-ui, nvim-dap-virtual-text, mason-nvim-dap, nvim-dap-python |
 | Git | gitsigns, lazygit.nvim, diffview.nvim |
-| Navigation | oil.nvim, harpoon v2, telescope.nvim |
-| Treesitter | nvim-treesitter, nvim-treesitter-textobjects (main), nvim-ts-autotag, nvim-treesitter-context |
-| Notebook | molten-nvim, image.nvim |
-| Task Runner | overseer.nvim |
-| Claude | pairp |
+| Navigation | oil.nvim, telescope.nvim, telescope-fzf-native, telescope-ui-select |
+| Treesitter | nvim-treesitter, nvim-treesitter-textobjects, nvim-ts-autotag, nvim-treesitter-context |
+| Task runner | overseer.nvim |
+| HTTP | kulala.nvim |
 | Markdown | render-markdown.nvim |
-| Editor | nvim-autopairs, nvim-surround, Comment.nvim, todo-comments, flash.nvim, undotree, zen-mode, mini.ai, neogen |
-| UI | snacks.nvim (notifier, bigfile, quickfile, words, indent, input, scope), lualine, which-key, trouble.nvim, aerial.nvim |
+| Editor | nvim-autopairs, nvim-surround, Comment.nvim, todo-comments, flash.nvim, undotree, zen-mode, treesj |
+| UI | snacks.nvim, lualine, which-key, trouble.nvim |
 | Theme | modus-themes.nvim |
 
-### LSP servers (auto-installed via mason)
+---
 
-- **C/C++**: clangd
-- **Rust**: rust-analyzer
-- **Python**: ruff, ty (via eglot preset)
-- **Lua**: lua-language-server
-- **OCaml**: ocaml-lsp
-- **ReasonML**: ocaml-lsp (via `reason` filetype)
-- **Haskell**: haskell-language-server
-- **Nix**: nil
-- **TypeScript/JS**: ts_ls, eslint-lsp
-- **Tailwind**: tailwindcss-language-server
-- **GraphQL**: graphql-language-service-cli
-- **YAML**: yaml-language-server (schemastore)
-- **LaTeX**: texlab
-- **Docker**: dockerfile-language-server, docker-compose-language-service
-- **Ruby**: ruby-lsp
-- **Conditional** (if binary on PATH): millet-ls, racket_langserver, coq-lsp, lean4, als, rescript-language-server
+## Language Support
 
-### Formatters (conform.nvim)
+### LSP servers
+
+| Language | Server |
+| :--- | :--- |
+| C/C++ | clangd |
+| Rust | rust-analyzer |
+| Python | ruff, ty |
+| Lua | lua-language-server |
+| OCaml / Reason | ocaml-lsp |
+| Haskell | haskell-language-server |
+| TypeScript / JavaScript / React | vtsls, eslint-lsp |
+| Vue / CSS / Tailwind | vtsls, css-lsp, tailwindcss-language-server |
+| JSON / YAML | json-lsp, yaml-language-server |
+
+Ruff handles Python lint/fix actions. Ty owns Python hover and type intelligence; Ruff hover is disabled to avoid duplicate hover providers.
+
+### Formatters
 
 | Language(s) | Formatter |
 | :--- | :--- |
 | C, C++ | clang-format |
 | Rust | rustfmt |
+| Python | ruff fix + ruff format |
 | OCaml | ocamlformat |
-| Python | ruff |
 | Haskell | ormolu |
-| Nix | nixfmt |
 | Lua | stylua |
 | Shell/Bash | shfmt |
-| JSON, YAML, Markdown, TS, JS, HTML, CSS, GraphQL | prettier |
-| Ruby | rubocop |
+| SQL | sql-formatter |
+| JS, TS, JSX, TSX, Vue, JSON, YAML, Markdown, HTML, CSS, SCSS | prettier |
 
-Format on save enabled with 3s timeout.
-
----
-
-## Key Options
-
-| Option | Value |
-| :--- | :--- |
-| Tabs | 2 spaces (expandtab) |
-| Line numbers | absolute + relative |
-| Color column | 100 |
-| Scroll offset | 8 lines |
-| Clipboard | system (`unnamedplus`) |
-| Folding | treesitter expr, disabled by default |
-| Undo | persistent (`~/.vim/undodir`) |
-| Swap/backup | disabled |
-
-Language overrides: C/C++/Rust use 4-space tabs.
+Format on save is enabled with a 3s timeout. JS/TS/Vue formatting uses Prettier directly and does not fall back to LSP formatting.
 
 ---
 
-## Autocommands
-
-| Event | Trigger | Action |
-| :--- | :--- | :--- |
-| TextYankPost | all | Highlight yanked text (200ms) |
-| FileType | help, lspinfo, man, qf, query, checkhealth | Map `q` to close |
-| BufWritePre | all | Auto-create parent directories |
-| FileType | rust, c, cpp | Set tabstop/shiftwidth to 4 |
-
----
-
-## Keybindings
+## Core Keybindings
 
 ### General
 
-| Mode | Key | Action |
-| :--- | :--- | :--- |
-| n | `<Esc>` | Clear search highlights |
-| n | `<C-h/j/k/l>` | Window navigation |
-| n | `<C-Up/Down>` | Resize window height |
-| n | `<C-Left/Right>` | Resize window width |
-| n | `<C-d>` / `<C-u>` | Scroll down/up (centered) |
-| n | `n` / `N` | Next/prev search result (centered) |
-| n | `<C-s>` | Save file |
-| n | `<leader>q` | Quit |
-| n | `<leader>sv` | Split vertical |
-| n | `<leader>sh` | Split horizontal |
-| n | `<leader>se` | Equalize splits |
-| n | `<leader>sx` | Close split |
-| n | `<leader>bn` / `bp` / `bd` | Buffer next/prev/delete |
-| v | `<` / `>` | Indent left/right |
-| v | `J` / `K` | Move lines down/up |
-| x | `<leader>p` | Paste without yanking |
+| Key | Action |
+| :--- | :--- |
+| `<Esc>` | Clear search highlights |
+| `<C-h/j/k/l>` | Window navigation |
+| `<C-Up/Down>` | Resize window height |
+| `<C-Left/Right>` | Resize window width |
+| `<C-s>` | Save file |
+| `<leader>q` | Quit |
+| `<leader>sv` / `<leader>sh` | Vertical / horizontal split |
+| `<leader>bn` / `<leader>bp` / `<leader>bd` | Buffer next / previous / delete |
 
-### Completion — blink.cmp
+### Find and Navigation
 
 | Key | Action |
 | :--- | :--- |
-| `<C-j>` / `<Tab>` | Snippet forward / next item |
-| `<C-k>` / `<S-Tab>` | Snippet backward / prev item |
-| `<CR>` | Accept |
-| `<C-Space>` | Open menu |
-| `<C-e>` | Cancel |
-| `<C-b>` / `<C-f>` | Scroll docs up/down |
-
-**Sources:** lazydev (Neovim Lua API, prioritized), LSP, path, snippets (friendly-snippets), buffer. Snippets use native `vim.snippet`.
-
-### Find — Telescope `<leader>f`
-
-| Key | Action |
-| :--- | :--- |
+| `-` | Open Oil parent directory |
+| `<leader>e` | Open Oil file explorer |
 | `<leader>ff` | Find files |
-| `<leader>fp` | Git files |
+| `<leader>fp` | Project files, using Git files when possible |
 | `<leader>fr` | Recent files |
 | `<leader>fg` | Live grep |
 | `<leader>f/` | Search current buffer |
@@ -185,63 +132,71 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>fh` | Help tags |
 | `<leader>fk` | Keymaps |
 | `<leader>fd` | Diagnostics |
-| `<leader>fs` / `fS` | Document / workspace symbols |
-
-### Motion
-
-| Key | Action |
-| :--- | :--- |
+| `<leader>fs` / `<leader>fS` | Document / workspace symbols |
 | `<leader><leader>` | Flash jump |
-| `<leader>fj` | Flash Treesitter |
-| `<leader>fr` / `fR` | Flash remote / Treesitter search |
-
-### Navigation
-
-| Key | Action |
-| :--- | :--- |
-| `-` | Oil: open parent directory |
-| `<leader>e` | Oil: file explorer |
-| `<leader>ha` | Harpoon: add file |
-| `<leader>hh` | Harpoon: menu |
-| `<leader>1–5` | Harpoon: jump to file 1–5 |
-| `<leader>hp` / `hn` | Harpoon: prev/next |
 
 ### LSP
 
 | Key | Action |
 | :--- | :--- |
 | `gd` / `gD` | Definition / declaration |
-| `gr` / `gi` / `gt` | References / implementation / type def |
+| `gr` / `gi` / `gt` | References / implementation / type definition |
 | `K` | Hover docs |
 | `<leader>la` | Code action |
-| `<leader>lr` | Rename |
+| `<leader>lr` | Rename with live preview |
 | `<leader>ld` | Line diagnostics |
 | `<leader>ls` | Signature help |
 | `<leader>ci` | Organize imports |
 | `<leader>cI` | Add missing imports |
 | `<leader>cu` | Remove unused imports |
 | `<leader>cF` | Fix all auto-fixable issues |
+| `<leader>cE` | Fix ESLint issues |
 | `<leader>lh` | Toggle inlay hints |
 | `<leader>lc` | Run code lens |
-| `<leader>lC` | Refresh code lens |
+| `<leader>lC` | Enable code lens |
+| `<leader>lR` | Restart attached LSP clients |
 
-**Inlay hints** auto-enabled for supporting servers (rust-analyzer, ts_ls, lua_ls). Toggle per-buffer with `<leader>lh`. **Code lens** auto-refreshes on `BufEnter`/`InsertLeave`. **Lazydev** provides full Neovim Lua API completions in `*.lua` files.
-
-### Formatting & Linting
-
-| Mode | Key | Action |
-| :--- | :--- | :--- |
-| n, v | `<leader>cf` | Format buffer/selection |
-| n | `<leader>ll` | Trigger lint |
-
-### Code Outline — aerial `<leader>co`
+### Formatting and Linting
 
 | Key | Action |
 | :--- | :--- |
-| `<leader>co` | Toggle code outline sidebar |
-| `[s` / `]s` | Previous / next symbol |
+| `<leader>cf` | Format buffer or visual selection |
+| `<leader>ll` | Trigger linting |
 
-### Trouble `<leader>x`
+### Tasks - Overseer
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>or` | Run any Overseer task/template |
+| `<leader>os` | Pick and run a `package.json` script |
+| `<leader>od` | Run `dev` package script |
+| `<leader>ol` | Run `lint` package script |
+| `<leader>oy` | Run `typecheck` package script |
+| `<leader>of` | Run `format` package script |
+| `<leader>op` | Run current Python file |
+| `<leader>oT` | Run Python tests with pytest |
+| `<leader>ob` | Build current project |
+| `<leader>on` | Run current project tests |
+| `<leader>oC` | Compile current C/C++ file |
+| `<leader>ot` | Toggle task panel |
+| `<leader>oa` | Task action |
+
+Project-aware tasks support Node package scripts, Python (`uv run python`, pytest), C/C++ (`cmake`, `meson`, `make`), Rust (`cargo`), OCaml (`dune`), and Haskell (`cabal`, `stack`).
+
+### Git
+
+| Key | Action |
+| :--- | :--- |
+| `]h` / `[h` | Next / previous hunk |
+| `<leader>gs` / `<leader>gr` | Stage / reset hunk |
+| `<leader>gS` / `<leader>gR` | Stage / reset buffer |
+| `<leader>gu` | Undo stage hunk |
+| `<leader>gp` / `<leader>gb` | Preview hunk / blame line |
+| `<leader>gd` / `<leader>gD` | Diff this / diff against previous |
+| `<leader>gg` | LazyGit |
+| `<leader>go` / `<leader>gc` / `<leader>gh` | Diffview open / close / file history |
+
+### Trouble
 
 | Key | Action |
 | :--- | :--- |
@@ -251,133 +206,37 @@ Language overrides: C/C++/Rust use 4-space tabs.
 | `<leader>cs` | Symbols |
 | `<leader>cl` | LSP references/definitions |
 
-### Git — gitsigns `<leader>g`
-
-| Mode | Key | Action |
-| :--- | :--- | :--- |
-| n | `]h` / `[h` | Next/prev hunk |
-| n, v | `<leader>gs` / `gr` | Stage/reset hunk |
-| n | `<leader>gS` / `gR` | Stage/reset buffer |
-| n | `<leader>gu` | Undo stage |
-| n | `<leader>gp` / `gb` | Preview hunk / blame line |
-| n | `<leader>gd` / `gD` | Diff this / diff this ~ |
-| n | `<leader>gg` | LazyGit |
-| n | `<leader>go` / `gc` / `gh` | Diffview open/close/history |
-
-### Testing — neotest `<leader>t`
-
-| Key | Action |
-| :--- | :--- |
-| `<leader>tt` | Run nearest test |
-| `<leader>tf` | Run file tests |
-| `<leader>ts` | Toggle test summary |
-| `<leader>to` | Test output |
-| `<leader>tp` | Toggle output panel |
-| `<leader>tS` | Stop test |
-| `<leader>td` | Debug nearest test |
-| `[t` / `]t` | Previous / next failed test |
-
-**Adapters:** Python, Vitest (JS/TS), Jest (NestJS/React), Rust.
-
-### Tasks — Overseer `<leader>o`
-
-| Key | Action |
-| :--- | :--- |
-| `<leader>or` | Run task/template |
-| `<leader>os` | Run `package.json` script |
-| `<leader>op` | Run current Python file |
-| `<leader>oT` | Run Python tests |
-| `<leader>ob` | Build current project |
-| `<leader>on` | Run current project tests |
-| `<leader>oC` | Compile current C/C++ file |
-| `<leader>ot` | Toggle task panel |
-| `<leader>oa` | Task action |
-
-Project-aware build/test helpers support C/C++ (`cmake`, `meson`, `make`), OCaml (`dune`), ReScript (`rescript build` or `package.json` scripts), and Haskell (`cabal`, `stack`).
-
-### Debugging — nvim-dap `<leader>d`
-
-| Key | Action |
-| :--- | :--- |
-| `<leader>db` / `dB` | Breakpoint / conditional breakpoint |
-| `<leader>dc` | Continue |
-| `<leader>di` / `do` / `dO` | Step into/over/out |
-| `<leader>dr` / `dl` | Toggle REPL / run last |
-| `<leader>du` | Toggle DAP UI |
-| `<leader>dC` | Debug current C/C++ executable |
-| `<leader>dP` | Debug current Python file |
-| `<leader>de` | Eval expression |
-
-**Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). C/C++ launch prefers current-file `.out` binaries plus executables discovered in `build/` and `bin/` before falling back to a manual path prompt. DAP UI auto-opens/closes.
-
-### Claude — Pairp `<leader>c`
-
-| Key | Action |
-| :--- | :--- |
-| `<leader>cc` | Toggle Claude Code window |
-
-### Notebook — molten-nvim `<leader>m`
-
-| Key | Action |
-| :--- | :--- |
-| `<leader>mi` | Initialize Molten kernel |
-| `<leader>mI` | Show Molten info |
-| `<leader>me` | Evaluate operator |
-| `<leader>mv` | Evaluate visual selection |
-| `<leader>ml` | Evaluate line |
-| `<leader>mr` | Re-evaluate cell |
-| `<leader>md` | Delete cell |
-| `<leader>mo` | Show output |
-| `<leader>mO` | Enter output window |
-| `<leader>mH` | Hide output |
-| `<leader>mn` / `<leader>mp` | Next / previous cell |
-| `<leader>mx` | Interrupt kernel |
-| `<leader>mR` | Restart kernel |
-| `<leader>mX` / `<leader>mL` | Export / import notebook output |
-
-Requires a Jupyter kernel registered for the project. Use the `jk` fish function to register the current uv venv. `.ipy` files are treated as Python. Molten is configured for image.nvim, virtual text output, faster kernel polling, and output import/export workflows.
-
-### Snacks — notifications & utilities
-
-| Key | Action |
-| :--- | :--- |
-| `<leader>n` | Notification history |
-| `<leader>nd` | Dismiss notifications |
-| `<leader>rf` | Rename file |
-| `]]` / `[[` | Next/prev reference (word under cursor) |
-
-**Auto-enabled features:** bigfile detection, quickfile, indent guides, scope highlighting, input UI.
-
 ### Treesitter
 
 | Mode | Key | Action |
 | :--- | :--- | :--- |
 | n | `<C-space>` | Init / grow selection |
 | n | `<BS>` | Shrink selection |
-| x, o | `af` / `if` | Around/inside function |
-| x, o | `ac` / `ic` | Around/inside class |
-| n, x, o | `]f` / `]c` | Next function/class start |
-| n, x, o | `[f` / `[c` | Prev function/class start |
+| x, o | `af` / `if` | Around / inside function |
+| x, o | `ac` / `ic` | Around / inside class |
+| n, x, o | `]f` / `[f` | Next / previous function |
+| n, x, o | `]c` / `[c` | Next / previous class |
 
-### Editor
+### Editor Utilities
 
-| Mode | Key | Plugin | Action |
-| :--- | :--- | :--- | :--- |
-| n, x, o | `s` / `S` | flash.nvim | Jump / treesitter jump |
-| o | `r` | flash.nvim | Remote flash |
-| o, x | `R` | flash.nvim | Treesitter search |
-| n | `<leader>u` | undotree | Toggle undotree |
-| n | `<leader>z` | zen-mode | Toggle zen mode |
-| n | `<leader>cn` | neogen | Generate documentation |
-| n | `gcc` | Comment.nvim | Toggle line comment |
-| v | `gc` / `gb` | Comment.nvim | Line/block comment |
+| Key | Action |
+| :--- | :--- |
+| `gcc`, visual `gc` / `gb` | Comment line / selection |
+| `<leader>u` | Toggle undotree |
+| `<leader>z` | Toggle zen mode |
+| `<leader>j` | Split / join node with treesj |
+| `<leader>n` / `<leader>nd` | Notification history / dismiss notifications |
+| `<leader>rf` | Rename current file |
+| `]]` / `[[` | Next / previous reference for word under cursor |
 
-### Mini.ai text objects
+---
 
-| Mode | Key | Object |
-| :--- | :--- | :--- |
-| o, v | `af` / `if` | Around/inside function |
-| o, v | `ac` / `ic` | Around/inside class |
-| o, v | `ab` / `ib` | Around/inside block |
-| o, v | `ad` / `id` | Around/inside digits |
-| o, v | `ae` / `ie` | Around/inside function call |
+## Validation
+
+Useful checks after config edits:
+
+```sh
+nvim --headless +qa
+nvim --headless '+checkhealth vim.deprecated' '+qa'
+stylua dot_config/nvim/lua/naamanu
+```

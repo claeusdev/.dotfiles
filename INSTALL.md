@@ -42,7 +42,7 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - FP/Research: OCaml, SML, Lisp, Racket, Coq, Agda
 - ML/AI & Scientific: jupyterlab, ipython, pandoc, typst, ollama
 - MLOps (via uv tool): mlflow, dvc, tensorboard
-- LSP/Formatters: language servers, prettier, stylua, shellcheck, texlab
+- LSP/Formatters: language servers, prettier, sql-formatter, stylua, ruff, ty, shellcheck
 - Git: gh, lazygit, git-delta
 - Databases: PostgreSQL, SQLite
 - Containers: Docker, lazydocker
