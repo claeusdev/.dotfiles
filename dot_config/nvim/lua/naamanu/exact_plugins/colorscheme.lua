@@ -3,8 +3,10 @@ return {
   priority = 1000,
   lazy = false,
   opts = {
-    style = "auto",
-    variant = "default",
+    style = "modus_vivendi",
+    variants = {
+      modus_vivendi = "default",
+    },
     dim_inactive = false,
     styles = {
       comments = { italic = true },
@@ -13,6 +15,6 @@ return {
   },
   config = function(_, opts)
     require("modus-themes").setup(opts)
-    vim.cmd.colorscheme("modus_operandi")
+    vim.cmd.colorscheme("modus_vivendi")
   end,
 }

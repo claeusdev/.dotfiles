@@ -2,7 +2,7 @@
 
 **Prefix**: `C-a`
 **Plugin manager**: TPM
-**Theme**: tmux-gruvbox (dark)
+**Theme**: static Modus Vivendi-style status colors
 **Config**: `~/.tmux.conf`
 
 ---
@@ -14,9 +14,7 @@
 | tmux-plugins/tpm | Plugin manager |
 | tmux-plugins/tmux-sensible | Sensible defaults |
 | tmux-plugins/tmux-yank | System clipboard integration in copy mode |
-| tmux-plugins/tmux-resurrect | Save and restore sessions |
-| tmux-plugins/tmux-continuum | Automatic session saving |
-| egel/tmux-gruvbox | Gruvbox colour theme |
+| tmux-plugins/tmux-resurrect | Manual session save and restore |
 
 ---
 
@@ -30,26 +28,26 @@
 | Mouse | on |
 | Window/pane base index | 1 |
 | Renumber windows | on |
-| Activity alerts | on (silent) |
+| Activity alerts | on, silent |
 | Copy mode | vi keys |
 | Resurrect pane contents | on |
 | Resurrect nvim strategy | session |
-| Continuum auto-restore | off |
 
-**Terminal overrides**: true color (xterm-256color, alacritty, ghostty), undercurl (LSP diagnostics), strikethrough.
+Terminal overrides enable true color for xterm-256color, Alacritty, and Ghostty, plus undercurl and strikethrough support for Neovim diagnostics.
 
 ---
 
 ## Keybindings
 
-All bindings use prefix `C-a` unless noted as no-prefix (`-n`).
+All bindings use prefix `C-a` unless noted as no-prefix.
 
-### Session & Config
+### Session and Config
 
 | Key | Action |
 | :--- | :--- |
 | `prefix + R` | Reload `~/.tmux.conf` |
-| `prefix + T` | Open sesh session picker (fzf popup) |
+| `prefix + C-s` | Save session with resurrect |
+| `prefix + C-r` | Restore session with resurrect |
 
 ### Windows
 
@@ -65,58 +63,45 @@ All bindings use prefix `C-a` unless noted as no-prefix (`-n`).
 
 | Key | Action |
 | :--- | :--- |
-| `prefix + \|` | Split horizontal (current path) |
-| `prefix + -` | Split vertical (current path) |
+| `prefix + \|` | Split horizontal in current path |
+| `prefix + -` | Split vertical in current path |
 | `prefix + h/j/k/l` | Select pane left/down/up/right |
-| `prefix + H/J/K/L` | Resize pane left/down/up/right (×5, repeatable) |
-| `prefix + m` | Maximize/zoom pane (toggle) |
+| `prefix + H/J/K/L` | Resize pane left/down/up/right, repeatable |
+| `prefix + m` | Toggle pane zoom |
 | `prefix + x` | Kill pane |
 
-### Neovim-aware navigation (no prefix)
+### Neovim-Aware Navigation
 
-`C-h/j/k/l` and `M-h/j/k/l` are intercepted: if the active pane is running Neovim they are forwarded to Neovim, otherwise they navigate/resize tmux panes.
+No-prefix `C-h/j/k/l` and `M-h/j/k/l` are intercepted. If the active pane is running Neovim, keys are forwarded to Neovim; otherwise tmux handles pane navigation or resizing.
 
 | Key | In tmux | In Neovim |
 | :--- | :--- | :--- |
 | `C-h/j/k/l` | Select pane | Move window |
-| `M-h/j/k/l` | Resize pane (×3) | Resize window |
+| `M-h/j/k/l` | Resize pane by 3 | Resize window |
 
-### Copy mode (vi keys)
+### Copy Mode
 
-Enter with `prefix + [`.
+Enter copy mode with `prefix + [`.
 
 | Key | Action |
 | :--- | :--- |
 | `v` | Begin selection |
-| `C-v` | Rectangle selection toggle |
+| `C-v` | Toggle rectangle selection |
 | `y` | Copy selection and exit |
 | `q` | Exit copy mode |
 
-### Session manager — sesh (`prefix + T`)
-
-Opens an fzf popup. Inside the picker:
-
-| Key | Filter |
-| :--- | :--- |
-| `C-a` | All sessions |
-| `C-t` | tmux sessions only |
-| `C-g` | Config sessions |
-| `C-x` | Zoxide directories |
-| `C-f` | Find directories (fd) |
-| `C-d` | Kill selected session |
-| `Tab` / `S-Tab` | Down / up |
-
-### Plugin management
+### Plugin Management
 
 | Key | Action |
 | :--- | :--- |
-| `prefix + I` | Install plugins (TPM) |
-| `prefix + U` | Update plugins (TPM) |
-| `prefix + alt+u` | Remove unused plugins (TPM) |
+| `prefix + I` | Install plugins |
+| `prefix + U` | Update plugins |
+| `prefix + alt+u` | Remove unused plugins |
 
-### Session persistence (tmux-resurrect)
+---
 
-| Key | Action |
-| :--- | :--- |
-| `prefix + C-s` | Save session |
-| `prefix + C-r` | Restore session |
+## Validation
+
+```sh
+tmux -L test -f ~/.tmux.conf start-server
+```

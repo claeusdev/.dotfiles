@@ -142,21 +142,11 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 | v       | `gb`        | Comment.nvim | Toggle block comment           |
 | n       | `<leader>u` | undotree     | Toggle Undotree                |
 | n       | `<leader>z` | zen-mode     | Toggle Zen Mode                |
-| n       | `<leader>cn`| neogen       | Generate documentation         |
+| n       | `<leader>j` | treesj       | Split/join syntax node         |
 | n, x, o | `s`         | flash.nvim   | Flash jump                     |
 | n, x, o | `S`         | flash.nvim   | Flash Treesitter               |
 | o       | `r`         | flash.nvim   | Remote Flash                   |
 | o, x    | `R`         | flash.nvim   | Treesitter Search              |
-
-### Mini.ai (Enhanced Text Objects)
-
-| Mode | Text Object | Description                 |
-| :--- | :---------- | :-------------------------- |
-| o, v | `af/if`     | Around/inside function      |
-| o, v | `ac/ic`     | Around/inside class         |
-| o, v | `ab/ib`     | Around/inside block         |
-| o, v | `ad/id`     | Around/inside digits        |
-| o, v | `ae/ie`     | Around/inside function call |
 
 ### Git
 
@@ -192,6 +182,7 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 | Mode | Keybinding   | Description            |
 | :--- | :----------- | :--------------------- |
 | n    | `<leader>ff` | Find files             |
+| n    | `<leader>fp` | Project files          |
 | n    | `<leader>fr` | Recent files           |
 | n    | `<leader>fg` | Live grep              |
 | n    | `<leader>fc` | Find string under cursor |
@@ -203,20 +194,6 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 | n    | `<leader>fS` | Workspace symbols      |
 
 **Extensions:** `telescope-fzf-native` for fast fuzzy matching, `telescope-ui-select` replaces `vim.ui.select` prompts with Telescope UI.
-
-### Harpoon (Quick File Navigation)
-
-| Mode | Keybinding   | Description            |
-| :--- | :----------- | :--------------------- |
-| n    | `<leader>ha` | Add file to Harpoon    |
-| n    | `<leader>hh` | Open Harpoon menu      |
-| n    | `<leader>1`  | Jump to Harpoon file 1 |
-| n    | `<leader>2`  | Jump to Harpoon file 2 |
-| n    | `<leader>3`  | Jump to Harpoon file 3 |
-| n    | `<leader>4`  | Jump to Harpoon file 4 |
-| n    | `<leader>5`  | Jump to Harpoon file 5 |
-| n    | `<leader>hp` | Previous Harpoon file  |
-| n    | `<leader>hn` | Next Harpoon file      |
 
 ### Treesitter
 
@@ -249,7 +226,8 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 | n    | `<leader>ls` | Signature help       |
 | n    | `<leader>lh` | Toggle inlay hints   |
 | n    | `<leader>lc` | Run code lens        |
-| n    | `<leader>lC` | Refresh code lens    |
+| n    | `<leader>lC` | Enable code lens     |
+| n    | `<leader>lR` | Restart LSP clients  |
 
 **Inlay hints** are auto-enabled for servers that support them (rust-analyzer, vtsls, lua_ls). Toggle per-buffer with `<leader>lh`. **Code lens** auto-refreshes on `BufEnter` and `InsertLeave`.
 
@@ -264,14 +242,6 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 
 Format on save is enabled by default.
 
-### Code Outline (Aerial)
-
-| Mode | Keybinding   | Description                          |
-| :--- | :----------- | :----------------------------------- |
-| n    | `<leader>co` | Toggle code outline sidebar          |
-| n    | `{`          | Previous symbol                      |
-| n    | `}`          | Next symbol                          |
-
 ### Trouble (Diagnostics)
 
 | Mode | Keybinding   | Description                          |
@@ -282,70 +252,16 @@ Format on save is enabled by default.
 | n    | `<leader>cs` | Symbols (Trouble)                    |
 | n    | `<leader>cl` | LSP references/definitions (Trouble) |
 
-### Testing (neotest)
-
-| Mode | Keybinding   | Description             |
-| :--- | :----------- | :---------------------- |
-| n    | `<leader>tt` | Run nearest test        |
-| n    | `<leader>tf` | Run file tests          |
-| n    | `<leader>ts` | Toggle test summary     |
-| n    | `<leader>to` | Test output             |
-| n    | `<leader>tp` | Toggle output panel     |
-| n    | `<leader>tS` | Stop test               |
-| n    | `<leader>td` | Debug nearest test      |
-| n    | `[t`         | Previous failed test    |
-| n    | `]t`         | Next failed test        |
-
-**Adapters:** Python, Vitest (JS/TS), Rust.
-
-### Debugging (DAP)
-
-| Mode | Keybinding   | Description             |
-| :--- | :----------- | :---------------------- |
-| n    | `<leader>db` | Toggle breakpoint       |
-| n    | `<leader>dB` | Conditional breakpoint  |
-| n    | `<leader>dc` | Continue                |
-| n    | `<leader>di` | Step into               |
-| n    | `<leader>do` | Step over               |
-| n    | `<leader>dO` | Step out                |
-| n    | `<leader>dr` | Toggle REPL             |
-| n    | `<leader>dl` | Run last                |
-| n    | `<leader>du` | Toggle DAP UI           |
-| n    | `<leader>dC` | Debug current C/C++ executable |
-| n    | `<leader>dP` | Debug current Python file |
-| n, v | `<leader>de` | Eval expression         |
-
-**Adapters:** js-debug-adapter (JS/TS), codelldb (C/C++/Rust), nvim-dap-python (Python). C/C++ launch prefers current-file `.out` binaries plus executables discovered in `build/` and `bin/` before falling back to a manual path prompt. DAP UI auto-opens on debug start and auto-closes on termination.
-
-### Notebook (Molten)
-
-| Mode | Keybinding   | Description              |
-| :--- | :----------- | :----------------------- |
-| n    | `<leader>mi` | Initialize Molten kernel |
-| n    | `<leader>mI` | Show Molten info         |
-| n    | `<leader>me` | Evaluate operator        |
-| v    | `<leader>mv` | Evaluate visual selection |
-| n    | `<leader>ml` | Evaluate line            |
-| n    | `<leader>mr` | Re-evaluate cell         |
-| n    | `<leader>md` | Delete cell              |
-| n    | `<leader>mo` | Show output              |
-| n    | `<leader>mO` | Enter output window      |
-| n    | `<leader>mH` | Hide output              |
-| n    | `<leader>mn` | Next cell                |
-| n    | `<leader>mp` | Previous cell            |
-| n    | `<leader>mx` | Interrupt kernel         |
-| n    | `<leader>mR` | Restart kernel           |
-| n    | `<leader>mX` | Export notebook output   |
-| n    | `<leader>mL` | Import notebook output   |
-
-**Requires:** a Jupyter kernel registered for the current project (use the `jk` fish function). `.ipy` files are treated as Python.
-
 ### Task Runner (Overseer)
 
 | Mode | Keybinding   | Description              |
 | :--- | :----------- | :----------------------- |
 | n    | `<leader>or` | Run task                 |
 | n    | `<leader>os` | Run package script       |
+| n    | `<leader>od` | Run `dev` package script |
+| n    | `<leader>ol` | Run `lint` package script |
+| n    | `<leader>oy` | Run `typecheck` package script |
+| n    | `<leader>of` | Run `format` package script |
 | n    | `<leader>op` | Run current Python file  |
 | n    | `<leader>oT` | Run Python tests         |
 | n    | `<leader>ob` | Build current project    |
@@ -354,7 +270,7 @@ Format on save is enabled by default.
 | n    | `<leader>ot` | Toggle task panel        |
 | n    | `<leader>oa` | Task action              |
 
-**Project-aware helpers:** C/C++ (`cmake`, `meson`, `make`), OCaml (`dune`), ReScript (`rescript build` or `package.json` scripts), and Haskell (`cabal`, `stack`). `.res` and `.resi` files are treated as ReScript.
+**Project-aware helpers:** Node package scripts, Python (`uv run python`, pytest), C/C++ (`cmake`, `meson`, `make`), Rust (`cargo`), OCaml (`dune`), and Haskell (`cabal`, `stack`).
 
 ### Snacks (Notifications & Utilities)
 
@@ -600,7 +516,6 @@ Active in `eglot-mode-map` when an LSP server is attached.
 | `C-a + m`        | Maximize pane (toggle zoom)                    |
 | `C-a + p`        | Previous window                                |
 | `C-a + n`        | Next window                                    |
-| `C-a + T`        | Open sesh session picker (fuzzy)               |
 | `C-a + [`        | Enter copy mode                                |
 | `v`              | Begin selection (in copy mode)                 |
 | `C-v`            | Rectangle selection (in copy mode)             |
@@ -609,14 +524,3 @@ Active in `eglot-mode-map` when an LSP server is attached.
 | `C-a + U`        | Update plugins (TPM)                           |
 | `C-a + C-s`      | Save session (resurrect)                       |
 | `C-a + C-r`      | Restore session (resurrect)                    |
-
-### Sesh Session Picker (`C-a + T`)
-
-| Keybinding | Description                    |
-| :--------- | :----------------------------- |
-| `C-a`      | Show all sessions              |
-| `C-t`      | Filter to tmux sessions        |
-| `C-g`      | Filter to config sessions      |
-| `C-x`      | Filter to zoxide directories   |
-| `C-f`      | Find directories               |
-| `C-d`      | Kill selected tmux session     |

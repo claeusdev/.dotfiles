@@ -118,13 +118,13 @@ Good patterns:
 
 ## 6. Link notes to active work
 
-Use Harpoon when a note is part of the working set.
+Use Telescope and buffer navigation when a note is part of the working set.
 
 | Key | Action |
 | :--- | :--- |
-| `<leader>ha` | add current note or file |
-| `<leader>hh` | open Harpoon menu |
-| `<leader>1-5` | jump to pinned items |
+| `<leader>fb` | find open buffers |
+| `<leader>fr` | find recent files |
+| `<leader>fg` | search across notes and code |
 
 This works especially well when you pin:
 
@@ -214,7 +214,7 @@ One simple routine that fits this setup:
 1. Keep a `notes/` directory in active repos.
 2. Create `index.md`, `todo.md`, and date-stamped logs as needed.
 3. Use Telescope grep instead of manually browsing old notes.
-4. Pin the active note with Harpoon during focused work.
+4. Keep the active note in a buffer and reopen it with `<leader>fb` or `<leader>fr`.
 5. Archive or compress notes once the project stabilizes.
 
 That gives you a useful notes system without building a second job around note management.
