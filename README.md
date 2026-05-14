@@ -55,12 +55,12 @@ See [INSTALL.md](INSTALL.md) for details and manual alternatives.
 
 ## Editor docs
 
-- [Emacs setup overview](emacs.md)
-- [Emacs development workflow](emacs-dev-workflow.md)
-- [Emacs Org workflow](emacs-org-workflow.md)
-- [Neovim setup overview](nvim.md)
-- [Neovim tutorials](nvim-tutorials.md)
-- [tmux setup overview](tmux.md)
+- [Emacs setup overview](docs/emacs.md)
+- [Emacs development workflow](docs/emacs-dev-workflow.md)
+- [Emacs Org workflow](docs/emacs-org-workflow.md)
+- [Neovim setup overview](docs/nvim.md)
+- [Neovim tutorials](docs/nvim-tutorials.md)
+- [tmux setup overview](docs/tmux.md)
 
 ## Emacs machine setup
 
