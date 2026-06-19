@@ -349,22 +349,23 @@ Format on save is enabled by default.
 | `M-g g`    | Consult go to line              |
 | `M-g i`    | Consult imenu                   |
 | `C-c j`    | Avy jump to character           |
-| `M-0`      | Select Treemacs window          |
-| `C-x t t`  | Toggle Treemacs file explorer   |
 | `M-$`      | Jinx spell-correct              |
 
-### Projectile (Project Management)
+### Project.el
 
-**Prefix**: `C-c p` opens the projectile command map
+**Prefix**: `C-c p` opens the project command map
 
 | Keybinding | Description              |
 | :--------- | :----------------------- |
 | `C-c p f`  | Find file in project     |
 | `C-c p p`  | Switch project           |
+| `C-c p P`  | Switch project and find file |
+| `C-c p b`  | Switch project buffer    |
+| `C-c p D`  | Open project Dired       |
 | `C-c p s`  | Search in project (grep) |
-| `C-c p c`  | Compile project          |
-| `C-c p k`  | Kill all project buffers |
-| `C-c p h`  | Show projectile help     |
+| `C-c p m`  | Compile/build project    |
+| `C-c p t`  | Run project tests        |
+| `C-c p v`  | Open project vterm       |
 
 ### LSP (Eglot)
 
@@ -390,19 +391,6 @@ Active in `eglot-mode-map` when an LSP server is attached.
 
 `diff-hl` shows change indicators in the gutter for `prog-mode` and `dired-mode` buffers. Press `?` in Magit to see all commands.
 
-### Debugging (DAP Mode)
-
-| Keybinding | Description       |
-| :--------- | :---------------- |
-| `C-c d b`  | Toggle breakpoint |
-| `C-c d d`  | Start debugging   |
-| `C-c d n`  | Next (step over)  |
-| `C-c d c`  | Continue          |
-| `C-c d s`  | Step in           |
-| `C-c d o`  | Step out          |
-| `C-c d r`  | Restart debug     |
-| `C-c d q`  | Disconnect        |
-
 ### Completion (Vertico & Corfu)
 
 **Vertico** (minibuffer completion):
@@ -418,7 +406,7 @@ Active in `eglot-mode-map` when an LSP server is attached.
 - `RET` — Accept completion
 - `C-g` — Cancel
 
-### FP / Research REPLs
+### Language REPLs
 
 **Prefix**: `C-c f` opens the REPL command map
 
@@ -426,13 +414,7 @@ Active in `eglot-mode-map` when an LSP server is attached.
 | :--------- | :--------------------------- |
 | `C-c f h`  | Haskell REPL (ghci)          |
 | `C-c f o`  | OCaml REPL (utop)            |
-| `C-c f s`  | SML REPL                     |
-| `C-c f r`  | Racket REPL                  |
-| `C-c f l`  | Common Lisp REPL (sly/sbcl)  |
 | `C-c f e`  | Emacs Lisp REPL (ielm)       |
-| `C-c f n`  | Lean 4 REPL                  |
-| `C-c f c`  | Coq proof (Proof General)    |
-| `C-c f a`  | Agda type-check/load         |
 
 ### Fish Shell — Aliases & Functions
 

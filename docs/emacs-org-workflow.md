@@ -17,8 +17,6 @@ This config is built around:
 - `org-roam`
 - `citar`
 - `org-noter`
-- `org-download`
-- `org-present`
 
 If you are setting this up on a new machine, run `C-c e h` first. It will tell you whether the optional PDF, citation, and language tools this workflow expects are actually available.
 
@@ -303,7 +301,6 @@ Core tools:
 - `citar`
 - `citar-org-roam`
 - `org-noter`
-- `pdf-tools`
 
 ### Basic paper workflow
 
@@ -398,7 +395,6 @@ Org Babel is enabled for:
 - Emacs Lisp
 - Python
 - shell
-- LaTeX
 
 So you can write documents like:
 
@@ -420,7 +416,7 @@ This config only skips confirmation for trusted Babel languages:
 
 - `emacs-lisp`
 - `python`
-- `latex`
+- `shell`
 
 Other languages still require confirmation.
 

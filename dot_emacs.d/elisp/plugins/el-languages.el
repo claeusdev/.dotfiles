@@ -33,6 +33,36 @@
       (executable-find "pyright-langserver")
       (executable-find "basedpyright-langserver")))
 
+(defun my/node-project-root ()
+  "Return the current Node project root, if any."
+  (when-let ((project (project-current nil)))
+    (let ((root (project-root project)))
+      (when (file-exists-p (expand-file-name "package.json" root))
+        root))))
+
+(defun my/node-package-manager (root)
+  "Return the package manager command for ROOT."
+  (cond
+   ((file-exists-p (expand-file-name "bun.lockb" root)) "bun")
+   ((file-exists-p (expand-file-name "bun.lock" root)) "bun")
+   ((file-exists-p (expand-file-name "pnpm-lock.yaml" root)) "pnpm")
+   ((file-exists-p (expand-file-name "yarn.lock" root)) "yarn")
+   (t "npm")))
+
+(defun my/node-run-script-command (script)
+  "Return a command to run package SCRIPT in the current project."
+  (when-let ((root (my/node-project-root)))
+    (let ((manager (my/node-package-manager root)))
+      (if (string= manager "yarn")
+          (format "yarn %s" script)
+        (format "%s run %s" manager script)))))
+
+(defun my/node-test-command ()
+  "Return a command for the current Node project test script."
+  (or (my/node-run-script-command "test")
+      (my/node-run-script-command "vitest")
+      "npm test"))
+
 (defun my/python-run-command ()
   "Return a Python command for running the current file."
   (format "%s %s"
@@ -96,6 +126,26 @@
     (when (fboundp 'merlin-mode)
       (merlin-mode 1))))
 
+(defun my/js-mode-defaults ()
+  "Set defaults for JavaScript, TypeScript, Vue, and web buffers."
+  (setq-local tab-width 2
+              fill-column 100)
+  (when-let ((cmd (or (my/node-run-script-command "typecheck")
+                      (my/node-run-script-command "build"))))
+    (my/set-local-compile-command cmd))
+  (my/eglot-ensure-when-executable "vtsls"))
+
+(defun my/css-mode-defaults ()
+  "Set defaults for CSS-like buffers."
+  (setq-local tab-width 2
+              fill-column 100)
+  (my/eglot-ensure-when-executable "vscode-css-language-server"))
+
+(defun my/sql-mode-defaults ()
+  "Set defaults for SQL buffers."
+  (setq-local tab-width 2
+              fill-column 100))
+
 ;; --- C/C++ ---
 (if (my/treesit-available-p 'c)
     (use-package c-ts-mode
@@ -153,6 +203,28 @@
   :hook ((rust-mode . cargo-minor-mode)
          (rust-ts-mode . cargo-minor-mode)))
 
+;; --- JavaScript / TypeScript / React / Vue / CSS / SQL ---
+(when (fboundp 'js-ts-mode)
+  (add-to-list 'major-mode-remap-alist '(js-mode . js-ts-mode)))
+
+(when (fboundp 'typescript-ts-mode)
+  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode)))
+
+(when (fboundp 'tsx-ts-mode)
+  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . tsx-ts-mode)))
+
+(add-to-list 'auto-mode-alist '("\\.vue\\'" . mhtml-mode))
+
+(add-hook 'js-mode-hook #'my/js-mode-defaults)
+(add-hook 'js-ts-mode-hook #'my/js-mode-defaults)
+(add-hook 'typescript-ts-mode-hook #'my/js-mode-defaults)
+(add-hook 'tsx-ts-mode-hook #'my/js-mode-defaults)
+
+(add-hook 'css-mode-hook #'my/css-mode-defaults)
+(add-hook 'css-ts-mode-hook #'my/css-mode-defaults)
+(add-hook 'sql-mode-hook #'my/sql-mode-defaults)
+
 ;; --- OCaml ---
 (use-package tuareg
   :hook (tuareg-mode . my/ocaml-mode-defaults))
@@ -170,45 +242,6 @@
                            (my/set-local-compile-command "cabal test")
                            (my/eglot-ensure-when-executable "haskell-language-server-wrapper")))))
 
-;; --- SML ---
-(use-package sml-mode
-  :mode "\\.\\(sml\\|sig\\|fun\\)\\'"
-  :custom (sml-indent-level 2)
-  :hook (sml-mode . (lambda () (my/eglot-ensure-when-executable "millet-ls"))))
-
-;; --- Racket ---
-(use-package racket-mode
-  :hook (racket-mode . (lambda () (my/eglot-ensure-when-executable "racket-langserver"))))
-
-;; --- Nix ---
-(use-package nix-mode
-  :mode "\\.nix\\'"
-  :hook (nix-mode . (lambda () (my/eglot-ensure-when-executable "nil"))))
-
-;; --- Coq ---
-(use-package proof-general
-  :mode ("\\.v\\'" . coq-mode)
-  :custom (proof-splash-enable nil)
-  :hook (coq-mode . (lambda () (my/eglot-ensure-when-executable "coq-lsp"))))
-
-;; --- Lean 4 (not on MELPA; install via package-vc) ---
-(when (executable-find "lean")
-  (unless (package-installed-p 'lean4-mode)
-    (package-vc-install "https://github.com/leanprover-community/lean4-mode"))
-  (use-package lean4-mode
-    :ensure nil
-    :mode "\\.lean\\'"
-    :commands lean4-mode))
-
-;; --- Agda ---
-(let ((agda-mode-path
-       (when (executable-find "agda-mode")
-         (ignore-errors
-           (car (split-string
-                 (shell-command-to-string "agda-mode locate") "\n"))))))
-  (when (and agda-mode-path (file-exists-p agda-mode-path))
-    (load-file agda-mode-path)))
-
 ;; --- Lisp / Scheme (built-in) ---
 (add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
 
@@ -220,6 +253,10 @@
 ;; --- YAML ---
 (use-package yaml-mode
   :mode "\\.ya?ml\\'")
+
+;; --- JSON ---
+(when (fboundp 'json-ts-mode)
+  (add-to-list 'major-mode-remap-alist '(json-mode . json-ts-mode)))
 
 (provide 'el-languages)
 ;;; el-languages.el ends here

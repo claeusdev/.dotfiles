@@ -25,7 +25,6 @@
   (my/org-ensure-directory (my/org-path "roam/literature"))
   (my/org-ensure-directory (my/org-path "roam/daily"))
   (my/org-ensure-directory (my/org-path "pdfs"))
-  (my/org-ensure-directory (my/org-path "images"))
   (my/org-ensure-file (my/org-path "inbox.org")
                       "#+title: Inbox\n\n* Tasks\n\n* Ideas\n")
   (my/org-ensure-file (my/org-path "projects.org")
@@ -116,7 +115,7 @@
   (my/org-bootstrap-files)
   (defun my/org-confirm-babel-evaluate (lang _body)
     "Only skip confirmation for trusted LANG values."
-    (not (member lang '("emacs-lisp" "python" "latex"))))
+    (not (member lang '("emacs-lisp" "python" "shell"))))
   (setq org-agenda-custom-commands
         '(("d" "Dashboard"
            ((agenda "" ((org-agenda-span 1)))
@@ -132,8 +131,7 @@
    'org-babel-load-languages
    '((emacs-lisp . t)
      (python . t)
-     (shell . t)
-     (latex . t))))
+     (shell . t))))
 
 ;; Org-superstar
 (use-package org-superstar
@@ -163,31 +161,6 @@
   (org-noter-default-notes-file-names '("notes.org"))
   :bind (:map org-mode-map
          ("C-c N" . org-noter)))
-
-;; Org-download — drag-and-drop images into org
-(use-package org-download
-  :after org
-  :custom
-  (org-download-method 'directory)
-  (org-download-image-dir "~/org/images/")
-  (org-download-heading-lvl nil)
-  :hook (org-mode . org-download-enable))
-
-;; Org-present — present from org files
-(use-package org-present
-  :commands org-present
-  :hook ((org-present-mode
-          . (lambda ()
-              (org-present-big)
-              (org-display-inline-images)
-              (org-present-hide-cursor)
-              (org-present-read-only)))
-         (org-present-mode-quit
-          . (lambda ()
-              (org-present-small)
-              (org-remove-inline-images)
-              (org-present-show-cursor)
-              (org-present-read-write)))))
 
 ;; Org-roam
 (use-package org-roam

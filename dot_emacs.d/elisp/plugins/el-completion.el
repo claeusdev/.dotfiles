@@ -2,61 +2,11 @@
 
 ;;; Code:
 
-(defun my/corfu-visible-p ()
-  "Return non-nil when the Corfu popup is visible."
-  (and (boundp 'corfu--frame)
-       (frame-live-p corfu--frame)
-       (frame-visible-p corfu--frame)))
-
-(defun my/yas-expandable-p ()
-  "Return non-nil if a Yasnippet expansion makes sense at point."
-  (and (bound-and-true-p yas-minor-mode)
-       (or (and (fboundp 'yas-active-snippets)
-                (yas-active-snippets))
-           (and (fboundp 'yas--templates-for-key-at-point)
-                (yas--templates-for-key-at-point)))))
-
-(defun my/yas-active-p ()
-  "Return non-nil when point is inside an active Yasnippet field."
-  (and (bound-and-true-p yas-minor-mode)
-       (fboundp 'yas-active-snippets)
-       (yas-active-snippets)))
-
 (defun my/add-capf-local (fn append)
   "Add FN buffer-locally to `completion-at-point-functions' if available.
 When APPEND is non-nil, add FN at the end of the local hook list."
   (when (fboundp fn)
     (add-hook 'completion-at-point-functions fn append t)))
-
-(defun my/tab-dwim ()
-  "Use a single IDE-like TAB behavior for completion, snippets, and indentation."
-  (interactive)
-  (cond
-   ((my/yas-active-p)
-    (yas-next-field-or-maybe-expand))
-   ((my/corfu-visible-p)
-    (corfu-next))
-   ((my/yas-expandable-p)
-    (yas-next-field-or-maybe-expand))
-   (t
-    (indent-for-tab-command))))
-
-(defun my/backtab-dwim ()
-  "Use a single IDE-like backtab behavior for completion and snippets."
-  (interactive)
-  (cond
-   ((and (my/yas-active-p)
-         (fboundp 'yas-prev-field))
-    (yas-prev-field))
-   ((my/corfu-visible-p)
-    (corfu-previous))
-   (t
-    (indent-for-tab-command))))
-
-(defun my/complete-dwim ()
-  "Trigger completion explicitly in an IDE-like way."
-  (interactive)
-  (completion-at-point))
 
 (defun my/setup-prog-completion ()
   "Add lightweight supplemental completion sources to programming buffers."
@@ -124,17 +74,14 @@ When APPEND is non-nil, add FN at the end of the local hook list."
 (use-package embark-consult
   :hook (embark-collect-mode . consult-preview-at-point-mode))
 
-;; Corfu — in-buffer completion
+;; Corfu — in-buffer completion.  TAB cycles candidates; RET inserts.
 (use-package corfu
-  :bind
-  (("C-<tab>" . my/complete-dwim)
-   ("C-M-i" . my/complete-dwim)
-   :map prog-mode-map
-   ("TAB" . my/tab-dwim)
-   ("<tab>" . my/tab-dwim)
-   ("<backtab>" . my/backtab-dwim)
-   :map text-mode-map
-   ("C-<tab>" . my/complete-dwim))
+  :init (global-corfu-mode)
+  :bind (:map corfu-map
+         ("TAB"     . corfu-next)
+         ([tab]     . corfu-next)
+         ("S-TAB"   . corfu-previous)
+         ([backtab] . corfu-previous))
   :custom
   (corfu-auto t)
   (corfu-auto-prefix 2)
@@ -145,32 +92,17 @@ When APPEND is non-nil, add FN at the end of the local hook list."
   (corfu-quit-no-match 'separator)
   (corfu-preview-current 'insert)
   (corfu-popupinfo-delay '(0.25 . 0.1))
-  (corfu-on-exact-match nil)
   (corfu-min-width 30)
   (corfu-max-width 90)
-  (corfu-count 14)
-  (corfu-scroll-margin 2)
-  :init (global-corfu-mode))
+  (corfu-count 14))
 
 (with-eval-after-load 'corfu
   (require 'corfu-history nil t)
   (require 'corfu-popupinfo nil t)
-  (require 'corfu-echo nil t)
   (when (fboundp 'corfu-history-mode)
     (corfu-history-mode 1))
   (when (fboundp 'corfu-popupinfo-mode)
-    (corfu-popupinfo-mode 1))
-  (when (fboundp 'corfu-echo-mode)
-    (corfu-echo-mode 1))
-  (define-key corfu-map (kbd "TAB") #'my/tab-dwim)
-  (define-key corfu-map (kbd "<tab>") #'my/tab-dwim)
-  (define-key corfu-map (kbd "S-TAB") #'my/backtab-dwim)
-  (define-key corfu-map (kbd "<backtab>") #'my/backtab-dwim)
-  (define-key corfu-map (kbd "RET") #'corfu-insert)
-  (define-key corfu-map (kbd "C-n") #'corfu-next)
-  (define-key corfu-map (kbd "C-p") #'corfu-previous)
-  (when (fboundp 'corfu-popupinfo-toggle)
-    (define-key corfu-map (kbd "M-d") #'corfu-popupinfo-toggle)))
+    (corfu-popupinfo-mode 1)))
 
 ;; Cape — completion-at-point extensions
 (use-package cape
