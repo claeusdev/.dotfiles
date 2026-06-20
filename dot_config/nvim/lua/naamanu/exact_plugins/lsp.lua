@@ -303,6 +303,7 @@ return {
 					end
 				end,
 				settings = {
+					run = "onSave",
 					quiet = true,
 					format = false,
 					codeActionOnSave = {

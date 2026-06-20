@@ -24,12 +24,10 @@
   :config
   ;; Server table
   (add-to-list 'eglot-server-programs '((c-mode c++-mode c-ts-mode c++-ts-mode) . ("clangd")))
+  (add-to-list 'eglot-server-programs '((js-mode js-ts-mode typescript-ts-mode tsx-ts-mode) . ("vtsls" "--stdio")))
+  (add-to-list 'eglot-server-programs '((css-mode css-ts-mode scss-mode) . ("vscode-css-language-server" "--stdio")))
   (add-to-list 'eglot-server-programs '(tuareg-mode . ("ocamllsp")))
   (add-to-list 'eglot-server-programs '(haskell-mode . ("haskell-language-server-wrapper" "--lsp")))
-  (add-to-list 'eglot-server-programs '(sml-mode . ("millet-ls")))
-  (add-to-list 'eglot-server-programs '(racket-mode . ("racket-langserver")))
-  (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
-  (add-to-list 'eglot-server-programs '(coq-mode . ("coq-lsp")))
   (add-to-list 'eglot-server-programs '((rust-mode rust-ts-mode) . ("rust-analyzer")))
   (add-hook 'eglot-managed-mode-hook #'eldoc-mode)
   (add-hook 'eglot-managed-mode-hook #'flymake-mode)

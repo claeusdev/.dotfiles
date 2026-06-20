@@ -20,9 +20,7 @@
 (require 'el-lsp)
 (require 'el-languages)
 (require 'el-org)
-(require 'el-latex)
 (require 'el-tools)
-(require 'el-dap)
 (require 'el-bindings)
 
 ;; Load OPAM setup if present

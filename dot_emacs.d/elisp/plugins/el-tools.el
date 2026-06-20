@@ -73,11 +73,15 @@
     (vterm (format "*vterm: %s*" (file-name-nondirectory
                                   (directory-file-name default-directory))))))
 
-(defcustom my/project-test-command-alist
+(defvar my/project-test-command-alist
   '((python-mode . my/python-test-command)
     (python-ts-mode . my/python-test-command)
     (rust-mode . "cargo test")
     (rust-ts-mode . "cargo test")
+    (js-mode . my/node-test-command)
+    (js-ts-mode . my/node-test-command)
+    (typescript-ts-mode . my/node-test-command)
+    (tsx-ts-mode . my/node-test-command)
     (c-mode . "cmake --build build && ctest --test-dir build --output-on-failure")
     (c-ts-mode . "cmake --build build && ctest --test-dir build --output-on-failure")
     (c++-mode . "cmake --build build && ctest --test-dir build --output-on-failure")
@@ -119,39 +123,10 @@
 (use-package avy
   :bind ("C-c j" . avy-goto-char-timer))
 
-;; Smartparens
-(use-package smartparens
-  :hook ((prog-mode . smartparens-mode)
-         (emacs-lisp-mode . smartparens-strict-mode)
-         (lisp-mode . smartparens-strict-mode)
-         (clojure-mode . smartparens-strict-mode))
-  :config
-  (require 'smartparens-config))
-
-;; Yasnippet
-(use-package yasnippet
-  :hook (prog-mode . yas-minor-mode)
-  :config
-  (yas-reload-all))
-
-(use-package yasnippet-snippets
-  :after yasnippet)
-
 ;; Which-key
 (use-package which-key
   :custom (which-key-idle-delay 0.3)
   :config (which-key-mode 1))
-
-;; Treemacs
-(use-package treemacs
-  :bind (("M-0"     . treemacs-select-window)
-         ("C-x t t" . treemacs)))
-
-(use-package treemacs-nerd-icons
-  :after treemacs
-  :config
-  (when (bound-and-true-p my/nerd-font-installed-p)
-    (treemacs-load-theme "nerd-icons")))
 
 ;; Vterm
 (use-package vterm
@@ -170,7 +145,19 @@
      (c-ts-mode . clang-format)
      (c++-mode . clang-format)
      (c++-ts-mode . clang-format)
-     (nix-mode . nixpkgs-fmt)))
+     (js-mode . prettier)
+     (js-ts-mode . prettier)
+     (typescript-ts-mode . prettier)
+     (tsx-ts-mode . prettier)
+     (mhtml-mode . prettier)
+     (css-mode . prettier)
+     (css-ts-mode . prettier)
+     (json-mode . prettier)
+     (json-ts-mode . prettier)
+     (yaml-mode . prettier)
+     (yaml-ts-mode . prettier)
+     (markdown-mode . prettier)
+     (sql-mode . sql-formatter)))
   :config (apheleia-global-mode 1))
 
 ;; Wgrep — editable grep buffers
@@ -197,8 +184,7 @@
 ;; Writegood — highlight weak writing patterns
 (use-package writegood-mode
   :hook ((org-mode . writegood-mode)
-         (markdown-mode . writegood-mode)
-         (LaTeX-mode . writegood-mode)))
+         (markdown-mode . writegood-mode)))
 
 (provide 'el-tools)
 ;;; el-tools.el ends here

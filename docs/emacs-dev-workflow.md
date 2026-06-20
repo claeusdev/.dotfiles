@@ -178,7 +178,6 @@ If you prefer seeing the filesystem:
 
 - `C-c p D` opens Dired at the project root
 - `C-x d` opens Dired for any directory
-- `C-x t t` opens Treemacs when you specifically want a persistent tree view
 
 But for most work, file creation via `C-x C-f` is faster than navigating a tree.
 
@@ -286,9 +285,9 @@ That is useful for bulk refactors such as:
 
 ---
 
-## 8. Dired, project finder, and Treemacs
+## 8. Dired and the project finder
 
-These three tools have different jobs in this setup.
+These two tools have different jobs in this setup.
 
 ### Use `C-c p f` as the default file finder
 
@@ -312,18 +311,6 @@ The distinction is:
 
 - `C-c p D` is current-project Dired
 - `C-x d` is arbitrary-directory Dired
-
-### Use Treemacs only when you want a persistent tree
-
-Treemacs is available on `C-x t t`, but it is not the main navigation path this config is built around.
-
-Use it when:
-
-- you are doing a structural pass over a repo
-- you want a tree open beside code for a while
-- you are browsing unfamiliar directories visually
-
-For normal editing, `C-c p f` is faster.
 
 ---
 

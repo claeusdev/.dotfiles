@@ -1,7 +1,7 @@
 README.md
 INSTALL.md
 AGENTS.md
-emacs-tutorials.md
+docs/
 setup.sh
 install-tools-mac.sh
 install-tools-linux.sh
