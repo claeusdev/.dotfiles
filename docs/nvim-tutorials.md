@@ -6,6 +6,7 @@ These are practical guides for this exact config, not generic Neovim documentati
 
 Start here:
 
+- **[Getting Started (Hands-On)](nvim-getting-started.md)** — a do-along walkthrough of files, motion, code, git, tasks, and notes with this exact config. **Begin here.**
 - [Neovim Development Workflow](nvim-dev-workflow.md)
 - [Neovim Research Workflow](nvim-research-workflow.md)
 - [Neovim Note-Taking Workflow](nvim-note-taking-workflow.md)
@@ -13,11 +14,12 @@ Start here:
 
 Recommended reading order:
 
-1. Read [Neovim setup overview](nvim.md) for the map and plugin inventory.
-2. Read [Neovim Development Workflow](nvim-dev-workflow.md) to learn the core motion, search, code, task, and review loop.
-3. Read [Neovim Research Workflow](nvim-research-workflow.md) if you use Python, Markdown, and external notebook tools.
-4. Read [Neovim Note-Taking Workflow](nvim-note-taking-workflow.md) if you want a lightweight notes system inside the same editor.
-5. Read [Neovim Starting Projects](nvim-starting-projects.md) when you want repeatable project bootstrap routines.
+1. Do the [Getting Started (Hands-On)](nvim-getting-started.md) lesson to get productive fast.
+2. Read [Neovim setup overview](nvim.md) for the map and plugin inventory.
+3. Read [Neovim Development Workflow](nvim-dev-workflow.md) to learn the core motion, search, code, task, and review loop.
+4. Read [Neovim Research Workflow](nvim-research-workflow.md) if you use Python, Markdown, and external notebook tools.
+5. Read [Neovim Note-Taking Workflow](nvim-note-taking-workflow.md) if you want a lightweight notes system inside the same editor.
+6. Read [Neovim Starting Projects](nvim-starting-projects.md) when you want repeatable project bootstrap routines.
 
 The important idea is that this setup is built around a few centers:
 
