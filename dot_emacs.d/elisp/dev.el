@@ -86,6 +86,15 @@ Values are either a literal string or a function returning one.")
   (setq project-list-file (expand-file-name "projects" my/cache-dir)
         compilation-scroll-output 'first-error))
 
+;; Applies each project's direnv environment buffer-locally, so PATH,
+;; VIRTUAL_ENV and friends resolve per project — LSP servers, ruff and
+;; python all come from the project's own environment.  Enabled from
+;; after-init as the envrc README advises, so envrc-mode is active before
+;; other buffer-local setup runs.
+(use-package envrc
+  :if (executable-find "direnv")
+  :hook (after-init . envrc-global-mode))
+
 ;; --- LSP -----------------------------------------------------------------
 
 (defun my/eglot-ensure-when-executable (command)
@@ -179,7 +188,10 @@ Values are either a literal string or a function returning one.")
 
 ;; dape is the DAP client built for Eglot; it replaces dap-mode, which belonged
 ;; to the lsp-mode ecosystem.  Adapters ship as built-in configurations, so
-;; only the binaries need installing (debugpy, codelldb).
+;; only the binaries need installing.  lldb-dap is a global install; debugpy
+;; is a Python module dape imports via the project's own `python' (envrc puts
+;; the venv on PATH), so add it per project with `uv add --dev debugpy' —
+;; dape errors clearly when it is missing.
 (use-package dape
   :commands (dape dape-breakpoint-toggle)
   :custom

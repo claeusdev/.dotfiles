@@ -2,7 +2,8 @@
 
 ;;; Commentary:
 ;; Scope: TypeScript, JavaScript, React/TSX, Rust, OCaml, Python, SQL, plus
-;; YAML, Dockerfile, JSON, TOML and Markdown for configuration and notes.
+;; YAML, Dockerfile, JSON, TOML, CSV and Markdown for configuration, data
+;; and notes.
 
 ;;; Code:
 
@@ -143,29 +144,49 @@ With prefix argument FORCE, reinstall grammars that are already present."
 
 ;; --- Python --------------------------------------------------------------
 
-(defun my/python-interpreter ()
-  "Return the project virtualenv interpreter when present, else the system one."
-  (or (my/project-file-path ".venv/bin/python")
-      (my/project-file-path "venv/bin/python")
-      (executable-find "python3")
-      "python3"))
+;; No hand-rolled venv detection: envrc supplies the project environment where
+;; an .envrc exists, uv runs commands inside the project venv without
+;; activation, and basedpyright finds a root-level .venv on its own.
+(defun my/python-uv-project-p ()
+  "Whether the current project should be driven through uv."
+  (and (executable-find "uv") (my/project-file-path "pyproject.toml")))
 
 (defun my/python-test-command ()
-  "Return a pytest command for the current project."
-  (format "%s -m pytest" (shell-quote-argument (my/python-interpreter))))
+  "Return a test command for the current Python project."
+  (if (my/python-uv-project-p) "uv run pytest" "python3 -m pytest"))
 
 (defun my/python-mode-defaults ()
   "Defaults for Python buffers."
-  (setq-local tab-width 4
-              fill-column 88
-              python-shell-interpreter (my/python-interpreter))
+  (setq-local tab-width 4 fill-column 88)
   (my/set-local-compile-command
-   (format "%s %s"
-           (shell-quote-argument (my/python-interpreter))
-           (shell-quote-argument (or buffer-file-name ""))))
+   (let ((file (shell-quote-argument (or buffer-file-name ""))))
+     (if (my/python-uv-project-p)
+         (format "uv run python %s" file)
+       (format "python3 %s" file))))
   (my/eglot-ensure-when-executable "basedpyright-langserver"))
 
 (add-hook 'python-ts-mode-hook #'my/python-mode-defaults)
+
+;; --- Notebooks and data files ---------------------------------------------
+
+;; Cell-based editing over plain .py files with `# %%' markers; cells are sent
+;; to the inferior Python REPL with C-c C-c.  With jupytext on PATH, .ipynb
+;; notebooks open transparently as scripts and convert back on save.
+(use-package code-cells
+  :init
+  (when (executable-find "jupytext")
+    (add-to-list 'auto-mode-alist '("\\.ipynb\\'" . code-cells-convert-ipynb)))
+  :hook (python-ts-mode . code-cells-mode-maybe)
+  :bind (:map code-cells-mode-map
+              ("M-p"     . code-cells-backward-cell)
+              ("M-n"     . code-cells-forward-cell)
+              ("C-c C-c" . code-cells-eval)))
+
+;; tsv-mode derives from csv-mode, so the alignment hook covers both.
+(use-package csv-mode
+  :mode (("\\.csv\\'" . csv-mode)
+         ("\\.tsv\\'" . tsv-mode))
+  :hook (csv-mode . csv-align-mode))
 
 ;; --- SQL, YAML, Docker ---------------------------------------------------
 

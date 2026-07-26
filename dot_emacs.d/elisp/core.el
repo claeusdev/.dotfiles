@@ -24,6 +24,17 @@
   (setq exec-path-from-shell-arguments '("-l"))
   (exec-path-from-shell-initialize))
 
+;; Homebrew's standalone dvisvgm bundles its own kpathsea, which searches
+;; relative to its own prefix and never finds the texlive formula's tree,
+;; breaking Org LaTeX previews.  exec-path-from-shell only copies PATH, so
+;; set the TEXMF variables here.  No-op when the directory is absent
+;; (MacTeX needs none of this).
+(when (and (not (getenv "TEXMFCNF"))
+           (file-directory-p "/opt/homebrew/opt/texlive/share/texmf-dist/web2c"))
+  (setenv "TEXMFCNF" "/opt/homebrew/opt/texlive/share/texmf-dist/web2c")
+  (setenv "TEXMFROOT" "/opt/homebrew/opt/texlive/share")
+  (setenv "TEXMFDIST" "/opt/homebrew/opt/texlive/share/texmf-dist"))
+
 ;; --- Editor defaults -----------------------------------------------------
 
 (setq-default indent-tabs-mode nil
@@ -84,7 +95,7 @@
 (setq global-auto-revert-non-file-buffers t)
 
 (use-package which-key
-  :ensure nil ; built in since Emacs 29
+  :ensure nil ; built in since Emacs 30
   :custom (which-key-idle-delay 0.3)
   :config (which-key-mode 1))
 
@@ -167,6 +178,11 @@
     (required "rg"                       "Project search via consult")
     (required "node"                     "TypeScript and JavaScript toolchain")
     (optional "fd"                       "Faster file finding")
+    (optional "uv"                       "Python environments and runner")
+    (optional "direnv"                   "envrc: per-project environments")
+    (optional "jupytext"                 "code-cells: .ipynb editing")
+    (optional "latex"                    "Org LaTeX previews")
+    (optional "dvisvgm"                  "Org LaTeX previews (SVG backend)")
     (optional "vtsls"                    "TypeScript / JavaScript LSP")
     (optional "rust-analyzer"            "Rust LSP")
     (optional "ocamllsp"                 "OCaml LSP")
@@ -177,11 +193,12 @@
     (optional "prettier"                 "Web, JSON, YAML, Markdown format")
     (optional "sql-formatter"            "SQL format")
     (optional "ocamlformat"              "OCaml format")
-    (optional "debugpy"                  "dape: Python debugging")
     (optional "lldb-dap"                 "dape: Rust / native debugging")
     (optional "gh"                       "Forge authentication")
     (optional "enchant-2"                "jinx spellchecker backend"))
-  "External tools this configuration expects, checked by `my/emacs-health-check'.")
+  "External tools this configuration expects, checked by `my/emacs-health-check'.
+debugpy is deliberately absent: it is a Python module dape resolves through
+the project environment, so install it per project with `uv add --dev debugpy'.")
 
 (defun my/emacs-health-check ()
   "Report which expected external tools are available on PATH."

@@ -53,7 +53,10 @@
           ("w" "Writing" tags-todo "@writing")))
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((emacs-lisp . t) (python . t) (shell . t))))
+   '((emacs-lisp . t) (python . t) (shell . t)))
+  ;; SVG previews stay crisp on retina displays; dvisvgm ships with MacTeX.
+  (when (executable-find "dvisvgm")
+    (setq org-preview-latex-default-process 'dvisvgm)))
 
 ;; --- Denote --------------------------------------------------------------
 
@@ -95,6 +98,17 @@
   :hook ((org-mode . olivetti-mode)
          (markdown-mode . olivetti-mode))
   :custom (olivetti-body-width 90))
+
+;; --- Math ------------------------------------------------------------------
+
+;; Fast LaTeX math entry inside Org: ` opens a symbol menu, _ and ^ insert
+;; scripts with braces, TAB expands templates like fr and env names.
+(use-package cdlatex
+  :hook (org-mode . org-cdlatex-mode))
+
+;; Render a LaTeX fragment when the cursor leaves it, un-render on re-entry.
+(use-package org-fragtog
+  :hook (org-mode . org-fragtog-mode))
 
 ;; Just-in-time spellchecker; needs the enchant library.
 (use-package jinx

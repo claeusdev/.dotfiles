@@ -106,26 +106,13 @@
 
 ;; --- REPLs ---------------------------------------------------------------
 
-(defun my/run-repl (name start-fn &optional fallback-cmd)
-  "Start a REPL called NAME via START-FN, falling back to FALLBACK-CMD."
-  (if (fboundp start-fn)
-      (call-interactively start-fn)
-    (if fallback-cmd
-        (pop-to-buffer (make-comint name fallback-cmd))
-      (user-error "%s is not available" name))))
-
+;; Only REPLs with real Emacs support; for node or utop, a project vterm
+;; (C-c p v) beats a bare comint buffer.
 (defvar my/repl-map (make-sparse-keymap) "Language REPLs.")
 (global-set-key (kbd "C-c f") my/repl-map)
-(define-key my/repl-map (kbd "o")
-            (lambda () (interactive) (my/run-repl "ocaml" 'utop "utop")))
-(define-key my/repl-map (kbd "p")
-            (lambda () (interactive) (my/run-repl "python" 'run-python "python3")))
-(define-key my/repl-map (kbd "n")
-            (lambda () (interactive) (my/run-repl "node" 'nodejs-repl "node")))
-(define-key my/repl-map (kbd "s")
-            (lambda () (interactive) (call-interactively #'sql-product-interactive)))
-(define-key my/repl-map (kbd "e")
-            (lambda () (interactive) (ielm)))
+(define-key my/repl-map (kbd "p") #'run-python)
+(define-key my/repl-map (kbd "s") #'sql-product-interactive)
+(define-key my/repl-map (kbd "e") #'ielm)
 
 (provide 'keys)
 ;;; keys.el ends here
