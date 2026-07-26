@@ -1,34 +1,48 @@
-;;; init.el --- Emacs configuration entry point -*- lexical-binding: t; -*-
+;;; init.el --- Configuration entry point -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Modules live in elisp/ and load in dependency order.  keys.el is last so
+;; every map it binds into already exists.
 
 ;;; Code:
 
-;; Add module directories to load-path
-(add-to-list 'load-path (expand-file-name "elisp/core" user-emacs-directory))
-(add-to-list 'load-path (expand-file-name "elisp/plugins" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
 
-;; Machine-local overrides that should not live in shared dotfiles.
+;; Machine-local overrides that should not live in the dotfiles repo.
 (let ((local-pre (expand-file-name "local-pre.el" user-emacs-directory)))
   (when (file-exists-p local-pre)
     (load local-pre nil 'nomessage)))
 
-;; Load modules in order (bindings last so all mode maps are available)
-(require 'el-packages)
-(require 'el-core)
-(require 'el-theme)
-(require 'el-completion)
-(require 'el-git)
-(require 'el-lsp)
-(require 'el-languages)
-(require 'el-org)
-(require 'el-tools)
-(require 'el-bindings)
+;; --- Package bootstrap ---------------------------------------------------
 
-;; Load OPAM setup if present
-(let ((opam-setup (expand-file-name "opam-user-setup.el" user-emacs-directory)))
-  (when (file-exists-p opam-setup)
-    (load opam-setup nil 'nomessage)))
+(require 'package)
+(setq package-archives
+      '(("gnu"    . "https://elpa.gnu.org/packages/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+        ("melpa"  . "https://melpa.org/packages/"))
+      ;; Prefer stable GNU/NonGNU where a package exists in both.
+      package-archive-priorities '(("gnu" . 3) ("nongnu" . 2) ("melpa" . 1)))
 
-;; Send custom-set-variables to a separate file
+(package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(require 'use-package)
+(setq use-package-always-ensure t
+      use-package-compute-statistics t)
+
+;; --- Modules -------------------------------------------------------------
+
+(require 'core)
+(require 'completion)
+(require 'dev)
+(require 'langs)
+(require 'notes)
+(require 'keys)
+
+;; Keep Customize's scribbles out of this file.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
   (load custom-file nil 'nomessage))

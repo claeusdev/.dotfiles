@@ -1,31 +1,34 @@
-;;; early-init.el --- Early initialization -*- lexical-binding: t; -*-
+;;; early-init.el --- Pre-frame initialization -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; Runs before init.el. Optimizes startup and disables UI chrome early.
+;; Runs before init.el and before the first frame is drawn.  Keep it small:
+;; anything that does not have to happen this early belongs in elisp/core.el.
 
 ;;; Code:
 
-;; Maximize GC threshold during startup (reset later in el-core.el)
+;; Raise the GC ceiling for startup; core.el restores a working value once the
+;; session is up.
 (setq gc-cons-threshold most-positive-fixnum
       gc-cons-percentage 0.6)
 
-;; Prevent package.el from loading packages before use-package
+;; use-package drives installation, so package.el must not activate first.
 (setq package-enable-at-startup nil)
 
-;; Disable UI elements before first frame renders
+;; Drop UI chrome before the first frame renders, to avoid a visible reflow.
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
+
 (setq inhibit-splash-screen t
-      inhibit-startup-message t)
+      inhibit-startup-message t
+      frame-inhibit-implied-resize t)
 
-;; Native compilation settings
-(when (featurep 'native-compile)
+;; `native-comp-deferred-compilation' was renamed in Emacs 29.1.  Note that a
+;; stock Homebrew `emacs' build has no native compilation at all; `emacs-plus'
+;; with --with-native-comp does.
+(when (and (fboundp 'native-comp-available-p) (native-comp-available-p))
   (setq native-comp-async-report-warnings-errors 'silent
-        native-comp-deferred-compilation t))
-
-;; Prevent frame resizing when setting font
-(setq frame-inhibit-implied-resize t)
+        native-comp-jit-compilation t))
 
 (provide 'early-init)
 ;;; early-init.el ends here
