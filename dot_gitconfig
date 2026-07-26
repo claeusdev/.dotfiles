@@ -9,6 +9,7 @@
 	editor = nvim
 	# Exclude machine-specific configs from global .gitconfig
 	excludesfile = ~/.gitignore_global
+	pager = delta
 [alias]
 	a = add
 	ap = add -p
@@ -48,3 +49,14 @@
 	enabled = true
 [diff]
 	algorithm = histogram
+	colorMoved = default
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	line-numbers = true
+	hyperlinks = true
+[merge]
+	# zdiff3 shows the common ancestor in conflicts, which makes
+	# three-way merges far easier to reason about than the default.
+	conflictStyle = zdiff3

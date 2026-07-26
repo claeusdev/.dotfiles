@@ -32,6 +32,14 @@ if command -v fnm &> /dev/null
     fnm env --use-on-cd --shell fish | source
 end
 
+# fnm's per-shell multishell dir is ephemeral, so long-running apps that
+# inherit PATH once at launch (Emacs via exec-path-from-shell) can end up
+# pointing at a node that no longer exists. Append the stable default alias
+# as a lower-priority fallback; per-project versions still take precedence.
+if test -d "$HOME/.local/share/fnm/aliases/default/bin"
+    set -gx PATH $PATH "$HOME/.local/share/fnm/aliases/default/bin"
+end
+
 # ======================
 # Modern CLI Tool Aliases
 # ======================
