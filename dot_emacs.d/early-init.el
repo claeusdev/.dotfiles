@@ -19,12 +19,10 @@
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
 
-;; Default frame geometry, measured in characters rather than pixels.
-;; `fill-column' is 100, so 120 columns fits a full-width line alongside the
-;; line numbers and the fill indicator.  For a maximized frame instead, use
-;; (push '(fullscreen . maximized) default-frame-alist).
-(push '(width  . 120) default-frame-alist)
-(push '(height . 45)  default-frame-alist)
+;; Start maximized.  Deliberately no `width'/`height' here: pinning character
+;; dimensions makes the window manager's maximize fight Emacs, which on macOS
+;; leaves dead space at the frame edge instead of reflowing the text.
+(push '(fullscreen . maximized) default-frame-alist)
 
 (setq inhibit-splash-screen t
       inhibit-startup-message t
