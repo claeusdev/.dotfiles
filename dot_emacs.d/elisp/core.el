@@ -103,8 +103,12 @@
        (seq-some (lambda (f) (string-match-p "Nerd Font" f)) (font-family-list)))
   "Whether any Nerd Font is present, for icon-dependent packages.")
 
-(defvar my/light-theme 'modus-operandi-tinted "Theme used in light mode.")
-(defvar my/dark-theme 'modus-vivendi-tinted "Theme used in dark mode.")
+;; Plain modus is pure white on pure black (#ffffff / #000000).  The `-tinted'
+;; pair uses a warmer background and a distinctly different syntax palette,
+;; not merely a recoloured background; swap these two values to try it.
+;; `M-x modus-themes-select' previews every variant interactively.
+(defvar my/light-theme 'modus-operandi "Theme used in light mode.")
+(defvar my/dark-theme 'modus-vivendi "Theme used in dark mode.")
 
 (defun my/load-theme (theme)
   "Load THEME, first disabling any currently enabled themes."
@@ -130,8 +134,9 @@
   :config
   (my/load-theme my/light-theme))
 
-;; First installed family wins.
-(let ((size (if (eq system-type 'darwin) 165 140)))
+;; First installed family wins.  `:height' is in tenths of a point, so 155 is
+;; 15.5pt.
+(let ((size (if (eq system-type 'darwin) 155 130)))
   (when-let* ((family (seq-find #'my/font-installed-p
                                 '("JetBrainsMono Nerd Font"
                                   "FiraCode Nerd Font"

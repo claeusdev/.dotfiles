@@ -2,7 +2,7 @@
 
 **Package manager**: use-package
 **LSP client**: Eglot
-**Theme**: Modus Operandi Tinted (light), toggle to Vivendi with `C-c t t`
+**Theme**: Modus Operandi (light), toggle to Vivendi with `C-c t t`
 **Config**: `~/.emacs.d/`
 **Project layer**: built-in `project.el`
 **Notes**: Denote
