@@ -52,15 +52,18 @@ lua/naamanu/
 | LSP | native `vim.lsp`, mason, mason-tool-installer, fidget, schemastore, lazydev.nvim, inc-rename |
 | Formatting | conform.nvim |
 | Linting | nvim-lint |
-| Git | gitsigns, lazygit.nvim, diffview.nvim |
-| Navigation | oil.nvim, telescope.nvim, telescope-fzf-native, telescope-ui-select |
-| Treesitter | nvim-treesitter, nvim-treesitter-textobjects, nvim-ts-autotag, nvim-treesitter-context |
+| Git | gitsigns, diffview.nvim, snacks.lazygit |
+| Navigation | oil.nvim, snacks.picker (also backs `vim.ui.select`) |
+| Treesitter | nvim-treesitter (main branch), nvim-treesitter-textobjects, nvim-ts-autotag, nvim-treesitter-context |
 | Task runner | overseer.nvim |
 | HTTP | kulala.nvim |
 | Markdown | render-markdown.nvim |
-| Editor | nvim-autopairs, nvim-surround, Comment.nvim, todo-comments, flash.nvim, undotree, zen-mode, treesj |
+| Editor | nvim-autopairs, nvim-surround, builtin `gc` comments, todo-comments, flash.nvim, undotree, treesj, snacks.zen |
+| AI | cc-nvim (`<leader>a` group) |
 | UI | snacks.nvim, lualine, which-key, trouble.nvim |
 | Theme | modus-themes.nvim |
+
+Native LSP configuration (vim.lsp.config/enable) lives in `lua/naamanu/core/lsp.lua`, required from `core/init.lua` after lazy.nvim. The nvim-treesitter `main` branch needs the `tree-sitter` CLI on PATH to compile parsers (`brew install tree-sitter-cli`).
 
 ---
 
@@ -72,7 +75,7 @@ lua/naamanu/
 | :--- | :--- |
 | C/C++ | clangd |
 | Rust | rust-analyzer |
-| Python | ruff, ty |
+| Python | ruff, basedpyright |
 | Lua | lua-language-server |
 | OCaml / Reason | ocaml-lsp |
 | Haskell | haskell-language-server |
@@ -80,7 +83,7 @@ lua/naamanu/
 | Vue / CSS / Tailwind | vtsls, css-lsp, tailwindcss-language-server |
 | JSON / YAML | json-lsp, yaml-language-server |
 
-Ruff handles Python lint/fix actions. Ty owns Python hover and type intelligence; Ruff hover is disabled to avoid duplicate hover providers.
+Ruff handles Python lint/fix actions. basedpyright owns Python hover and type intelligence (matching the Emacs setup); Ruff hover is disabled to avoid duplicate hover providers.
 
 ### Formatters
 

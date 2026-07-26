@@ -1,53 +1,69 @@
+-- Parsers this config expects; anything missing is installed on startup.
+local ensure_installed = {
+	"bash",
+	"c",
+	"cpp",
+	"css",
+	"dockerfile",
+	"fish",
+	"haskell",
+	"html",
+	"javascript",
+	"json",
+	"lua",
+	"markdown",
+	"markdown_inline",
+	"ocaml",
+	"ocaml_interface",
+	"python",
+	"query",
+	"regex",
+	"rust",
+	"sql",
+	"toml",
+	"tsx",
+	"typescript",
+	"vim",
+	"vimdoc",
+	"yaml",
+}
+
 return {
-	-- Treesitter
+	-- Treesitter.  The `main` branch is the maintained rewrite: setup() only
+	-- takes install_dir, parsers are installed explicitly, and highlighting
+	-- is started per buffer via vim.treesitter.start.  The old master-branch
+	-- module options (highlight/indent/incremental_selection) do not exist.
 	{
 		"nvim-treesitter/nvim-treesitter",
+		branch = "main",
 		build = ":TSUpdate",
 		event = { "BufReadPre", "BufNewFile" },
-		opts = {
-			ensure_installed = {
-				"c",
-				"cmake",
-				"cpp",
-				"rust",
-				"python",
-				"ocaml",
-				"ocaml_interface",
-				"haskell",
-				"lua",
-				"make",
-				"vim",
-				"vimdoc",
-				"bash",
-				"sql",
-				"json",
-				"yaml",
-				"toml",
-				"markdown",
-				"markdown_inline",
-				"typescript",
-				"tsx",
-				"javascript",
-				"regex",
-				"html",
-				"css",
-				"scss",
-				"vue",
-			},
-			highlight = { enable = true },
-			indent = { enable = true },
-			incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "<C-space>",
-					node_incremental = "<C-space>",
-					scope_incremental = false,
-					node_decremental = "<bs>",
-				},
-			},
-		},
-		config = function(_, opts)
-			require("nvim-treesitter").setup(opts)
+		config = function()
+			local ts = require("nvim-treesitter")
+			ts.setup({})
+
+			local installed = require("nvim-treesitter.config").get_installed("parsers")
+			local missing = vim.tbl_filter(function(lang)
+				return not vim.list_contains(installed, lang)
+			end, ensure_installed)
+			if #missing > 0 then
+				ts.install(missing)
+			end
+
+			vim.api.nvim_create_autocmd("FileType", {
+				group = vim.api.nvim_create_augroup("treesitter-start", { clear = true }),
+				callback = function(ev)
+					if pcall(vim.treesitter.start, ev.buf) then
+						vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+					end
+				end,
+			})
+
+			-- The main branch dropped incremental_selection; flash's
+			-- treesitter mode is the label-based replacement.
+			vim.keymap.set({ "n", "x" }, "<C-space>", function()
+				require("flash").treesitter()
+			end, { desc = "Treesitter selection" })
 		end,
 	},
 

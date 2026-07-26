@@ -17,58 +17,44 @@ return {
 		},
 	},
 
-	-- Telescope
+	-- Picker: snacks.picker (fragment merged into the main snacks.nvim spec).
+	-- ui_select is on by default once the picker is enabled, so code actions
+	-- and other vim.ui.select prompts render as pickers too.
 	{
-		"nvim-telescope/telescope.nvim",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-			"nvim-telescope/telescope-ui-select.nvim",
+		"folke/snacks.nvim",
+		opts = {
+			picker = {
+				enabled = true,
+				ui_select = true,
+				sources = {
+					files = { hidden = true },
+				},
+			},
 		},
-		cmd = "Telescope",
 		keys = {
-			{ "<leader>ff", "<cmd>Telescope find_files<CR>", desc = "Find files" },
+			{ "<leader>ff", function() Snacks.picker.files() end, desc = "Find files" },
 			{
 				"<leader>fp",
 				function()
-					local builtin = require("telescope.builtin")
-					local ok = pcall(builtin.git_files, { show_untracked = true })
-					if not ok then
-						builtin.find_files({ hidden = true })
+					if vim.fs.root(0, ".git") then
+						Snacks.picker.git_files({ untracked = true })
+					else
+						Snacks.picker.files()
 					end
 				end,
 				desc = "Project files",
 			},
-			{ "<leader>fr", "<cmd>Telescope oldfiles<CR>", desc = "Recent files" },
-			{ "<leader>fg", "<cmd>Telescope live_grep<CR>", desc = "Live grep" },
-			{ "<leader>f/", "<cmd>Telescope current_buffer_fuzzy_find<CR>", desc = "Search current buffer" },
-			{ "<leader>f.", "<cmd>Telescope resume<CR>", desc = "Resume last picker" },
-			{ "<leader>fc", "<cmd>Telescope grep_string<CR>", desc = "Find string under cursor" },
-			{ "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "Find buffers" },
-			{ "<leader>fh", "<cmd>Telescope help_tags<CR>", desc = "Help tags" },
-			{ "<leader>fk", "<cmd>Telescope keymaps<CR>", desc = "Keymaps" },
-			{ "<leader>fd", "<cmd>Telescope diagnostics<CR>", desc = "Diagnostics" },
-			{ "<leader>fs", "<cmd>Telescope lsp_document_symbols<CR>", desc = "Document symbols" },
-			{ "<leader>fS", "<cmd>Telescope lsp_workspace_symbols<CR>", desc = "Workspace symbols" },
+			{ "<leader>fr", function() Snacks.picker.recent() end, desc = "Recent files" },
+			{ "<leader>fg", function() Snacks.picker.grep() end, desc = "Live grep" },
+			{ "<leader>f/", function() Snacks.picker.lines() end, desc = "Search current buffer" },
+			{ "<leader>f.", function() Snacks.picker.resume() end, desc = "Resume last picker" },
+			{ "<leader>fc", function() Snacks.picker.grep_word() end, desc = "Find string under cursor", mode = { "n", "x" } },
+			{ "<leader>fb", function() Snacks.picker.buffers() end, desc = "Find buffers" },
+			{ "<leader>fh", function() Snacks.picker.help() end, desc = "Help tags" },
+			{ "<leader>fk", function() Snacks.picker.keymaps() end, desc = "Keymaps" },
+			{ "<leader>fd", function() Snacks.picker.diagnostics() end, desc = "Diagnostics" },
+			{ "<leader>fs", function() Snacks.picker.lsp_symbols() end, desc = "Document symbols" },
+			{ "<leader>fS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "Workspace symbols" },
 		},
-		config = function()
-			local telescope = require("telescope")
-			telescope.setup({
-				defaults = {
-					path_display = { "truncate" },
-				},
-				pickers = {
-					find_files = {
-						hidden = true,
-						file_ignore_patterns = { "%.git/" },
-					},
-					git_files = {
-						show_untracked = true,
-					},
-				},
-			})
-			telescope.load_extension("fzf")
-			telescope.load_extension("ui-select")
-		end,
 	},
 }

@@ -37,15 +37,7 @@ return {
     },
   },
 
-  -- LazyGit
-  {
-    "kdheepak/lazygit.nvim",
-    cmd = "LazyGit",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    keys = {
-      { "<leader>gg", "<cmd>LazyGit<CR>", desc = "LazyGit" },
-    },
-  },
+  -- LazyGit: snacks.lazygit (<leader>gg, bound in snacks.lua).
 
   -- Diffview
   {

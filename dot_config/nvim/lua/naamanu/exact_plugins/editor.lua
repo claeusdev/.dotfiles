@@ -14,12 +14,8 @@ return {
 		opts = {},
 	},
 
-	-- Comment
-	{
-		"numToStr/Comment.nvim",
-		event = { "BufReadPre", "BufNewFile" },
-		opts = {},
-	},
+	-- Commenting: builtin gc/gcc (Neovim 0.10+); commentstring tweaks live in
+	-- core/autocmds.lua.
 
 	-- Todo comments
 	{
@@ -70,22 +66,16 @@ return {
 		},
 	},
 
-	-- Undotree
+	-- Undotree.  <leader>uu (not <leader>u) so the ui/toggle which-key group
+	-- prefix does not collide with a standalone action.
 	{
 		"mbbill/undotree",
 		keys = {
-			{ "<leader>u", "<cmd>UndotreeToggle<CR>", desc = "Toggle undotree" },
+			{ "<leader>uu", "<cmd>UndotreeToggle<CR>", desc = "Toggle undotree" },
 		},
 	},
 
-	-- Zen mode
-	{
-		"folke/zen-mode.nvim",
-		keys = {
-			{ "<leader>z", "<cmd>ZenMode<CR>", desc = "Toggle zen mode" },
-		},
-		opts = {},
-	},
+	-- Zen mode: snacks.zen (<leader>z, bound in snacks.lua).
 
 	-- Treesj (split / join)
 	{

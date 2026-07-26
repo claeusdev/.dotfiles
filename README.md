@@ -135,18 +135,17 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 
 ### Editor
 
-| Mode    | Keybinding  | Plugin       | Description                    |
-| :------ | :---------- | :----------- | :----------------------------- |
-| n       | `gcc`       | Comment.nvim | Toggle comment on current line |
-| v       | `gc`        | Comment.nvim | Toggle line comment            |
-| v       | `gb`        | Comment.nvim | Toggle block comment           |
-| n       | `<leader>u` | undotree     | Toggle Undotree                |
-| n       | `<leader>z` | zen-mode     | Toggle Zen Mode                |
-| n       | `<leader>j` | treesj       | Split/join syntax node         |
-| n, x, o | `s`         | flash.nvim   | Flash jump                     |
-| n, x, o | `S`         | flash.nvim   | Flash Treesitter               |
-| o       | `r`         | flash.nvim   | Remote Flash                   |
-| o, x    | `R`         | flash.nvim   | Treesitter Search              |
+| Mode    | Keybinding          | Plugin     | Description                    |
+| :------ | :------------------ | :--------- | :----------------------------- |
+| n       | `gcc`               | builtin    | Toggle comment on current line |
+| v       | `gc`                | builtin    | Toggle line comment            |
+| n       | `<leader>uu`        | undotree   | Toggle Undotree                |
+| n       | `<leader>z`         | snacks.zen | Toggle Zen Mode                |
+| n       | `<leader>j`         | treesj     | Split/join syntax node         |
+| n, x, o | `<leader><leader>`  | flash.nvim | Flash jump                     |
+| n, x, o | `<leader>fj`        | flash.nvim | Flash Treesitter               |
+| o       | `<leader>fr`        | flash.nvim | Remote Flash                   |
+| o, x    | `<leader>fR`        | flash.nvim | Treesitter Search              |
 
 ### Git
 
@@ -165,7 +164,7 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 | n    | `<leader>gb` | gitsigns     | Blame line        |
 | n    | `<leader>gd` | gitsigns     | Diff this         |
 | n    | `<leader>gD` | gitsigns     | Diff this ~       |
-| n    | `<leader>gg` | lazygit.nvim | Open LazyGit      |
+| n    | `<leader>gg` | snacks       | Open LazyGit      |
 | n    | `<leader>go` | diffview     | Open Diffview     |
 | n    | `<leader>gc` | diffview     | Close Diffview    |
 | n    | `<leader>gh` | diffview     | File history      |
@@ -177,7 +176,7 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 | n    | `-`          | Open parent directory (Oil) |
 | n    | `<leader>e`  | Open file explorer (Oil)    |
 
-### Telescope
+### Picker (snacks.picker)
 
 | Mode | Keybinding   | Description            |
 | :--- | :----------- | :--------------------- |
@@ -185,7 +184,9 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 | n    | `<leader>fp` | Project files          |
 | n    | `<leader>fr` | Recent files           |
 | n    | `<leader>fg` | Live grep              |
-| n    | `<leader>fc` | Find string under cursor |
+| n    | `<leader>f/` | Search current buffer  |
+| n    | `<leader>f.` | Resume last picker     |
+| n, x | `<leader>fc` | Find string under cursor |
 | n    | `<leader>fb` | Find buffers           |
 | n    | `<leader>fh` | Help tags              |
 | n    | `<leader>fk` | Keymaps                |
@@ -193,14 +194,13 @@ This document outlines the keybindings configured for Neovim, Emacs, and tmux.
 | n    | `<leader>fs` | Document symbols       |
 | n    | `<leader>fS` | Workspace symbols      |
 
-**Extensions:** `telescope-fzf-native` for fast fuzzy matching, `telescope-ui-select` replaces `vim.ui.select` prompts with Telescope UI.
+`vim.ui.select` prompts (code actions, etc.) also render through snacks.picker.
 
 ### Treesitter
 
 | Mode          | Keybinding  | Description                      |
 | :------------ | :---------- | :------------------------------- |
-| Normal/Visual | `<C-space>` | Initialize/increment selection   |
-| Normal/Visual | `<bs>`      | Decrement selection (node)       |
+| Normal/Visual | `<C-space>` | Treesitter selection (via flash) |
 | Normal/Visual | `af`        | Select around function           |
 | Normal/Visual | `if`        | Select inside function           |
 | Normal/Visual | `ac`        | Select around class              |
@@ -276,13 +276,17 @@ Format on save is enabled by default.
 
 | Mode | Keybinding   | Description              |
 | :--- | :----------- | :----------------------- |
-| n    | `<leader>n`  | Notification history     |
+| n    | `<leader>nh` | Notification history     |
 | n    | `<leader>nd` | Dismiss notifications    |
 | n    | `<leader>rf` | Rename file              |
 | n, t | `]]`         | Next reference           |
 | n, t | `[[`         | Previous reference       |
 
-**Auto-enabled:** bigfile detection, indent guides, scope highlighting, quickfile, input UI.
+**Auto-enabled:** bigfile detection, indent guides, scope highlighting, quickfile, input UI, picker (`vim.ui.select`).
+
+### AI (cc-nvim)
+
+The `<leader>a` group is provided by [cc-nvim](https://github.com/nmanu-dev/cc-nvim) — Claude in a split/float with code-aware commands (explain, walk-through, critique, diff review, commit messages, staged review, PR descriptions, notes and quizzes). See the plugin repo for the full keymap; `<leader>aa` toggles the panel.
 
 ---
 

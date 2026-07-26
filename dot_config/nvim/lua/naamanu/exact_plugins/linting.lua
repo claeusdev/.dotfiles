@@ -4,8 +4,9 @@ return {
 	config = function()
 		local lint = require("lint")
 
+		-- Python is deliberately absent: the ruff LSP already publishes the
+		-- same diagnostics; running the CLI too doubles every message.
 		lint.linters_by_ft = {
-			python = { "ruff" },
 			sh = { "shellcheck" },
 			bash = { "shellcheck" },
 		}

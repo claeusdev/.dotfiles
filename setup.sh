@@ -92,6 +92,8 @@ if [ "$PLATFORM" = "mac" ]; then
     echo ""
     echo "Installing modern CLI utilities..."
     brew_install neovim ripgrep fd fzf bat eza jq yq htop btop tree tldr diff-so-fancy
+    # nvim-treesitter (main branch) compiles parsers via the tree-sitter CLI
+    brew_install tree-sitter-cli
     brew_install yazi atuin glow dust procs hyperfine tokei
 
     echo ""
@@ -235,6 +237,15 @@ elif [ "$PLATFORM" = "linux" ]; then
         install_pkg neovim ripgrep fd-find fzf bat htop tree jq
     elif [ "$PKG_MGR" = "pacman" ]; then
         install_pkg neovim ripgrep fd fzf bat htop tree jq
+    fi
+
+    # nvim-treesitter (main branch) compiles parsers via the tree-sitter CLI.
+    # Distro packages are often missing or stale; cargo is the reliable path.
+    if ! command -v tree-sitter &> /dev/null; then
+        install_optional_pkg tree-sitter-cli
+        if ! command -v tree-sitter &> /dev/null && command -v cargo &> /dev/null; then
+            cargo install tree-sitter-cli
+        fi
     fi
 
     if ! command -v eza &> /dev/null; then
