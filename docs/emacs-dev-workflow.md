@@ -101,7 +101,8 @@ In this config, Python buffers then behave like this:
 - `M-x compile` runs the current file with the project interpreter when possible
 - `C-c p t` runs pytest for the current file when you are visiting one
 - if `./.venv/bin/python` exists, Emacs prefers it automatically
-- if `ty` is installed, Eglot uses it for Python language intelligence
+- if `basedpyright-langserver` is installed, Eglot uses it for Python language intelligence
+- `ruff` handles linting and formatting; Apheleia runs it on save
 
 ---
 
@@ -199,7 +200,7 @@ This config is optimized for keyboard-first navigation.
 - `C-c s i` uses `consult-imenu` to jump to classes, functions, methods, headings, and other symbols
 - `M-g g` goes to a line number
 - `C-c s l` searches within the current buffer
-- `C-c j` uses `avy` to jump to visible text on screen
+- `M-g o` jumps by outline heading
 
 ### Move by symbol intelligence
 

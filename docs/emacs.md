@@ -2,72 +2,93 @@
 
 **Package manager**: use-package
 **LSP client**: Eglot
-**Theme**: Modus Vivendi
+**Theme**: Modus Operandi Tinted (light), toggle to Vivendi with `C-c t t`
 **Config**: `~/.emacs.d/`
 **Project layer**: built-in `project.el`
+**Notes**: Denote
 **Health check**: `C-c e h`
 
 ---
 
+A small, modern Emacs 30 configuration for software engineering and research:
+roughly 550 lines across six modules, with 30 packages. Everything Emacs now
+does well enough on its own — projects, LSP, diagnostics, tree-sitter,
+which-key, editorconfig — is used from the built-ins rather than replaced.
+
+Run `C-c e h` on a new machine. It reports every external tool the config
+expects and is the fastest way to find a missing language server.
+
 ## Structure
 
 ```text
-early-init.el
-init.el
-elisp/
-  core/
-    el-packages.el
-    el-core.el
-    el-bindings.el
-  plugins/
-    el-theme.el
-    el-completion.el
-    el-git.el
-    el-lsp.el
-    el-languages.el
-    el-org.el
-    el-tools.el
+~/.emacs.d/
+  early-init.el        GC, UI chrome, native-comp guard
+  init.el              package bootstrap, ordered module loading
+  elisp/
+    core.el            editor defaults, session, theme, fonts, health check
+    completion.el      vertico, orderless, marginalia, consult, embark, corfu, cape
+    dev.el             project, eglot, apheleia, magit, forge, diff-hl, vterm, dape
+    langs.el           tree-sitter grammars and per-language setup
+    notes.el           org, denote, org-modern, olivetti, jinx, org-present, gptel
+    keys.el            every global binding, loaded last
+  custom.el            machine-local; holds package-selected-packages
+  local-pre.el         optional, loaded before modules; untracked
+  local-post.el        optional, loaded after modules; untracked
 ```
 
----
+Modules load in dependency order. `keys.el` is last so every map it binds
+into already exists.
 
 ## Philosophy
 
-This Emacs config now mirrors the Neovim setup: completion, LSP, formatting, project tasks, Git, notes, and a narrow language stack. It intentionally avoids a built-in DAP/debug layer and avoids broad proof/research language packages by default.
+- **Built-ins first.** `project.el` over projectile, `eglot` over lsp-mode,
+  `flymake` over flycheck, tree-sitter modes over hand-written ones.
+- **Nothing configured that is not used.** No language, note system, or tool
+  appears here unless it is part of the actual workflow.
+- **Fail visibly, not silently.** Language servers start only when their
+  binary exists (`my/eglot-ensure-when-executable`), and `C-c e h` names what
+  is missing instead of leaving a mode quietly broken.
+- **One prefix per concern.** `C-c p` projects, `C-c s` search, `C-c l` LSP,
+  `C-c n` notes, `C-c d` debug, `C-c f` REPLs, `C-c t` toggles, `C-c e` Emacs.
 
----
+## Language support
 
-## Language Support
+| Language | Mode | LSP | Formatter |
+| :--- | :--- | :--- | :--- |
+| TypeScript | `typescript-ts-mode` | vtsls | prettier |
+| React / TSX | `tsx-ts-mode` | vtsls | prettier |
+| JavaScript | `js-ts-mode` | vtsls | prettier |
+| Rust | `rust-ts-mode` | rust-analyzer | rustfmt |
+| OCaml | `tuareg-mode` | ocamllsp | ocamlformat |
+| Python | `python-ts-mode` | basedpyright | ruff |
+| SQL | `sql-mode` | — | sql-formatter |
+| YAML | `yaml-ts-mode` | yaml-language-server | prettier |
+| Dockerfile | `dockerfile-ts-mode` | docker-langserver | — |
+| JSON / TOML | `json-ts-mode`, `toml-ts-mode` | — | prettier |
+| Markdown | `markdown-mode` | — | prettier |
 
-| Language | Mode / Tooling |
-| :--- | :--- |
-| C/C++ | built-in C/C++ or tree-sitter modes, clangd, clang-format |
-| Python | python / python-ts-mode, Ruff, Ty, pytest helpers |
-| Rust | rust-ts-mode or rust-mode, rust-analyzer, cargo |
-| TypeScript / JavaScript / React | built-in js/typescript tree-sitter modes, vtsls, Prettier |
-| Vue | mhtml-mode, Prettier |
-| CSS | css/css-ts-mode, CSS LSP, Prettier |
-| SQL | sql-mode, sql-formatter |
-| OCaml | tuareg, ocamllsp, merlin fallback |
-| Haskell | haskell-mode, HLS |
-| JSON / YAML / Markdown | built-in/json-ts, yaml-mode, markdown-mode, Prettier |
+Emacs ships tree-sitter support but no grammars. Install them once with
+`C-c e g` (`my/install-missing-grammars`); they compile into
+`~/.emacs.d/tree-sitter/`.
 
----
+Formatting runs on save through Apheleia, asynchronously, without moving
+point.
 
-## Key Packages
+## Key packages
 
-| Area | Packages |
-| :--- | :--- |
-| Completion | vertico, orderless, marginalia, consult, embark, corfu, cape |
-| Git | magit, diff-hl |
-| Project/tasks | project.el, compile, vterm, consult-ripgrep |
-| Formatting | apheleia |
-| Editing | avy, editorconfig, wgrep |
-| UI | modus-themes, doom-modeline, nerd-icons, rainbow-delimiters, which-key |
-| Notes | org, org-roam, citar, org-noter |
-| Writing | olivetti, jinx, writegood-mode |
+- **Completion** — vertico, orderless, marginalia, consult, embark,
+  embark-consult, corfu, cape
+- **Git** — magit, forge, diff-hl
+- **Development** — apheleia, wgrep, vterm, dape
+- **Appearance** — modus-themes, doom-modeline, nerd-icons (plus completion
+  and corfu variants), rainbow-delimiters
+- **Languages** — tuareg, markdown-mode
+- **Notes and writing** — denote, org-modern, olivetti, jinx, org-present
+- **Research** — gptel
 
----
+`package-selected-packages` in `custom.el` is kept in sync with the
+`use-package` declarations, which is what makes `M-x package-autoremove` safe
+to run.
 
 ## Keybindings
 
@@ -75,75 +96,153 @@ This Emacs config now mirrors the Neovim setup: completion, LSP, formatting, pro
 
 | Key | Action |
 | :--- | :--- |
-| `ESC` | Keyboard escape/quit |
 | `M-o` | Other window |
 | `C-c w` | Delete window |
-| `C-c r` | Replace string |
-| `C-c e h` | Emacs health check |
+| `C-x b` | Switch buffer (consult) |
+| `M-y` | Yank history |
+| `C-.` | Embark act |
+| `C-h B` | Every binding in this buffer |
+| `<escape>` | Quit / cancel |
 
-### Search
+### Search — `C-c s`
 
 | Key | Action |
 | :--- | :--- |
-| `C-c s l` | Search current buffer |
-| `C-c s s` | Search current project |
-| `C-c s r` | Ripgrep from chosen root |
-| `C-c s i` | Consult imenu |
-| `C-c s o` | Consult outline |
-| `C-c j` | Avy jump |
+| `C-c s s` | Ripgrep the project |
+| `C-c s r` | Ripgrep, prompting for a directory |
+| `C-c s l` | Search lines in this buffer |
+| `C-c s i` | Jump to a symbol (imenu) |
+| `C-c s o` | Jump by outline heading |
 
-### Projects
+`M-g g` goto-line, `M-g i` imenu and `M-g o` outline are bound directly too.
+
+### Projects — `C-c p`
 
 | Key | Action |
 | :--- | :--- |
 | `C-c p p` | Switch project |
-| `C-c p P` | Switch project and find file |
-| `C-c p f` | Find file in current project |
-| `C-c p b` | Switch project buffer |
-| `C-c p D` | Project Dired |
-| `C-c p s` | Search project |
-| `C-c p m` | Compile/build project |
-| `C-c p t` | Run project tests |
-| `C-c p v` | Project vterm |
+| `C-c p P` | Switch project and find a file |
+| `C-c p f` | Find file in project |
+| `C-c p b` | Switch buffer in project |
+| `C-c p a` | Remember this directory as a project |
+| `C-c p d` / `D` | Find directory / Dired |
+| `C-c p o` | Dired at project root |
+| `C-c p m` | Compile |
+| `C-c p t` | Test (mode-aware) |
+| `C-c p v` | vterm at project root |
 
-### LSP
+`C-c p t` picks its command from the major mode: the project's npm, pnpm,
+yarn or bun `test` script for TS and JS, else `cargo test`, `dune test`, or
+pytest.
+
+### LSP — `C-c l`
 
 | Key | Action |
 | :--- | :--- |
-| `C-c l a` | Code actions |
-| `C-c l d` | Find definition |
+| `C-c l d` | Go to definition |
 | `C-c l D` | Find references |
 | `C-c l i` | Find implementation |
 | `C-c l t` | Find type definition |
+| `C-c l r` | Rename across the project |
+| `C-c l a` | Code actions |
 | `C-c l f` | Format buffer |
-| `C-c l r` | Rename symbol |
 | `C-c l e` | Buffer diagnostics |
-| `C-c l n` / `C-c l p` | Next / previous diagnostic |
+| `C-c l n` / `p` | Next / previous error |
 
-### REPLs
+`M-g n` and `M-g p` also move between diagnostics.
 
-| Key | Action |
-| :--- | :--- |
-| `C-c f h` | Haskell REPL |
-| `C-c f o` | OCaml REPL |
-| `C-c f e` | Emacs Lisp REPL |
-
-### Notes
+### Git — `C-x g`
 
 | Key | Action |
 | :--- | :--- |
-| `C-c a` | Org agenda |
+| `C-x g` | Magit status |
+| `s` / `u` | Stage / unstage (file, hunk, or region) |
+| `c c` | Commit — `C-c C-c` to finish |
+| `b b` / `b c` | Checkout / create branch |
+| `P p` / `F p` | Push / pull |
+| `'` | Forge: pull requests and issues |
+| `?` | Full menu for the current context |
+
+Forge authenticates with the same token as `gh`. diff-hl marks changed lines
+in the fringe as you type.
+
+### Debugging — `C-c d`
+
+| Key | Action |
+| :--- | :--- |
+| `C-c d d` | Start dape |
+| `C-c d b` | Toggle breakpoint |
+| `C-c d n` / `i` / `o` | Next / step in / step out |
+| `C-c d c` | Continue |
+| `C-c d q` | Quit |
+
+Adapters: `debugpy` for Python, `lldb-dap` for Rust and native code.
+
+### Notes — `C-c n`
+
+| Key | Action |
+| :--- | :--- |
+| `C-c n n` | New Denote note |
+| `C-c n l` | Insert a link to another note |
+| `C-c n b` | Backlinks |
+| `C-c n r` | Rename / retag |
+| `C-c n f` | Find a note |
+| `C-c n s` | Ripgrep all notes |
+| `C-c n i` / `p` / `j` | Inbox / projects / journal |
 | `C-c c` | Org capture |
-| `C-c n i` | Open inbox |
-| `C-c n p` | Open projects |
-| `C-c n j` | Open journal |
-| `C-c n s` | Search notes |
-| `C-c n f` | Find org-roam note |
+| `C-c a` | Org agenda (`C-c a d` for the dashboard) |
 
----
+### Toggles, Emacs, LLM, REPLs
+
+| Key | Action |
+| :--- | :--- |
+| `C-c t t` | Light / dark theme |
+| `C-c t l` / `w` / `o` | Line numbers / visual line / olivetti |
+| `C-c e h` | Health check |
+| `C-c e g` | Install missing tree-sitter grammars |
+| `C-c g` / `C-c G` | gptel: send region / open chat |
+| `C-c f o` `p` `n` `s` `e` | REPL: OCaml, Python, Node, SQL, elisp |
+| `M-$` | Correct spelling at point |
+
+Pause after any prefix and which-key lists what follows.
+
+## External tools
+
+Required: `git`, `rg`, `node`.
+
+Expected but optional: `vtsls`, `rust-analyzer`, `ocamllsp`,
+`basedpyright-langserver`, `yaml-language-server`, `docker-langserver`,
+`ruff`, `prettier`, `sql-formatter`, `ocamlformat`, `debugpy`, `lldb-dap`,
+`gh`, `enchant`, `fd`.
+
+```sh
+npm install -g vtsls basedpyright yaml-language-server \
+               dockerfile-language-server-nodejs sql-formatter prettier
+rustup component add rust-analyzer          # the rustup shim alone is not enough
+opam install ocaml-lsp-server ocamlformat
+brew install enchant                        # jinx will not build without it
+uv tool install debugpy
+ln -sf "$(xcrun --find lldb-dap)" ~/.local/bin/lldb-dap
+```
+
+`gptel` reads its key from `~/.authinfo.gpg`, never from the environment, so
+it cannot leak into this repo:
+
+```
+machine api.anthropic.com login apikey password sk-ant-...
+```
 
 ## Validation
 
 ```sh
-emacs --batch -l ~/.emacs.d/init.el --eval '(message "emacs config loaded")'
+emacs --batch -l ~/.emacs.d/init.el --eval '(princ "ok")'   # starts clean
+emacs --batch --eval '(byte-recompile-directory "~/.emacs.d/elisp" 0 t)'
+/usr/bin/time -p emacs --batch -l ~/.emacs.d/init.el --eval '(princ "")'
 ```
+
+Startup is about 0.27s. Delete any `.elc` files afterwards — a stale `.elc`
+shadowing a chezmoi-updated `.el` is a real hazard.
+
+In `--batch`, flymake's timers never run, so `flymake-diagnostics` reports
+nothing even when the server has answered. Inspect `eglot--diagnostics`
+instead when testing non-interactively.

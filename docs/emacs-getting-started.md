@@ -32,10 +32,12 @@ Almost everything hangs off seven prefixes. Learn these and you can find the res
 | `C-c p`         | **Project** — find files, search, compile, test, shell     |
 | `C-c l`         | **LSP** — definitions, references, rename (in code only)    |
 | `C-c s`         | **Search** & navigation                                    |
-| `C-c n`         | **Notes** & research (org-roam)                            |
+| `C-c n`         | **Notes** (Denote) and the org inbox                       |
 | `C-c c` / `C-c a` | **Capture** / **Agenda**                                 |
-| `C-c f`         | Language **REPLs** (Haskell `h`, OCaml `o`, Elisp `e`)      |
-| `C-x g`         | **Magit** (git)                                            |
+| `C-c d`         | **Debug** (dape)                                           |
+| `C-c f`         | Language **REPLs** (OCaml `o`, Python `p`, Node `n`, Elisp `e`) |
+| `C-c t`         | **Toggles** — theme (`t`), line numbers, centring          |
+| `C-x g`         | **Magit** (git) — `'` for Forge pull requests              |
 
 Run a **health check** any time with `C-c e h` — it lists which external tools
 (ripgrep, language servers, formatters) are actually installed.
@@ -68,8 +70,8 @@ Code buffers get relative line numbers and a fill-column rule; prose buffers sof
 
 | Key            | Action                                            |
 | :------------- | :------------------------------------------------ |
-| `C-c j`        | **Avy** — type a char, then its highlight, to jump |
 | `C-c s l`      | Search lines in this buffer (jump on `RET`)       |
+| `C-c s i`      | Jump to a function / heading (imenu)              |
 | `M-g i`        | Jump to a function / heading (imenu)              |
 | `M-g o`        | Jump by outline                                   |
 | `M-g g`        | Go to line number                                 |
@@ -77,7 +79,7 @@ Code buffers get relative line numbers and a fill-column rule; prose buffers sof
 The classic motions still apply: `C-n`/`C-p` line, `C-f`/`C-b` char, `M-f`/`M-b` word,
 `C-a`/`C-e` line ends, `M-<`/`M->` buffer ends.
 
-> **Practice** — `C-c s l`, type a word that's on screen, `RET` to land on it. Then `C-c j` and teleport to any visible character.
+> **Practice** — `C-c s l`, type a word that's on screen, `RET` to land on it. Then `C-c s i` and jump straight to a function by name.
 
 ---
 
@@ -183,8 +185,7 @@ Changed lines are marked in the gutter (diff-hl) as you edit.
 
 ## 7. Notes and tasks (org)
 
-Four files live in `~/org/` (created automatically on first start): `inbox.org`,
-`projects.org`, `papers.org`, `journal.org`.
+Three files live in `~/org/`: `inbox.org`, `projects.org`, `journal.org`.
 
 **Capture** from anywhere with `C-c c`, then pick a template:
 
@@ -193,19 +194,19 @@ Four files live in `~/org/` (created automatically on first start): `inbox.org`,
 | `t` | TODO → inbox               |
 | `i` | Idea → inbox               |
 | `p` | Project task → projects    |
-| `R` | Paper to read → papers     |
 | `j` | Journal entry              |
 
-Finish a capture with `C-c C-c`, abort with `C-c C-k`.
+Finish a capture with `C-c C-c`, abort with `C-c C-k`. Every capture records a
+link back to the file and line you were on, which is most of the value when you
+capture from inside code.
 
 **Review** with the agenda `C-c a`, then a view:
 
 | Key | View                                           |
 | :-- | :--------------------------------------------- |
-| `d` | Dashboard (today + inbox + next + research/coding) |
+| `d` | Dashboard (today + next + inbox + coding/research) |
 | `r` | Research items                                 |
 | `w` | Writing items                                  |
-| `p` | Projects                                       |
 
 In a heading, set state with `C-c C-t` (or cycle with `S-→`): **TODO → NEXT → WAIT →
 DONE/CANCELLED**. Tag with `@research`, `@coding`, `@writing`, `@admin`. Quick file
@@ -215,39 +216,42 @@ access: `C-c n i` (inbox), `C-c n p` (projects), `C-c n j` (journal).
 
 ---
 
-## 8. Research: org-roam + citations
+## 8. Durable notes: Denote
 
-**org-roam** is your linked note network (a Zettelkasten):
+Org holds things with a *state* — a task that is TODO and later DONE. **Denote**
+holds things with a *life* — an idea you will link to and build on. Notes live in
+`~/notes/` as plain files whose names carry the metadata:
+
+```
+20260726T091235--eglot-setup-notes__emacs_tools.org
+└── identifier ─┘  └─── title ───┘  └── keywords ─┘
+```
+
+No database, nothing to rebuild or corrupt, and `rg` works on them because they
+are just files.
 
 | Key       | Action                                             |
 | :-------- | :------------------------------------------------- |
-| `C-c n f` | Find or **create** a note (type a title)           |
-| `C-c n I` | Insert a link to another note while writing        |
-| `C-c n c` | Capture with a template: default / project / literature |
-| `C-c n b` | Toggle the **backlinks** panel (what links here)   |
-| `C-c n d` | Jump to today's daily note                         |
-| `C-c n l` | Browse literature notes                            |
+| `C-c n n` | **Create** a note (prompts for title, then keywords) |
+| `C-c n l` | Insert a link to another note while writing        |
+| `C-c n b` | **Backlinks** — what links here                    |
+| `C-c n r` | Rename or retag (rewrites the filename correctly)  |
+| `C-c n f` | Find a note                                        |
 | `C-c n s` | Ripgrep across all notes                           |
 
-**Citations (citar)** — keep references in `~/org/references.bib` and PDFs in
-`~/org/pdfs/`. Inside an org buffer:
+Links are stored by identifier, not filename, so renaming a note never breaks a
+link pointing at it.
 
-| Key       | Action                                   |
-| :-------- | :--------------------------------------- |
-| `C-c b i` | Insert a citation                        |
-| `C-c b o` | Open the cited paper's PDF / link        |
-| `C-c b n` | Open (or create) that paper's note       |
-| `C-c N`   | **org-noter** — annotate a PDF page-by-page next to your notes |
+Note that `C-c n n` creates the *buffer*; the file reaches disk when you save
+with `C-x C-s`. An abandoned note leaves nothing behind.
 
-Writing aids: org buffers open in a centered column (olivetti); `M-$` corrects the
-word at point (jinx); clumsy phrasing is highlighted (writegood).
+Writing aids: org buffers render through org-modern, open in a centered column
+(olivetti), and `M-$` corrects the word at point (jinx).
 
-**A paper, end to end:** add it to `references.bib` → `C-c b n` to spin up its
-literature note → read the PDF with `C-c N`, capturing notes against page locations →
-`C-c n I` to link it into a project note → it now appears in that project's
-**backlinks** (`C-c n b`).
+**Presenting:** any org file with top-level headings is already a deck. `M-x
+org-present`, then `<right>`/`<left>` to move and `C-c C-q` to quit.
 
-> **Practice** — `C-c n f`, type `Test Note`, `RET` — you just created a roam note. Write a line, `C-c n I` to link another note, then `C-c n b` to see the backlink.
+> **Practice** — `C-c n n`, title it `Test Note`, tag it `emacs`, `C-x C-s`. Write a line, `C-c n l` to link another note, then `C-c n b` to see the backlink.
 
 ---
 
@@ -290,19 +294,22 @@ This config is built so you can *find* commands instead of recalling them:
 | Open a file               | `C-x C-f`                              |
 | Switch buffer             | `C-x b`                                |
 | Find file in project      | `C-c p f`                              |
-| Search project            | `C-c p s`                              |
-| Jump on screen            | `C-c j`                                |
+| Search project            | `C-c s s`                              |
+| Jump to a symbol          | `C-c s i`                              |
 | Go to definition          | `C-c l d` (back: `M-,`)                |
 | Rename symbol             | `C-c l r`                              |
+| Next / previous error     | `M-g n` / `M-g p`                      |
 | Compile / test            | `C-c p m` / `C-c p t`                  |
 | Project shell             | `C-c p v`                              |
-| Git                       | `C-x g`                                |
+| Git                       | `C-x g` (`'` for pull requests)        |
+| Debug                     | `C-c d d` (breakpoint: `C-c d b`)      |
 | Capture a note/task       | `C-c c`                                |
 | Agenda                    | `C-c a`                                |
-| Find/create roam note     | `C-c n f`                              |
-| Insert note link          | `C-c n I`                              |
+| New note                  | `C-c n n`                              |
+| Insert note link          | `C-c n l`                              |
 | Backlinks                 | `C-c n b`                              |
-| Insert citation           | `C-c b i`                              |
+| Ask an LLM                | `C-c g` / `C-c G`                      |
+| Toggle light/dark         | `C-c t t`                              |
 | Spell-correct word        | `M-$`                                  |
 | Health check              | `C-c e h`                              |
 
@@ -311,5 +318,6 @@ This config is built so you can *find* commands instead of recalling them:
 ## Where to go next
 
 - **[Emacs Development Workflow](emacs-dev-workflow.md)** — deeper on project navigation, the edit/build/test loop, and refactoring.
-- **[Emacs Org Workflow](emacs-org-workflow.md)** — deeper on the notes, research, papers, and writing system.
+- **[Emacs TypeScript Workflow](emacs-ts-workflow.md)** — the same loop end to end in TypeScript, from `npm init` to the first commit.
+- **[Emacs Notes Workflow](emacs-org-workflow.md)** — deeper on Denote, capture, writing, and presentations.
 - **[Emacs Setup Overview](emacs.md)** — the package/keybinding reference and per-language tooling.
