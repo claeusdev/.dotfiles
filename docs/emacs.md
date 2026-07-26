@@ -246,3 +246,43 @@ shadowing a chezmoi-updated `.el` is a real hazard.
 In `--batch`, flymake's timers never run, so `flymake-diagnostics` reports
 nothing even when the server has answered. Inspect `eglot--diagnostics`
 instead when testing non-interactively.
+
+## Troubleshooting
+
+### "Vertico detected an error" in the minibuffer
+
+Vertico catches errors raised by annotators and reports them, so the name in
+the message is rarely the culprit. Read the backtrace from the top: the first
+few frames name the real offender.
+
+The known instance of this is a **`compat` miscompilation**. If the backtrace
+shows
+
+```
+vertico--debug((wrong-number-of-arguments (1 . 1) 3))
+seconds-to-string(... expanded abbrev)
+marginalia--time-relative(...)
+```
+
+then `marginalia.el` was byte-compiled at install time in an environment where
+`compat-31` was not loaded. The `compat-call` macro then expanded to the
+*native* `seconds-to-string` (which takes one argument on Emacs 30) instead of
+`compat--seconds-to-string` (which takes four). The wrong call is baked into
+the `.elc`, so it survives restarts.
+
+Fix by recompiling the package with compat present:
+
+```sh
+emacs --batch --eval "(progn (package-initialize) (require 'compat) \
+  (require 'compat-31 nil t) \
+  (byte-compile-file \"~/.emacs.d/elpa/marginalia-*/marginalia.el\"))"
+```
+
+Or from inside Emacs, `M-x package-recompile RET marginalia RET`.
+`M-x package-recompile-all` fixes the whole tree if more than one package is
+affected.
+
+To check whether any other package is exposed to the same failure, compare
+each `compat-call` site's argument count against the native function's arity —
+only calls that pass *more* arguments than the native function accepts can
+break this way.
