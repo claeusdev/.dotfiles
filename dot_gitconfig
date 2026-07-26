@@ -60,3 +60,9 @@
 	# zdiff3 shows the common ancestor in conflicts, which makes
 	# three-way merges far easier to reason about than the default.
 	conflictStyle = zdiff3
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential

@@ -1,1 +1,4 @@
 eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+
+# User-local binaries (uv tools, standalone installers)
+export PATH="$HOME/.local/bin:$PATH"

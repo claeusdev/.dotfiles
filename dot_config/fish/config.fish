@@ -141,3 +141,24 @@ end
 if command -q starship
     starship init fish | source
 end
+
+# pnpm
+set -gx PNPM_HOME "/Users/nanamanu/.local/share/pnpm"
+if not string match -q -- $PNPM_HOME $PATH
+  set -gx PATH "$PNPM_HOME" $PATH
+end
+# pnpm end
+
+# Added by Antigravity
+fish_add_path /Users/nanamanu/.antigravity/antigravity/bin
+
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init2.fish 2>/dev/null || :
+
+
+# Added by Antigravity CLI installer
+set -gx PATH "/Users/nanamanu/.local/bin" $PATH
+
+# Added by Antigravity IDE
+fish_add_path /Users/nanamanu/.antigravity-ide/antigravity-ide/bin

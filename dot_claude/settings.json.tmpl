@@ -1,9 +1,13 @@
 {
+  "model": "claude-fable-5[1m]",
   "statusLine": {
     "type": "command",
     "command": "bash {{ .chezmoi.homeDir }}/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "lua-lsp@claude-plugins-official": true
-  }
+    "lua-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
+  },
+  "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true
 }
