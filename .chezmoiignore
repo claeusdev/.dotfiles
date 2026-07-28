@@ -19,5 +19,8 @@ LICENSE
 .claude/session-env/
 .claude/shell-snapshots/
 .emacs.d/var/
+.emacs.d/elpa/
+.emacs.d/eln-cache/
+.emacs.d/auto-save-list/
 .emacs.d/recentf
 .config/fish/fish_variables
