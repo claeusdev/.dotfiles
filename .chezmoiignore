@@ -19,3 +19,5 @@ LICENSE
 .claude/session-env/
 .claude/shell-snapshots/
 .emacs.d/var/
+.emacs.d/recentf
+.config/fish/fish_variables

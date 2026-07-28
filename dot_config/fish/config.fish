@@ -125,11 +125,16 @@ switch (uname)
     case Darwin
         # Antigravity (macOS only)
         test -d "$HOME/.antigravity/antigravity/bin" && fish_add_path "$HOME/.antigravity/antigravity/bin"
+        test -d "$HOME/.antigravity-ide/antigravity-ide/bin" && fish_add_path "$HOME/.antigravity-ide/antigravity-ide/bin"
         # Coursier (Scala) - macOS location
         test -d "$HOME/Library/Application Support/Coursier/bin" && set -gx PATH "$PATH:$HOME/Library/Application Support/Coursier/bin"
+        # OrbStack - command-line tools and integration (macOS only)
+        test -r "$HOME/.orbstack/shell/init2.fish" && source "$HOME/.orbstack/shell/init2.fish" 2>/dev/null; or true
     case Linux
         # Coursier (Scala) - Linux location
         test -d "$HOME/.local/share/coursier/bin" && set -gx PATH "$PATH:$HOME/.local/share/coursier/bin"
+        # opencode (Linux only)
+        test -d "$HOME/.opencode/bin" && fish_add_path "$HOME/.opencode/bin"
 end
 
 # mise (version manager)
@@ -141,24 +146,3 @@ end
 if command -q starship
     starship init fish | source
 end
-
-# pnpm
-set -gx PNPM_HOME "/Users/nanamanu/.local/share/pnpm"
-if not string match -q -- $PNPM_HOME $PATH
-  set -gx PATH "$PNPM_HOME" $PATH
-end
-# pnpm end
-
-# Added by Antigravity
-fish_add_path /Users/nanamanu/.antigravity/antigravity/bin
-
-# Added by OrbStack: command-line tools and integration
-# This won't be added again if you remove it.
-source ~/.orbstack/shell/init2.fish 2>/dev/null || :
-
-
-# Added by Antigravity CLI installer
-set -gx PATH "/Users/nanamanu/.local/bin" $PATH
-
-# Added by Antigravity IDE
-fish_add_path /Users/nanamanu/.antigravity-ide/antigravity-ide/bin
