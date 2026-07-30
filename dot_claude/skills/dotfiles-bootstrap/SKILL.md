@@ -22,7 +22,11 @@ installs packages ONLY — all config files come from `chezmoi apply`.
 2. `nvim '+Lazy sync' +qa` — install Neovim plugins.
 3. In tmux: `prefix + I` — install tmux plugins.
 4. `gh auth login` — GitHub CLI; Emacs Forge reuses this token.
-5. Linux only: log out/in for the Docker group.
+5. `git clone git@github.com:naamanu/notes.git ~/workspace/learn/notes` — the
+   `~/.claude/skills/*` symlinks are chezmoi-managed but point into this repo's
+   `.claude/skills/`; they dangle (all global Claude skills silently missing)
+   until it exists at exactly this path.
+6. Linux only: log out/in for the Docker group.
 
 ## Neovim first run
 
