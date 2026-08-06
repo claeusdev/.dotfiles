@@ -39,14 +39,14 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - Shell: fish, tmux, starship, zoxide
 - CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, btop, yazi, atuin, glow, dust, procs, hyperfine, tokei
 - Languages: Node.js, Python (uv), Rust, Go, Lua
-- FP/Research: OCaml, SML, Lisp, Racket, Coq, Agda
+- FP: OCaml (opam, dune, merlin, ocaml-lsp), Lisp (sbcl)
 - ML/AI & Scientific: jupyterlab, ipython, pandoc, typst, ollama
 - MLOps (via uv tool): mlflow, dvc, tensorboard
 - LSP/Formatters: language servers, prettier, sql-formatter, stylua, ruff, basedpyright, shellcheck
 - Treesitter: tree-sitter CLI (parser compilation for Neovim)
 - Git: gh, lazygit, git-delta
 - Databases: PostgreSQL, SQLite
-- Containers: Docker, lazydocker
+- Containers: Docker + lazydocker — **opt-in**, set `INSTALL_DOCKER=1`
 - Fonts: JetBrains Mono, Inconsolata (Nerd Font patched)
 
 ### macOS Only
@@ -62,7 +62,7 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - [ ] Restart terminal (or log out/in)
 - [ ] `nvim '+Lazy sync' +qa` — install Neovim plugins
 - [ ] Open tmux, press `prefix + I` — install tmux plugins
-- [ ] Log out/in for Docker group changes (Linux)
+- [ ] Log out/in for Docker group changes (Linux, only if `INSTALL_DOCKER=1`)
 - [ ] `gh auth login` — authenticate GitHub CLI
 - [ ] `uv tool install jupyterlab --with ipykernel` — verify JupyterLab works
 - [ ] `mlenv test-project ml` — test ML project bootstrapping

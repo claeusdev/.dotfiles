@@ -11,6 +11,14 @@
 
 FAILED_PACKAGES=()
 
+# ── Optional components ───────────────────────────────────────
+#
+# Docker is heavyweight and not needed on every machine, so it is opt-in:
+#
+#   INSTALL_DOCKER=1 bash <(curl -s https://raw.githubusercontent.com/naamanu/.dotfiles/main/setup.sh)
+#
+INSTALL_DOCKER="${INSTALL_DOCKER:-0}"
+
 echo "========================================="
 echo "  Dotfiles Bootstrap"
 echo "========================================="
@@ -156,30 +164,19 @@ if [ "$PLATFORM" = "mac" ]; then
     brew_install go rust lua uv
 
     echo ""
-    echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
+    echo "Installing C/C++, OCaml, and Lisp toolchains..."
     brew_install llvm bear
-    brew_install ocaml opam dune ocaml-lsp ocamlformat merlin
-    brew_install smlnj sbcl racket
-    brew_install coq agda
+    brew_install ocaml opam dune
+    brew_install sbcl
 
-    if brew info isabelle > /dev/null 2>&1; then
-        brew_install isabelle
-    else
-        echo "Skipping Isabelle (formula not available in this Homebrew setup)."
-    fi
-
-    if brew info coq-lsp > /dev/null 2>&1; then
-        brew_install coq-lsp
-    else
-        echo "Skipping coq-lsp (install via OPAM if needed: opam install coq-lsp)."
-    fi
-
-    if command -v cargo &> /dev/null; then
-        cargo install millet || true
-    fi
-
-    if command -v raco &> /dev/null; then
-        raco pkg install --auto racket-langserver || true
+    # ocaml-lsp-server, ocamlformat and merlin are OPAM packages, not Homebrew
+    # formulae — installing them with brew always failed silently.
+    if command -v opam &> /dev/null; then
+        if [ ! -d "$HOME/.opam" ]; then
+            opam init -a --disable-sandboxing --shell-setup || true
+        fi
+        eval "$(opam env 2>/dev/null)" || true
+        opam install -y ocaml-lsp-server ocamlformat merlin || true
     fi
 
     echo ""
@@ -191,9 +188,13 @@ if [ "$PLATFORM" = "mac" ]; then
     brew_install postgresql@16 sqlite redis
 
     echo ""
-    echo "Installing Docker and container tools..."
-    brew_cask_install docker
-    brew_install lazydocker
+    if [ "$INSTALL_DOCKER" = "1" ]; then
+        echo "Installing Docker and container tools..."
+        brew_cask_install docker-desktop
+        brew_install lazydocker
+    else
+        echo "Skipping Docker (set INSTALL_DOCKER=1 to install Docker Desktop + lazydocker)."
+    fi
 
     echo ""
     echo "Installing cloud and DevOps tools..."
@@ -410,7 +411,7 @@ elif [ "$PLATFORM" = "linux" ]; then
     $PKG_INSTALL lua5.4 || $PKG_INSTALL lua || true
 
     echo ""
-    echo "Installing C/C++, OCaml/SML, Lisp/Racket, and theorem proving toolchains..."
+    echo "Installing C/C++, OCaml, and Lisp toolchains..."
     if [ "$PKG_MGR" = "apt" ]; then
         install_pkg clang clangd lldb bear ocaml opam
     elif [ "$PKG_MGR" = "dnf" ]; then
@@ -421,19 +422,14 @@ elif [ "$PLATFORM" = "linux" ]; then
 
     install_optional_pkg dune
     install_optional_pkg ocaml-dune
-    install_optional_pkg smlnj
     install_optional_pkg sbcl
-    install_optional_pkg racket
-    install_optional_pkg coq
-    install_optional_pkg agda
-    install_optional_pkg isabelle
 
     if command -v opam &> /dev/null; then
         if [ ! -d "$HOME/.opam" ]; then
             opam init -a --disable-sandboxing --shell-setup || true
         fi
         eval "$(opam env 2>/dev/null)" || true
-        opam install -y ocaml-lsp-server ocamlformat merlin coq-lsp || true
+        opam install -y ocaml-lsp-server ocamlformat merlin || true
     fi
 
     echo ""
@@ -444,11 +440,6 @@ elif [ "$PLATFORM" = "linux" ]; then
 
     if command -v cargo &> /dev/null; then
         cargo install stylua || true
-        cargo install millet || true
-    fi
-
-    if command -v raco &> /dev/null; then
-        raco pkg install --auto racket-langserver || true
     fi
 
     install_pkg shellcheck
@@ -464,24 +455,28 @@ elif [ "$PLATFORM" = "linux" ]; then
     fi
 
     echo ""
-    echo "Installing Docker..."
-    if ! command -v docker &> /dev/null; then
-        if [ "$PKG_MGR" = "apt" ]; then
-            curl -fsSL https://get.docker.com -o get-docker.sh
-            sudo sh get-docker.sh
-            sudo usermod -aG docker "$USER"
-            rm get-docker.sh
-        else
-            install_pkg docker docker-compose
-            sudo systemctl start docker
-            sudo systemctl enable docker
-            sudo usermod -aG docker "$USER"
+    if [ "$INSTALL_DOCKER" = "1" ]; then
+        echo "Installing Docker..."
+        if ! command -v docker &> /dev/null; then
+            if [ "$PKG_MGR" = "apt" ]; then
+                curl -fsSL https://get.docker.com -o get-docker.sh
+                sudo sh get-docker.sh
+                sudo usermod -aG docker "$USER"
+                rm get-docker.sh
+            else
+                install_pkg docker docker-compose
+                sudo systemctl start docker
+                sudo systemctl enable docker
+                sudo usermod -aG docker "$USER"
+            fi
         fi
-    fi
 
-    if ! command -v lazydocker &> /dev/null; then
-        echo "Installing lazydocker..."
-        curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash || FAILED_PACKAGES+=(lazydocker)
+        if ! command -v lazydocker &> /dev/null; then
+            echo "Installing lazydocker..."
+            curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash || FAILED_PACKAGES+=(lazydocker)
+        fi
+    else
+        echo "Skipping Docker (set INSTALL_DOCKER=1 to install Docker + lazydocker)."
     fi
 
     echo ""
@@ -621,7 +616,11 @@ echo "Manual next steps:"
 echo "  1. Restart your terminal (or log out and back in)"
 echo "  2. Install Neovim plugins:  nvim '+Lazy sync' +qa"
 echo "  3. Install tmux plugins:    prefix + I  (inside tmux)"
-if [ "$PLATFORM" = "linux" ]; then
+if [ "$PLATFORM" = "linux" ] && [ "$INSTALL_DOCKER" = "1" ]; then
 echo "  4. Log out/in for Docker group changes"
+fi
+if [ "$INSTALL_DOCKER" != "1" ]; then
+echo ""
+echo "Docker was skipped. To include it, re-run with INSTALL_DOCKER=1."
 fi
 echo ""
