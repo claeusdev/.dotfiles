@@ -48,8 +48,12 @@ bash <(curl -s https://raw.githubusercontent.com/naamanu/.dotfiles/main/setup.sh
 
 Or deploy dotfiles only (no tool installation):
 ```sh
-chezmoi init --apply naamanu
+chezmoi init --apply https://github.com/naamanu/.dotfiles.git
 ```
+
+Use the full URL, not the `chezmoi init --apply naamanu` shorthand — that
+shorthand expands to `naamanu/dotfiles`, a different repo. With a GitHub SSH
+key already set up, `git@github.com:naamanu/.dotfiles.git` works too.
 
 See [INSTALL.md](INSTALL.md) for details and manual alternatives.
 

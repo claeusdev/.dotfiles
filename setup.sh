@@ -31,20 +31,71 @@ echo "Detected platform: $PLATFORM"
 
 # ── 2. Install chezmoi ────────────────────────────────────────
 
+# Ensure the install target is on PATH even if chezmoi is already present,
+# so a chezmoi installed by a previous run is found in a fresh shell.
+export PATH="$HOME/.local/bin:$PATH"
+
 if ! command -v chezmoi &> /dev/null; then
     echo ""
     echo "Installing chezmoi..."
     sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
-    export PATH="$HOME/.local/bin:$PATH"
 else
     echo "chezmoi already installed."
+fi
+
+if ! command -v chezmoi &> /dev/null; then
+    echo "Error: chezmoi installation failed; cannot deploy dotfiles."
+    exit 1
 fi
 
 # ── 3. Deploy dotfiles ────────────────────────────────────────
 
 echo ""
 echo "Initializing dotfiles with chezmoi..."
-chezmoi init --apply --ssh naamanu
+
+# Use the explicit repo URL. The `chezmoi init <username>` shorthand expands to
+# <username>/dotfiles, which is a *different* repo than this one (.dotfiles).
+DOTFILES_SSH_URL="git@github.com:naamanu/.dotfiles.git"
+DOTFILES_HTTPS_URL="https://github.com/naamanu/.dotfiles.git"
+
+# Prefer SSH, but only when a key is actually loaded and accepted by GitHub.
+# On a brand-new machine the key usually does not exist yet, and an SSH clone
+# fails before any dotfiles land. GitHub returns exit 1 on a successful auth
+# ("does not provide shell access"), so match the greeting instead of the code.
+if ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 \
+       -o BatchMode=yes -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+    DOTFILES_URL="$DOTFILES_SSH_URL"
+    echo "GitHub SSH auth OK; cloning over SSH."
+else
+    DOTFILES_URL="$DOTFILES_HTTPS_URL"
+    echo "No working GitHub SSH key; cloning over HTTPS."
+    echo "  (After adding a key, switch the remote with:"
+    echo "   chezmoi git -- remote set-url origin $DOTFILES_SSH_URL)"
+fi
+
+SOURCE_DIR="$(chezmoi source-path 2>/dev/null || echo "$HOME/.local/share/chezmoi")"
+
+DOTFILES_OK=1
+if [ -d "$SOURCE_DIR/.git" ]; then
+    # Already initialized: pull the latest and re-apply rather than re-cloning.
+    echo "Existing chezmoi source dir found; updating in place."
+    chezmoi update || DOTFILES_OK=0
+else
+    # Covers both "does not exist" and "exists but empty", the state left
+    # behind by a previously failed clone.
+    rmdir "$SOURCE_DIR" 2>/dev/null || true
+    chezmoi init --apply "$DOTFILES_URL" || DOTFILES_OK=0
+fi
+
+if [ "$DOTFILES_OK" -ne 1 ]; then
+    echo ""
+    echo "Error: failed to deploy dotfiles from $DOTFILES_URL"
+    echo "Fix the clone problem above and re-run this script; the tool"
+    echo "installation below is skipped so the failure is not buried."
+    exit 1
+fi
+
+echo "Dotfiles deployed."
 
 # ── 4. Install development tools ─────────────────────────────
 
