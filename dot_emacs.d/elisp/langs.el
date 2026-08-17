@@ -187,6 +187,13 @@ With prefix argument FORCE, reinstall grammars that are already present."
   :custom
   (utop-edit-command nil))
 
+;; Merlin features plain Eglot drops: `ocaml-eglot-construct' fills a typed
+;; hole, `ocaml-eglot-destruct' generates exhaustive match arms, plus
+;; type-driven search and enclosing-type navigation.
+(use-package ocaml-eglot
+  :after tuareg
+  :hook (tuareg-mode . ocaml-eglot))
+
 ;; --- Python --------------------------------------------------------------
 
 ;; No hand-rolled venv detection: envrc supplies the project environment where
