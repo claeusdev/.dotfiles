@@ -143,7 +143,7 @@
         modus-themes-mixed-fonts t
         modus-themes-org-blocks 'gray-background)
   :config
-  (my/load-theme my/light-theme))
+  (my/load-theme my/dark-theme))
 
 ;; First installed family wins.  `:height' is in tenths of a point, so 155 is
 ;; 15.5pt.
@@ -152,7 +152,16 @@
                                 '("JetBrainsMono Nerd Font"
                                   "FiraCode Nerd Font"
                                   "Inconsolata Nerd Font"))))
-    (set-face-attribute 'default nil :family family :height size)))
+    (set-face-attribute 'default nil :family family :height size)
+    ;; Anchor `fixed-pitch' to the same family so code blocks and tables in
+    ;; mixed-font buffers match code buffers exactly.
+    (set-face-attribute 'fixed-pitch nil :family family :height 1.0)))
+
+;; Prose face for org/markdown (`variable-pitch-mode' in notes.el).  Charter
+;; ships with macOS; on machines without any of these, prose stays monospace.
+(when-let* ((family (seq-find #'my/font-installed-p
+                              '("Charter" "Georgia"))))
+  (set-face-attribute 'variable-pitch nil :family family :height 1.05))
 
 (use-package nerd-icons
   :if my/nerd-font-installed-p)

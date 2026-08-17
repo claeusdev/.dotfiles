@@ -99,6 +99,11 @@
          (markdown-mode . olivetti-mode))
   :custom (olivetti-body-width 90))
 
+;; Prose in the `variable-pitch' face (Charter, set in core.el); code blocks,
+;; tables, and metadata stay `fixed-pitch' via `modus-themes-mixed-fonts'.
+(add-hook 'org-mode-hook #'variable-pitch-mode)
+(add-hook 'markdown-mode-hook #'variable-pitch-mode)
+
 ;; --- Math ------------------------------------------------------------------
 
 ;; Fast LaTeX math entry inside Org: ` opens a symbol menu, _ and ^ insert
