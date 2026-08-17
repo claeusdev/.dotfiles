@@ -195,6 +195,8 @@
     (optional "vtsls"                    "TypeScript / JavaScript LSP")
     (optional "rust-analyzer"            "Rust LSP")
     (optional "ocamllsp"                 "OCaml LSP")
+    (optional "clangd"                   "C/C++ LSP (Xcode CLT or llvm)")
+    (optional "clang-format"             "C/C++ format")
     (optional "basedpyright-langserver"  "Python LSP")
     (optional "yaml-language-server"     "YAML LSP")
     (optional "docker-langserver"        "Dockerfile LSP")
@@ -231,7 +233,7 @@ the project environment, so install it per project with `uv add --dev debugpy'."
                       (mapconcat
                        (lambda (l)
                          (format "%s%s" l (if (treesit-language-available-p l) "" "(!)")))
-                       '(typescript tsx javascript rust python yaml json toml dockerfile)
+                       '(typescript tsx javascript rust python c cpp yaml json toml dockerfile)
                        " ")))
       (insert "\nLocal overrides:\n")
       (dolist (file '("local-pre.el" "local-post.el" "custom.el"))

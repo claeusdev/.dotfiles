@@ -39,6 +39,7 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - Shell: fish, tmux, starship, zoxide
 - CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, btop, yazi, atuin, glow, dust, procs, hyperfine, tokei
 - Languages: Node.js, Python (uv), Rust, Go, Lua
+- C/C++: clang/clangd, clang-format, bear, lldb
 - FP: OCaml (opam, dune, merlin, ocaml-lsp, utop), Lisp (sbcl)
 - ML/AI & Scientific: jupyterlab, ipython, pandoc, typst, ollama
 - MLOps (via uv tool): mlflow, dvc, tensorboard

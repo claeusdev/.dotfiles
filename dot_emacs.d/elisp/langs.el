@@ -13,6 +13,8 @@
 ;; `M-x my/install-missing-grammars'.
 (setq treesit-language-source-alist
       '((bash       "https://github.com/tree-sitter/tree-sitter-bash")
+        (c          "https://github.com/tree-sitter/tree-sitter-c")
+        (cpp        "https://github.com/tree-sitter/tree-sitter-cpp")
         (css        "https://github.com/tree-sitter/tree-sitter-css")
         (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
         (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
@@ -51,6 +53,15 @@ With prefix argument FORCE, reinstall grammars that are already present."
                 (sh-mode         . bash-ts-mode)))
   (when (treesit-language-available-p
          (intern (string-remove-suffix "-ts-mode" (symbol-name (cdr pair)))))
+    (add-to-list 'major-mode-remap-alist pair)))
+
+;; The C++ grammar is named `cpp', which the suffix rule above cannot derive,
+;; so the C family is remapped explicitly (c-or-c++-ts-mode needs both).
+(when (and (treesit-language-available-p 'c)
+           (treesit-language-available-p 'cpp))
+  (dolist (pair '((c-mode        . c-ts-mode)
+                  (c++-mode      . c++-ts-mode)
+                  (c-or-c++-mode . c-or-c++-ts-mode)))
     (add-to-list 'major-mode-remap-alist pair)))
 
 (when (treesit-language-available-p 'typescript)
@@ -128,6 +139,21 @@ With prefix argument FORCE, reinstall grammars that are already present."
   (my/eglot-ensure-when-executable "rust-analyzer"))
 
 (add-hook 'rust-ts-mode-hook #'my/rust-mode-defaults)
+
+;; --- C / C++ -------------------------------------------------------------
+
+;; clangd reads compile_commands.json for flags; generate one in Makefile
+;; projects with `bear -- make'.  A project .clang-format or .editorconfig
+;; overrides the indentation defaults below.
+(defun my/c-mode-defaults ()
+  "Defaults for C and C++ buffers."
+  (my/set-local-compile-command "make -k")
+  (setq-local tab-width 4 fill-column 100)
+  (setq-local c-ts-mode-indent-offset 4)
+  (my/eglot-ensure-when-executable "clangd"))
+
+(dolist (hook '(c-ts-mode-hook c++-ts-mode-hook))
+  (add-hook hook #'my/c-mode-defaults))
 
 ;; --- OCaml ---------------------------------------------------------------
 

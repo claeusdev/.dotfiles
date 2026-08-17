@@ -165,7 +165,9 @@ if [ "$PLATFORM" = "mac" ]; then
 
     echo ""
     echo "Installing C/C++, OCaml, and Lisp toolchains..."
-    brew_install llvm bear
+    # clangd comes from the Xcode CLT; brew llvm is keg-only, so install
+    # clang-format standalone to get it on PATH.
+    brew_install llvm bear clang-format
     brew_install ocaml opam dune
     brew_install sbcl
 
@@ -413,10 +415,12 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo ""
     echo "Installing C/C++, OCaml, and Lisp toolchains..."
     if [ "$PKG_MGR" = "apt" ]; then
-        install_pkg clang clangd lldb bear ocaml opam
+        install_pkg clang clangd clang-format lldb bear ocaml opam
     elif [ "$PKG_MGR" = "dnf" ]; then
+        # clang-tools-extra provides clangd and clang-format
         install_pkg clang clang-tools-extra lldb bear ocaml opam
     elif [ "$PKG_MGR" = "pacman" ]; then
+        # clang provides clangd and clang-format
         install_pkg clang llvm lldb bear ocaml opam
     fi
 

@@ -120,6 +120,7 @@ Values are either a literal string or a function returning one.")
   (dolist (entry
            '(((js-ts-mode typescript-ts-mode tsx-ts-mode) . ("vtsls" "--stdio"))
              ((rust-ts-mode)      . ("rust-analyzer"))
+             ((c-ts-mode c++-ts-mode) . ("clangd"))
              ((tuareg-mode)       . ("ocamllsp"))
              ((python-ts-mode)    . ("basedpyright-langserver" "--stdio"))
              ((yaml-ts-mode)      . ("yaml-language-server" "--stdio"))
@@ -151,9 +152,15 @@ Values are either a literal string or a function returning one.")
      (markdown-mode      . prettier)
      (python-ts-mode     . ruff-format)
      (rust-ts-mode       . rustfmt)
+     (c-ts-mode          . clang-format)
+     (c++-ts-mode        . clang-format)
      (tuareg-mode        . ocamlformat)
      (sql-mode           . sql-formatter)))
-  :config (apheleia-global-mode 1))
+  :config
+  ;; Without a project .clang-format, leave the buffer alone rather than
+  ;; imposing LLVM style; formatting stays project-opt-in like ocamlformat.
+  (push "--fallback-style=none" (cddr (assq 'clang-format apheleia-formatters)))
+  (apheleia-global-mode 1))
 
 ;; --- Git -----------------------------------------------------------------
 
