@@ -191,13 +191,13 @@ Values are either a literal string or a function returning one.")
   :commands vterm
   :custom (vterm-max-scrollback 10000)
   :init
-  ;; Open vterm in a split to the right instead of replacing the current
-  ;; window; reuse the window if a vterm is already showing.
+  ;; Open vterm in a split below instead of replacing the current window;
+  ;; reuse the window if a vterm is already showing.
   (add-to-list 'display-buffer-alist
                '("\\*vterm"
                  (display-buffer-reuse-window display-buffer-in-direction)
-                 (direction . right)
-                 (window-width . 0.5))))
+                 (direction . below)
+                 (window-height . 0.3))))
 
 ;; --- Debugging -----------------------------------------------------------
 
