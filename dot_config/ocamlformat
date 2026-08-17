@@ -1,0 +1,6 @@
+# Canonical ocamlformat defaults. `ocamlformat-init` copies this into new
+# projects with a pinned `version =` line prepended; keep this file
+# version-free so the pin always reflects the installed binary.
+# The janestreet profile carries its own margin (90); the Emacs fill-column
+# for OCaml buffers (langs.el) matches it.
+profile = janestreet

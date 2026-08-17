@@ -193,6 +193,7 @@
     (optional "prettier"                 "Web, JSON, YAML, Markdown format")
     (optional "sql-formatter"            "SQL format")
     (optional "ocamlformat"              "OCaml format")
+    (optional "utop"                     "OCaml REPL (ships utop.el)")
     (optional "lldb-dap"                 "dape: Rust / native debugging")
     (optional "gh"                       "Forge authentication")
     (optional "enchant-2"                "jinx spellchecker backend"))

@@ -134,13 +134,32 @@ With prefix argument FORCE, reinstall grammars that are already present."
 (defun my/ocaml-mode-defaults ()
   "Defaults for OCaml buffers."
   (my/set-local-compile-command "dune build")
-  (setq-local fill-column 100)
+  ;; matches the janestreet ocamlformat profile's margin (~/.config/ocamlformat)
+  (setq-local fill-column 90)
+  ;; utop.el reads a buffer-local `utop-command' from the buffer that
+  ;; launches it: project libraries via dune inside a project, bare utop
+  ;; elsewhere.
+  (setq-local utop-command
+              (if (my/project-file-path "dune-project")
+                  "opam exec -- dune utop . -- -emacs"
+                "opam exec -- utop -- -emacs"))
   (my/eglot-ensure-when-executable "ocamllsp"))
 
 (use-package tuareg
   :mode (("\\.ml\\'" . tuareg-mode)
          ("\\.mli\\'" . tuareg-mode))
   :hook (tuareg-mode . my/ocaml-mode-defaults))
+
+;; utop.el ships with the opam utop package, not ELPA, so the elisp always
+;; matches the installed utop binary.
+(use-package utop
+  :ensure nil
+  :if (file-exists-p "~/.opam/default/share/emacs/site-lisp/utop.el")
+  :load-path "~/.opam/default/share/emacs/site-lisp"
+  :commands (utop utop-minor-mode)
+  :hook (tuareg-mode . utop-minor-mode)
+  :custom
+  (utop-edit-command nil))
 
 ;; --- Python --------------------------------------------------------------
 

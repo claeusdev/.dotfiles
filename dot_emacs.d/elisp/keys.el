@@ -106,13 +106,15 @@
 
 ;; --- REPLs ---------------------------------------------------------------
 
-;; Only REPLs with real Emacs support; for node or utop, a project vterm
-;; (C-c p v) beats a bare comint buffer.
+;; Only REPLs with real Emacs support; for node, a project vterm (C-c p v)
+;; beats a bare comint buffer.  utop qualifies: utop.el speaks a dedicated
+;; -emacs protocol with completion and phrase evaluation.
 (defvar my/repl-map (make-sparse-keymap) "Language REPLs.")
 (global-set-key (kbd "C-c f") my/repl-map)
 (define-key my/repl-map (kbd "p") #'run-python)
 (define-key my/repl-map (kbd "s") #'sql-product-interactive)
 (define-key my/repl-map (kbd "e") #'ielm)
+(define-key my/repl-map (kbd "o") #'utop)
 
 (provide 'keys)
 ;;; keys.el ends here

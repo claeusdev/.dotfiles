@@ -176,7 +176,7 @@ if [ "$PLATFORM" = "mac" ]; then
             opam init -a --disable-sandboxing --shell-setup || true
         fi
         eval "$(opam env 2>/dev/null)" || true
-        opam install -y ocaml-lsp-server ocamlformat merlin || true
+        opam install -y ocaml-lsp-server ocamlformat merlin utop || true
     fi
 
     echo ""
@@ -429,7 +429,7 @@ elif [ "$PLATFORM" = "linux" ]; then
             opam init -a --disable-sandboxing --shell-setup || true
         fi
         eval "$(opam env 2>/dev/null)" || true
-        opam install -y ocaml-lsp-server ocamlformat merlin || true
+        opam install -y ocaml-lsp-server ocamlformat merlin utop || true
     fi
 
     echo ""
