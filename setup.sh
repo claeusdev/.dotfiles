@@ -184,6 +184,8 @@ if [ "$PLATFORM" = "mac" ]; then
     echo ""
     echo "Installing language servers and formatters..."
     brew_install lua-language-server stylua black ruff prettier shfmt shellcheck
+    # Emacs pdf-tools compiles its epdfinfo server against these on first use.
+    brew_install poppler automake
 
     echo ""
     echo "Installing database tools..."
@@ -447,6 +449,23 @@ elif [ "$PLATFORM" = "linux" ]; then
     fi
 
     install_pkg shellcheck
+
+    # Emacs pdf-tools compiles its epdfinfo server against these on first use.
+    if [ "$PKG_MGR" = "apt" ]; then
+        install_optional_pkg libpoppler-glib-dev
+        install_optional_pkg libpoppler-private-dev
+        install_optional_pkg libpng-dev
+        install_optional_pkg zlib1g-dev
+        install_optional_pkg automake
+    elif [ "$PKG_MGR" = "dnf" ]; then
+        install_optional_pkg poppler-glib-devel
+        install_optional_pkg libpng-devel
+        install_optional_pkg automake
+    elif [ "$PKG_MGR" = "pacman" ]; then
+        install_optional_pkg poppler-glib
+        install_optional_pkg libpng
+        install_optional_pkg automake
+    fi
 
     echo ""
     echo "Installing database tools..."

@@ -85,6 +85,32 @@
   (let ((default-directory denote-directory))
     (call-interactively #'find-file)))
 
+;; --- Papers and bibliography ---------------------------------------------
+
+;; Real PDF rendering.  The epdfinfo server compiles itself the first time a
+;; PDF is opened; the build needs poppler, automake and pkg-config (setup.sh).
+(use-package pdf-tools
+  :mode ("\\.pdf\\'" . pdf-view-mode)
+  :magic ("%PDF" . pdf-view-mode)
+  :init (pdf-loader-install :no-query)
+  :custom (pdf-view-use-scaling t)) ; crisp text on retina displays
+
+;; One bibliography for everything: org-cite inserts citations (C-c C-x @),
+;; citar browses, previews and opens entries.
+(use-package citar
+  :custom
+  (citar-bibliography '("~/notes/references.bib"))
+  (org-cite-global-bibliography '("~/notes/references.bib"))
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar))
+
+;; Literature notes as Denote files: `citar-open' (C-c n c) gains actions to
+;; create and revisit a note per bibliography entry.
+(use-package citar-denote
+  :after (citar denote)
+  :config (citar-denote-mode 1))
+
 ;; --- Writing -------------------------------------------------------------
 
 (use-package org-modern

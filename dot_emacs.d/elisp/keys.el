@@ -92,6 +92,7 @@
 (define-key my/notes-map (kbd "r") #'denote-rename-file)
 (define-key my/notes-map (kbd "f") #'my/denote-find)
 (define-key my/notes-map (kbd "s") #'my/denote-search)
+(define-key my/notes-map (kbd "c") #'citar-open)
 (define-key my/notes-map (kbd "i") (lambda () (interactive) (find-file "~/org/inbox.org")))
 (define-key my/notes-map (kbd "p") (lambda () (interactive) (find-file "~/org/projects.org")))
 (define-key my/notes-map (kbd "j") (lambda () (interactive) (find-file "~/org/journal.org")))

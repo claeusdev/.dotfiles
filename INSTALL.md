@@ -44,6 +44,7 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - ML/AI & Scientific: jupyterlab, ipython, pandoc, typst, ollama
 - MLOps (via uv tool): mlflow, dvc, tensorboard
 - LSP/Formatters: language servers, prettier, sql-formatter, stylua, ruff, basedpyright, shellcheck
+- Emacs pdf-tools build deps: poppler, automake
 - Treesitter: tree-sitter CLI (parser compilation for Neovim)
 - Git: gh, lazygit, git-delta
 - Databases: PostgreSQL, SQLite
