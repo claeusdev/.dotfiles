@@ -79,6 +79,15 @@
       scroll-conservatively 101
       scroll-preserve-screen-position t)
 
+;; Jump to any visible position from a couple of characters.
+(use-package avy
+  :bind ("M-j" . avy-goto-char-timer))
+
+;; Trim trailing whitespace, but only on lines this session actually edited,
+;; so shared files do not fill diffs with whitespace churn.
+(use-package ws-butler
+  :hook (prog-mode . ws-butler-mode))
+
 ;; --- Session -------------------------------------------------------------
 
 (setq recentf-save-file (expand-file-name "recentf" my/cache-dir)
