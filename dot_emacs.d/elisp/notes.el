@@ -7,6 +7,14 @@
 
 ;;; Code:
 
+(defconst my/notes-directory
+  (file-name-as-directory (expand-file-name (or (getenv "NOTES_DIR") "~/notes")))
+  "Portable Markdown note directory.")
+
+(defconst my/bibliography-file
+  (expand-file-name (or (getenv "BIBLIOGRAPHY") "references.bib") my/notes-directory)
+  "Shared BibTeX bibliography.")
+
 ;; --- Org -----------------------------------------------------------------
 
 (use-package org
@@ -62,8 +70,8 @@
 
 (use-package denote
   :custom
-  (denote-directory (expand-file-name "~/notes/"))
-  (denote-file-type 'org)
+  (denote-directory my/notes-directory)
+  (denote-file-type 'markdown-yaml)
   (denote-known-keywords
    '("emacs" "typescript" "rust" "ocaml" "python" "sql"
      "systems" "research" "project" "reading"))
@@ -99,8 +107,8 @@
 ;; citar browses, previews and opens entries.
 (use-package citar
   :custom
-  (citar-bibliography '("~/notes/references.bib"))
-  (org-cite-global-bibliography '("~/notes/references.bib"))
+  (citar-bibliography (list my/bibliography-file))
+  (org-cite-global-bibliography (list my/bibliography-file))
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar))
@@ -110,6 +118,12 @@
 (use-package citar-denote
   :after (citar denote)
   :config (citar-denote-mode 1))
+
+(defun my/citar-insert-pandoc ()
+  "Insert a Pandoc citation using the shared bibliography."
+  (interactive)
+  (when-let* ((key (citar-select-ref)))
+    (insert (format "[@%s]" key))))
 
 ;; --- Writing -------------------------------------------------------------
 
@@ -178,24 +192,5 @@
   :commands org-present
   :hook ((org-present-mode . my/org-present-start)
          (org-present-mode-quit . my/org-present-stop)))
-
-;; --- LLM -----------------------------------------------------------------
-
-;; The API key is read from ~/.authinfo.gpg, never from the shell environment,
-;; so it cannot leak into the dotfiles repo:
-;;   machine api.anthropic.com login apikey password sk-ant-...
-(use-package gptel
-  :commands (gptel gptel-send gptel-menu)
-  :custom
-  (gptel-default-mode 'org-mode)
-  :config
-  (setq gptel-model 'claude-sonnet-5
-        gptel-backend (gptel-make-anthropic "Claude"
-                        :stream t
-                        :key (lambda ()
-                               (or (auth-source-pick-first-password
-                                    :host "api.anthropic.com" :user "apikey")
-                                   (getenv "ANTHROPIC_API_KEY"))))))
-
 (provide 'notes)
 ;;; notes.el ends here

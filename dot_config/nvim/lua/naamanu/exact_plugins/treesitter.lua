@@ -6,6 +6,7 @@ local ensure_installed = {
 	"css",
 	"dockerfile",
 	"fish",
+	"go",
 	"haskell",
 	"html",
 	"javascript",

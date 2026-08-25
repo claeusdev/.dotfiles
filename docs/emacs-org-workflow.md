@@ -6,7 +6,7 @@ This document covers the notes side of the Emacs setup in this repository:
 - durable, linked notes (Denote)
 - writing comfort (org-modern, olivetti, jinx)
 - presentations (org-present)
-- LLM assistance (gptel)
+- terminal-agent assistance via the shared DEV_AGENT
 
 There are deliberately two layers, and the split matters. **Org** is for
 things with a *state* — a task that is TODO and later DONE, an agenda that
@@ -151,20 +151,9 @@ into a live buffer to demo, then come back.
 
 ---
 
-## 5. gptel
+## 5. Terminal agent
 
-`C-c G` opens a chat buffer; `C-c g` sends the region or buffer from wherever
-you are. Because `gptel-default-mode` is `org-mode`, a conversation is itself
-a note — save it into `~/notes/` and link it like anything else.
-
-Useful in this workflow for summarising a paper into a Denote note, drafting
-from bullet points, or interrogating a region of code.
-
-The API key is read from `~/.authinfo.gpg`, never the environment:
-
-```
-machine api.anthropic.com login apikey password sk-ant-...
-```
+Use `C-c g g` to open the shared coding agent at the project root and `C-c g c` to copy a current file/line reference before opening it. The agent defaults to Codex, then Claude, and can be overridden with `DEV_AGENT`.
 
 ---
 

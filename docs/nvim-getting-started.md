@@ -164,7 +164,7 @@ Function signatures show automatically while you fill in arguments.
 
 ## 6. Code intelligence (native LSP)
 
-Language servers install automatically via **Mason** and attach by filetype (clangd,
+Language servers are installed by setup.sh and resolved from the shared PATH and attach by filetype (clangd,
 rust-analyzer, `ruff` + `ty` for Python, ocamllsp, hls, vtsls, eslint, tailwind, json,
 yaml…). Inlay hints turn on where supported.
 
@@ -277,7 +277,7 @@ In a `.http` / `.rest` file, the `<leader>R` group is a full REST client:
 - **which-key** — pause after any prefix (`Space`, `g`, `]`, `[`, `<leader>c`…) to see
   what's available.
 - `<leader>fk` searches **every keymap**; `<leader>fh` searches the help.
-- `:checkhealth` diagnoses problems · `:Mason` manages servers/formatters · `:Lazy`
+- `:checkhealth` diagnoses problems · `:Lazy`
   manages plugins · `:LspInfo` shows what's attached to the buffer.
 
 > **Practice** — `<leader>fk`, type `hunk` to surface every git-hunk binding at once.
@@ -288,7 +288,7 @@ In a `.http` / `.rest` file, the `<leader>R` group is a full REST client:
 
 - **Stuck** in a half-typed command or wrong mode: `<Esc>`. Bad edit: `u` (or
   `<leader>u` for the undo tree).
-- **No completion / formatting** for a language: `:Mason` to install the server or
+- **No completion / formatting** for a language: run `dev-doctor --all`, then use `setup.sh` to install the server or
   formatter, `:LspInfo` to confirm it attached, `<leader>lR` to restart it.
 - **General health:** `:checkhealth`. **Plugins out of sync:** `:Lazy` then `S` to sync.
 - **Secrets showing** in a `.env` file: `<leader>uc` toggles masking (cloak).

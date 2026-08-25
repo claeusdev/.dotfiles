@@ -28,13 +28,14 @@ return {
 		event = "VeryLazy",
 		opts = {
 			spec = {
-				{ "<leader>a", group = "ai/claude" },
+				{ "<leader>a", group = "agent" },
 				{ "<leader>b", group = "buffer" },
 				{ "<leader>c", group = "code" },
+				{ "<leader>d", group = "debug" },
 				{ "<leader>f", group = "find" },
 				{ "<leader>g", group = "git" },
 				{ "<leader>l", group = "lsp" },
-				{ "<leader>n", group = "notify" },
+				{ "<leader>n", group = "notes" },
 				{ "<leader>o", group = "overseer" },
 				{ "<leader>r", group = "rename" },
 				{ "<leader>R", group = "REST/HTTP" },

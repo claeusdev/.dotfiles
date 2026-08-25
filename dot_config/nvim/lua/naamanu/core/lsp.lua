@@ -8,23 +8,11 @@
 -- `workspace_required = false`.
 
 local lsp = vim.lsp
-local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
-
-local function mason_binary(binary)
-	local candidate = mason_bin .. "/" .. binary
-	return vim.fn.executable(candidate) == 1 and candidate or nil
-end
-
-local function available_binary(binary)
-	return mason_binary(binary) or (vim.fn.exepath(binary) ~= "" and vim.fn.exepath(binary) or nil)
-end
-
-local function mason_cmd(binary, extra_args)
-	local executable = available_binary(binary)
-	if not executable then
+local function shared_cmd(binary, extra_args)
+	local executable = vim.fn.exepath(binary)
+	if executable == "" then
 		return nil
 	end
-
 	return vim.list_extend({ executable }, extra_args or {})
 end
 
@@ -48,9 +36,9 @@ vim.diagnostic.config({
 	float = { border = "rounded" },
 })
 
--- Mason-installable servers
+-- Shared PATH language servers
 lsp.config("clangd", {
-	cmd = mason_cmd("clangd", { "--background-index", "--clang-tidy" }),
+	cmd = shared_cmd("clangd", { "--background-index", "--clang-tidy" }),
 	filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
 	root_markers = {
 		"compile_commands.json",
@@ -63,7 +51,7 @@ lsp.config("clangd", {
 })
 
 lsp.config("rust_analyzer", {
-	cmd = mason_cmd("rust-analyzer"),
+	cmd = shared_cmd("rust-analyzer"),
 	filetypes = { "rust" },
 	settings = {
 		["rust-analyzer"] = {
@@ -80,7 +68,7 @@ lsp.config("rust_analyzer", {
 })
 
 lsp.config("lua_ls", {
-	cmd = mason_cmd("lua-language-server"),
+	cmd = shared_cmd("lua-language-server"),
 	filetypes = { "lua" },
 	settings = {
 		Lua = {
@@ -93,7 +81,7 @@ lsp.config("lua_ls", {
 })
 
 lsp.config("ruff", {
-	cmd = mason_cmd("ruff", { "server" }),
+	cmd = shared_cmd("ruff", { "server" }),
 	filetypes = { "python" },
 	root_markers = { "pyproject.toml", "ruff.toml", ".ruff.toml", "uv.lock", "requirements.txt", ".git" },
 })
@@ -101,7 +89,7 @@ lsp.config("ruff", {
 -- basedpyright matches the Emacs setup, so both editors report the same
 -- Python diagnostics.  ruff owns imports and formatting.
 lsp.config("basedpyright", {
-	cmd = mason_cmd("basedpyright-langserver", { "--stdio" }),
+	cmd = shared_cmd("basedpyright-langserver", { "--stdio" }),
 	filetypes = { "python" },
 	root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "uv.lock", ".git" },
 	settings = {
@@ -116,7 +104,7 @@ lsp.config("basedpyright", {
 })
 
 lsp.config("ocamllsp", {
-	cmd = mason_cmd("ocamllsp"),
+	cmd = shared_cmd("ocamllsp"),
 	filetypes = {
 		"ocaml",
 		"ocaml.interface",
@@ -129,8 +117,27 @@ lsp.config("ocamllsp", {
 	root_markers = { "dune-project", "dune-workspace", "dune", ".git" },
 })
 
+lsp.config("gopls", {
+	cmd = shared_cmd("gopls"),
+	filetypes = { "go", "gomod", "gowork", "gotmpl" },
+	root_markers = { "go.work", "go.mod", ".git" },
+	settings = { gopls = { gofumpt = true, staticcheck = true, usePlaceholders = true } },
+})
+
+lsp.config("bashls", {
+	cmd = shared_cmd("bash-language-server", { "start" }),
+	filetypes = { "bash", "sh" },
+	root_markers = { ".git" },
+})
+
+lsp.config("dockerls", {
+	cmd = shared_cmd("docker-langserver", { "--stdio" }),
+	filetypes = { "dockerfile" },
+	root_markers = { "Dockerfile", ".git" },
+})
+
 lsp.config("hls", {
-	cmd = mason_cmd("haskell-language-server-wrapper"),
+	cmd = shared_cmd("haskell-language-server-wrapper"),
 	filetypes = { "haskell", "lhaskell", "cabal" },
 	root_markers = { "hie.yaml", "stack.yaml", "cabal.project", "package.yaml", ".git" },
 	settings = {
@@ -141,7 +148,7 @@ lsp.config("hls", {
 })
 
 lsp.config("vtsls", {
-	cmd = mason_cmd("vtsls", { "--stdio" }),
+	cmd = shared_cmd("vtsls", { "--stdio" }),
 	filetypes = {
 		"javascript",
 		"javascriptreact",
@@ -187,7 +194,7 @@ lsp.config("vtsls", {
 })
 
 lsp.config("eslint", {
-	cmd = mason_cmd("vscode-eslint-language-server", { "--stdio" }),
+	cmd = shared_cmd("vscode-eslint-language-server", { "--stdio" }),
 	filetypes = {
 		"javascript",
 		"javascriptreact",
@@ -220,7 +227,7 @@ lsp.config("eslint", {
 })
 
 lsp.config("tailwindcss", {
-	cmd = mason_cmd("tailwindcss-language-server", { "--stdio" }),
+	cmd = shared_cmd("tailwindcss-language-server", { "--stdio" }),
 	filetypes = {
 		"html",
 		"css",
@@ -234,13 +241,13 @@ lsp.config("tailwindcss", {
 })
 
 lsp.config("cssls", {
-	cmd = mason_cmd("vscode-css-language-server", { "--stdio" }),
+	cmd = shared_cmd("vscode-css-language-server", { "--stdio" }),
 	filetypes = { "css", "scss", "less" },
 	init_options = { provideFormatter = false },
 })
 
 lsp.config("jsonls", {
-	cmd = mason_cmd("vscode-json-language-server", { "--stdio" }),
+	cmd = shared_cmd("vscode-json-language-server", { "--stdio" }),
 	filetypes = { "json", "jsonc" },
 	init_options = { provideFormatter = false },
 	settings = {
@@ -252,7 +259,7 @@ lsp.config("jsonls", {
 })
 
 lsp.config("yamlls", {
-	cmd = mason_cmd("yaml-language-server", { "--stdio" }),
+	cmd = shared_cmd("yaml-language-server", { "--stdio" }),
 	filetypes = { "yaml", "yaml.docker-compose", "yaml.gitlab" },
 	settings = {
 		yaml = {
@@ -263,11 +270,14 @@ lsp.config("yamlls", {
 	},
 })
 
--- Enable servers whose binary is present (mason bin first, then PATH), so a
+-- Enable servers whose binary is present on the shared PATH, so a
 -- missing tool degrades silently instead of erroring.
-local mason_servers = {
+local shared_servers = {
 	{ name = "clangd", binary = "clangd" },
 	{ name = "rust_analyzer", binary = "rust-analyzer" },
+	{ name = "gopls", binary = "gopls" },
+	{ name = "bashls", binary = "bash-language-server" },
+	{ name = "dockerls", binary = "docker-langserver" },
 	{ name = "lua_ls", binary = "lua-language-server" },
 	{ name = "ruff", binary = "ruff" },
 	{ name = "basedpyright", binary = "basedpyright-langserver" },
@@ -281,8 +291,8 @@ local mason_servers = {
 	{ name = "yamlls", binary = "yaml-language-server" },
 }
 
-for _, server in ipairs(mason_servers) do
-	if available_binary(server.binary) then
+for _, server in ipairs(shared_servers) do
+	if vim.fn.executable(server.binary) == 1 then
 		lsp.enable(server.name)
 	end
 end

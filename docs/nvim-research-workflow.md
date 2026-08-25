@@ -51,7 +51,7 @@ mkdir -p src scripts tests notes sql
 Python support in Neovim:
 
 - Ruff provides linting, fixes, and formatting.
-- Ty provides hover and type intelligence.
+- basedpyright provides hover and type intelligence.
 - `<leader>op` runs the current Python file.
 - `<leader>oT` runs pytest for the project or current file context.
 

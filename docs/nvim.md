@@ -49,7 +49,7 @@ lua/naamanu/
 | Category | Plugin(s) |
 | :--- | :--- |
 | Completion | blink.cmp, friendly-snippets, native `vim.snippet` |
-| LSP | native `vim.lsp`, mason, mason-tool-installer, fidget, schemastore, lazydev.nvim, inc-rename |
+| LSP | native `vim.lsp`, shared PATH tools, fidget, schemastore, lazydev.nvim, inc-rename |
 | Formatting | conform.nvim |
 | Linting | nvim-lint |
 | Git | gitsigns, diffview.nvim, snacks.lazygit |
@@ -59,7 +59,7 @@ lua/naamanu/
 | HTTP | kulala.nvim |
 | Markdown | render-markdown.nvim |
 | Editor | nvim-autopairs, nvim-surround, builtin `gc` comments, todo-comments, flash.nvim, undotree, treesj, snacks.zen |
-| AI | cc-nvim (`<leader>a` group) |
+| Agent | shared terminal agent (`<leader>a` group) |
 | UI | snacks.nvim, lualine, which-key, trouble.nvim |
 | Theme | modus-themes.nvim |
 
@@ -228,7 +228,7 @@ Project-aware tasks support Node package scripts, Python (`uv run python`, pytes
 | `<leader>u` | Toggle undotree |
 | `<leader>z` | Toggle zen mode |
 | `<leader>j` | Split / join node with treesj |
-| `<leader>n` / `<leader>nd` | Notification history / dismiss notifications |
+| `<leader>n` / `<leader>ud` | Notification history / dismiss notifications |
 | `<leader>rf` | Rename current file |
 | `]]` / `[[` | Next / previous reference for word under cursor |
 

@@ -50,6 +50,8 @@
     (js-ts-mode         . my/node-test-command)
     (python-ts-mode     . my/python-test-command)
     (rust-ts-mode       . "cargo test")
+    (go-ts-mode         . "go test ./...")
+    (haskell-mode       . "cabal test all")
     (tuareg-mode        . "dune test"))
   "Default test command per major mode.
 Values are either a literal string or a function returning one.")
@@ -95,6 +97,41 @@ Values are either a literal string or a function returning one.")
   :if (executable-find "direnv")
   :hook (after-init . envrc-global-mode))
 
+;; --- Shared terminal agent -----------------------------------------------
+
+(defun my/agent-command ()
+  "Return the configured terminal agent executable."
+  (or (let ((configured (getenv "DEV_AGENT")))
+        (and configured (not (string-empty-p configured)) configured))
+      (seq-find #'executable-find '("codex" "claude"))))
+
+(defun my/project-agent ()
+  "Open or reuse the shared terminal coding agent at the project root."
+  (interactive)
+  (let ((agent (my/agent-command)))
+    (unless agent
+      (user-error "Install codex or claude, or set DEV_AGENT"))
+    (let ((default-directory (my/project-root))
+          (name (format "*agent: %s*" (file-name-nondirectory
+                                       (directory-file-name (my/project-root))))))
+      (if (get-buffer name)
+          (pop-to-buffer name)
+        (vterm name)
+        (vterm-send-string agent)
+        (vterm-send-return)))))
+
+(defun my/agent-context (beg end)
+  "Copy a file-and-line context reference for BEG through END, then open the agent."
+  (interactive "r")
+  (unless buffer-file-name (user-error "Save this buffer before sharing context"))
+  (let* ((root (my/project-root))
+         (path (file-relative-name buffer-file-name root))
+         (first (line-number-at-pos beg))
+         (last (line-number-at-pos end)))
+    (kill-new (format "Please inspect @%s:%d-%d" path first last))
+    (my/project-agent)
+    (message "Context reference copied; paste it into the agent terminal")))
+
 ;; --- LSP -----------------------------------------------------------------
 
 (defun my/eglot-ensure-when-executable (command)
@@ -120,9 +157,15 @@ Values are either a literal string or a function returning one.")
   (dolist (entry
            '(((js-ts-mode typescript-ts-mode tsx-ts-mode) . ("vtsls" "--stdio"))
              ((rust-ts-mode)      . ("rust-analyzer"))
+             ((go-ts-mode)        . ("gopls"))
+             ((haskell-mode)      . ("haskell-language-server-wrapper" "--lsp"))
+             ((lua-mode)          . ("lua-language-server"))
+             ((bash-ts-mode)      . ("bash-language-server" "start"))
              ((c-ts-mode c++-ts-mode) . ("clangd"))
              ((tuareg-mode)       . ("ocamllsp"))
              ((python-ts-mode)    . ("basedpyright-langserver" "--stdio"))
+             ((json-ts-mode)      . ("vscode-json-language-server" "--stdio"))
+             ((css-ts-mode)       . ("vscode-css-language-server" "--stdio"))
              ((yaml-ts-mode)      . ("yaml-language-server" "--stdio"))
              ((dockerfile-ts-mode). ("docker-langserver" "--stdio"))))
     (add-to-list 'eglot-server-programs entry))
@@ -154,13 +197,22 @@ Values are either a literal string or a function returning one.")
      (rust-ts-mode       . rustfmt)
      (c-ts-mode          . clang-format)
      (c++-ts-mode        . clang-format)
+     (go-ts-mode         . goimports)
+     (haskell-mode       . ormolu)
+     (lua-mode           . stylua)
+     (bash-ts-mode       . shfmt)
      (tuareg-mode        . ocamlformat)
      (sql-mode           . sql-formatter)))
   :config
+  (setf (alist-get 'goimports apheleia-formatters) '("goimports"))
   ;; Without a project .clang-format, leave the buffer alone rather than
   ;; imposing LLVM style; formatting stays project-opt-in like ocamlformat.
   (push "--fallback-style=none" (cddr (assq 'clang-format apheleia-formatters)))
   (apheleia-global-mode 1))
+
+
+(use-package restclient
+  :mode ("\\.http\\'" . restclient-mode))
 
 ;; --- Git -----------------------------------------------------------------
 

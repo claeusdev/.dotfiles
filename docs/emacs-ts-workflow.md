@@ -412,7 +412,7 @@ C-x g   magit            C-c a   agenda          C-c c   capture
 C-x b   switch buffer    C-.     embark act      M-$     spellcheck
 M-o     other window     C-c w   delete window   M-y     yank history
 C-c t t toggle theme     C-c e h health check    C-c e g install grammars
-C-c g   gptel send       C-c G   gptel chat      <escape> quit
+C-c g g terminal agent    C-c g c copy context      <escape> quit
 ```
 
 **REPLs** — `C-c f`

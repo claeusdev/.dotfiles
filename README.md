@@ -59,6 +59,8 @@ See [INSTALL.md](INSTALL.md) for details and manual alternatives.
 
 ## Editor docs
 
+- [Shared Emacs/Neovim capability contract](docs/capability-parity.md)
+
 - [Emacs setup overview](docs/emacs.md)
 - [Emacs development workflow](docs/emacs-dev-workflow.md)
 - [Emacs Org workflow](docs/emacs-org-workflow.md)
@@ -280,17 +282,17 @@ Format on save is enabled by default.
 
 | Mode | Keybinding   | Description              |
 | :--- | :----------- | :----------------------- |
-| n    | `<leader>nh` | Notification history     |
-| n    | `<leader>nd` | Dismiss notifications    |
+| n    | `<leader>uh` | Notification history     |
+| n    | `<leader>ud` | Dismiss notifications    |
 | n    | `<leader>rf` | Rename file              |
 | n, t | `]]`         | Next reference           |
 | n, t | `[[`         | Previous reference       |
 
 **Auto-enabled:** bigfile detection, indent guides, scope highlighting, quickfile, input UI, picker (`vim.ui.select`).
 
-### AI (cc-nvim)
+### Terminal agent
 
-The `<leader>a` group is provided by [cc-nvim](https://github.com/nmanu-dev/cc-nvim) — Claude in a split/float with code-aware commands (explain, walk-through, critique, diff review, commit messages, staged review, PR descriptions, notes and quizzes). See the plugin repo for the full keymap; `<leader>aa` toggles the panel.
+`<leader>aa` opens the shared `DEV_AGENT` (Codex, then Claude by default) at the project root; `<leader>ac` copies a file-and-line context reference. See the capability contract for details.
 
 ---
 

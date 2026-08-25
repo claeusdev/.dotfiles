@@ -24,6 +24,7 @@ return {
 		formatters_by_ft = {
 			c = { "clang-format" },
 			cpp = { "clang-format" },
+			go = { "goimports", "gofmt" },
 			rust = { "rustfmt" },
 			ocaml = { "ocamlformat" },
 			python = { "ruff_fix", "ruff_format" },

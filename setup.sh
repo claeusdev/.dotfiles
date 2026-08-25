@@ -19,6 +19,13 @@ FAILED_PACKAGES=()
 #
 INSTALL_DOCKER="${INSTALL_DOCKER:-0}"
 
+CHECK_ONLY=0
+case "${1:-}" in
+    --check) CHECK_ONLY=1 ;;
+    "") ;;
+    *) echo "Usage: setup.sh [--check]" >&2; exit 2 ;;
+esac
+
 echo "========================================="
 echo "  Dotfiles Bootstrap"
 echo "========================================="
@@ -36,6 +43,25 @@ case "$OS" in
         ;;
 esac
 echo "Detected platform: $PLATFORM"
+
+export PATH="$HOME/.local/bin:$PATH"
+
+if [ "$CHECK_ONLY" -eq 1 ]; then
+    if command -v dev-doctor &> /dev/null; then
+        exec dev-doctor --all
+    fi
+    echo "dev-doctor is not installed yet; checking bootstrap prerequisites."
+    missing=0
+    for command in git curl bash; do
+        if command -v "$command" &> /dev/null; then
+            printf '[ok]      %s (%s)\n' "$command" "$(command -v "$command")"
+        else
+            printf '[MISSING] %s\n' "$command"
+            missing=$((missing + 1))
+        fi
+    done
+    exit "$missing"
+fi
 
 # ── 2. Install chezmoi ────────────────────────────────────────
 
@@ -161,7 +187,7 @@ if [ "$PLATFORM" = "mac" ]; then
 
     echo ""
     echo "Installing programming languages and runtimes..."
-    brew_install go rust lua uv
+    brew_install go rust lua uv ghc cabal-install haskell-language-server ormolu
 
     echo ""
     echo "Installing C/C++, OCaml, and Lisp toolchains..."
@@ -183,7 +209,7 @@ if [ "$PLATFORM" = "mac" ]; then
 
     echo ""
     echo "Installing language servers and formatters..."
-    brew_install lua-language-server stylua black ruff prettier shfmt shellcheck
+    brew_install lua-language-server stylua ruff shfmt shellcheck
     # Emacs pdf-tools compiles its epdfinfo server against these on first use.
     brew_install poppler automake
 
@@ -275,7 +301,27 @@ elif [ "$PLATFORM" = "linux" ]; then
 
     echo ""
     echo "Installing shell and terminal tools..."
-    install_pkg fish tmux emacs
+    if [ "$PKG_MGR" = "apt" ]; then
+        install_pkg fish tmux
+        # Debian/Ubuntu package Emacs 29, but the config targets Emacs 30
+        # (which-key and editorconfig are expected as built-ins). The
+        # classic-confined snap tracks current releases; symlink it into
+        # ~/.local/bin so it shadows any apt-installed /usr/bin/emacs.
+        if command -v snap &> /dev/null; then
+            sudo snap install emacs --classic || FAILED_PACKAGES+=(emacs)
+            mkdir -p ~/.local/bin
+            ln -sf /snap/bin/emacs ~/.local/bin/emacs
+            if [ -e /snap/bin/emacsclient ]; then
+                ln -sf /snap/bin/emacsclient ~/.local/bin/emacsclient
+            else
+                ln -sf /snap/bin/emacs.emacsclient ~/.local/bin/emacsclient
+            fi
+        else
+            install_pkg emacs
+        fi
+    else
+        install_pkg fish tmux emacs
+    fi
 
     if ! command -v starship &> /dev/null; then
         echo "Installing starship..."
@@ -285,22 +331,52 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo ""
     echo "Installing modern CLI utilities..."
     if [ "$PKG_MGR" = "apt" ]; then
-        install_pkg neovim ripgrep fd-find fzf bat htop tree jq
+        install_pkg ripgrep fd-find fzf bat htop tree jq
         mkdir -p ~/.local/bin
         ln -sf /usr/bin/batcat ~/.local/bin/bat 2>/dev/null || true
         ln -sf /usr/bin/fdfind ~/.local/bin/fd 2>/dev/null || true
+        # Debian/Ubuntu package Neovim far behind stable (noble: 0.9.5), but
+        # the nvim config needs >= 0.10 (vim.uv). Install the official
+        # release tarball under ~/.local instead; ~/.local/bin shadows any
+        # apt-installed /usr/bin/nvim.
+        NVIM_ARCH=x86_64
+        [ "$(uname -m)" = "aarch64" ] && NVIM_ARCH=arm64
+        if curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${NVIM_ARCH}.tar.gz" -o /tmp/nvim.tar.gz; then
+            rm -rf ~/.local/opt/nvim "/tmp/nvim-linux-${NVIM_ARCH}"
+            mkdir -p ~/.local/opt
+            tar xzf /tmp/nvim.tar.gz -C /tmp
+            mv "/tmp/nvim-linux-${NVIM_ARCH}" ~/.local/opt/nvim
+            ln -sf ~/.local/opt/nvim/bin/nvim ~/.local/bin/nvim
+        else
+            FAILED_PACKAGES+=(neovim)
+        fi
     elif [ "$PKG_MGR" = "dnf" ]; then
         install_pkg neovim ripgrep fd-find fzf bat htop tree jq
     elif [ "$PKG_MGR" = "pacman" ]; then
         install_pkg neovim ripgrep fd fzf bat htop tree jq
     fi
 
-    # nvim-treesitter (main branch) compiles parsers via the tree-sitter CLI.
-    # Distro packages are often missing or stale; cargo is the reliable path.
-    if ! command -v tree-sitter &> /dev/null; then
-        install_optional_pkg tree-sitter-cli
-        if ! command -v tree-sitter &> /dev/null && command -v cargo &> /dev/null; then
+    # nvim-treesitter (main branch) compiles parsers via `tree-sitter build`,
+    # which needs CLI >= 0.22. Distro packages are often missing or stale
+    # (noble ships 0.20.8, which lacks the build subcommand), so a mere
+    # `command -v` check is not enough — verify the version too.
+    tree_sitter_ok() {
+        command -v tree-sitter &> /dev/null || return 1
+        local v
+        v=$(tree-sitter --version | awk '{print $2}')
+        [ "$(printf '%s\n' 0.22.0 "$v" | sort -V | head -1)" = "0.22.0" ]
+    }
+    if ! tree_sitter_ok; then
+        TS_ARCH=x64
+        [ "$(uname -m)" = "aarch64" ] && TS_ARCH=arm64
+        if curl -fsSL "https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-${TS_ARCH}.gz" -o /tmp/tree-sitter.gz; then
+            gunzip -f /tmp/tree-sitter.gz
+            mkdir -p ~/.local/bin
+            install -m 755 /tmp/tree-sitter ~/.local/bin/tree-sitter
+        elif command -v cargo &> /dev/null; then
             cargo install tree-sitter-cli
+        else
+            FAILED_PACKAGES+=(tree-sitter-cli)
         fi
     fi
 
@@ -441,14 +517,27 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo ""
     echo "Installing language servers and formatters..."
     if command -v npm &> /dev/null; then
-        npm install -g prettier eslint typescript || true
+        npm install -g --prefix "$HOME/.local" \
+            typescript prettier eslint @vtsls/language-server basedpyright \
+            vscode-langservers-extracted yaml-language-server \
+            dockerfile-language-server-nodejs bash-language-server \
+            sql-formatter || FAILED_PACKAGES+=(node-editor-tools)
     fi
 
     if command -v cargo &> /dev/null; then
         cargo install stylua || true
+        rustup component add rust-analyzer rustfmt clippy 2>/dev/null || true
     fi
 
     install_pkg shellcheck
+    install_optional_pkg shfmt
+
+    if command -v go &> /dev/null; then
+        GOBIN="$HOME/.local/bin" go install golang.org/x/tools/gopls@latest || FAILED_PACKAGES+=(gopls)
+        GOBIN="$HOME/.local/bin" go install github.com/go-delve/delve/cmd/dlv@latest || FAILED_PACKAGES+=(delve)
+        GOBIN="$HOME/.local/bin" go install golang.org/x/tools/cmd/goimports@latest || FAILED_PACKAGES+=(goimports)
+    fi
+
 
     # Emacs pdf-tools compiles its epdfinfo server against these on first use.
     if [ "$PKG_MGR" = "apt" ]; then
@@ -590,6 +679,79 @@ fi
 if command -v fnm &> /dev/null; then
     echo "Installing Node.js LTS via fnm..."
     fnm install --lts
+fi
+
+# User-scoped fallbacks keep Ubuntu usable when optional distro packages are
+# unavailable or sudo is not available during a later repair run.
+if ! command -v direnv &> /dev/null && command -v go &> /dev/null; then
+    GOBIN="$HOME/.local/bin" go install github.com/direnv/direnv/v2@latest || FAILED_PACKAGES+=(direnv)
+fi
+if ! command -v shfmt &> /dev/null && command -v go &> /dev/null; then
+    GOBIN="$HOME/.local/bin" go install mvdan.cc/sh/v3/cmd/shfmt@latest || FAILED_PACKAGES+=(shfmt)
+fi
+
+if ! command -v rustup &> /dev/null; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o /tmp/rustup-init.sh
+    sh /tmp/rustup-init.sh -y --profile minimal || FAILED_PACKAGES+=(rustup)
+fi
+export PATH="$HOME/.cargo/bin:$PATH"
+
+if [ "$PLATFORM" = linux ] && ! command -v lua-language-server &> /dev/null; then
+    LUA_LS_VERSION="${LUA_LS_VERSION:-3.18.2}"
+    mkdir -p "$HOME/.local/opt/lua-language-server"
+    if curl -fsSL "https://github.com/LuaLS/lua-language-server/releases/download/$LUA_LS_VERSION/lua-language-server-$LUA_LS_VERSION-linux-x64.tar.gz" -o /tmp/lua-language-server.tar.gz; then
+        tar xzf /tmp/lua-language-server.tar.gz -C "$HOME/.local/opt/lua-language-server"
+        ln -sf "$HOME/.local/opt/lua-language-server/bin/lua-language-server" "$HOME/.local/bin/lua-language-server"
+    else
+        FAILED_PACKAGES+=(lua-language-server)
+    fi
+fi
+
+if [ "$PLATFORM" = linux ] && ! command -v ghcup &> /dev/null; then
+    curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org -o /tmp/ghcup.sh
+    BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_MINIMAL=1 sh /tmp/ghcup.sh || FAILED_PACKAGES+=(ghcup)
+fi
+export PATH="$HOME/.ghcup/bin:$PATH"
+if command -v ghcup &> /dev/null; then
+    ghcup install ghc recommended || true
+    ghcup set ghc recommended || true
+    ghcup install cabal recommended || true
+    ghcup set cabal recommended || true
+    ghcup install hls recommended || FAILED_PACKAGES+=(haskell-language-server)
+    ghcup set hls recommended || true
+fi
+if ! command -v ormolu &> /dev/null && command -v cabal &> /dev/null; then
+    cabal update || true
+    cabal install ormolu --installdir="$HOME/.local/bin" --overwrite-policy=always || FAILED_PACKAGES+=(ormolu)
+fi
+
+if ! command -v lldb-dap &> /dev/null; then
+    LLDB_DAP="$(command -v lldb-dap-19 || command -v lldb-dap-18 || true)"
+    [ -z "$LLDB_DAP" ] || ln -sf "$LLDB_DAP" "$HOME/.local/bin/lldb-dap"
+fi
+
+# Shared editor tools live in a fixed user prefix so Emacs and Neovim resolve
+# the same binaries regardless of the active Node version manager.
+if command -v npm &> /dev/null; then
+    npm install -g --prefix "$HOME/.local" \
+        typescript prettier eslint @vtsls/language-server basedpyright \
+        vscode-langservers-extracted yaml-language-server \
+        dockerfile-language-server-nodejs bash-language-server \
+        sql-formatter || FAILED_PACKAGES+=(node-editor-tools)
+fi
+
+if command -v go &> /dev/null; then
+    GOBIN="$HOME/.local/bin" go install golang.org/x/tools/gopls@latest || FAILED_PACKAGES+=(gopls)
+    GOBIN="$HOME/.local/bin" go install github.com/go-delve/delve/cmd/dlv@latest || FAILED_PACKAGES+=(delve)
+    GOBIN="$HOME/.local/bin" go install golang.org/x/tools/cmd/goimports@latest || FAILED_PACKAGES+=(goimports)
+fi
+
+if command -v rustup &> /dev/null; then
+    rustup component add rust-analyzer rustfmt clippy || FAILED_PACKAGES+=(rust-components)
+fi
+
+if command -v cargo &> /dev/null && ! command -v stylua &> /dev/null; then
+    cargo install stylua || FAILED_PACKAGES+=(stylua)
 fi
 
 # Set fish as default shell

@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+set -u
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.ghcup/bin:$PATH"
+JSON=0
+SHOW_ALL=0
+for arg in "$@"; do
+    case "$arg" in
+        --json) JSON=1 ;;
+        --all) SHOW_ALL=1 ;;
+        -h|--help) echo "usage: dev-doctor [--json] [--all]"; exit 0 ;;
+        *) echo "dev-doctor: unknown argument: $arg" >&2; exit 2 ;;
+    esac
+done
+TOOLS=$(cat <<'EOF'
+required|git|version control
+required|rg|project search
+required|fd|file search
+required|fzf|interactive selection
+required|direnv|project environments
+required|node|TypeScript and JavaScript runtime
+required|uv|Python projects and tools
+optional|vtsls|TypeScript and JavaScript LSP
+optional|vscode-eslint-language-server|ESLint LSP
+optional|prettier|web and document formatter
+optional|basedpyright-langserver|Python LSP
+optional|ruff|Python lint and format
+optional|rust-analyzer|Rust LSP
+optional|gopls|Go LSP
+optional|dlv|Go debugger
+optional|clangd|C and C++ LSP
+optional|lldb-dap|native debugger adapter
+optional|ocamllsp|OCaml LSP
+optional|ocamlformat|OCaml formatter
+optional|haskell-language-server-wrapper|Haskell LSP
+optional|ormolu|Haskell formatter
+optional|lua-language-server|Lua LSP
+optional|stylua|Lua formatter
+optional|bash-language-server|shell LSP
+optional|shellcheck|shell lint
+optional|shfmt|shell formatter
+optional|yaml-language-server|YAML LSP
+optional|docker-langserver|Dockerfile LSP
+optional|sql-formatter|SQL formatter
+optional|tree-sitter|parser compiler
+optional|pandoc|research document conversion
+optional|gh|GitHub workflows
+optional|lazygit|terminal Git UI
+optional|codex|terminal coding agent
+optional|claude|terminal coding agent
+EOF
+)
+[ "$JSON" -eq 0 ] || printf '['
+first=1
+missing_required=0
+while IFS='|' read -r kind command description; do
+    [ -n "$command" ] || continue
+    path=$(command -v "$command" 2>/dev/null || true)
+    if [ -z "$path" ] && [ "$kind" = required ]; then missing_required=$((missing_required + 1)); fi
+    if [ "$JSON" -eq 1 ]; then
+        [ "$first" -eq 1 ] || printf ','
+        first=0
+        if [ -n "$path" ]; then
+            printf '\n  {"kind":"%s","command":"%s","status":"ok","path":"%s","description":"%s"}' "$kind" "$command" "$path" "$description"
+        else
+            printf '\n  {"kind":"%s","command":"%s","status":"missing","path":null,"description":"%s"}' "$kind" "$command" "$description"
+        fi
+    elif [ -n "$path" ] || [ "$SHOW_ALL" -eq 1 ] || [ "$kind" = required ]; then
+        if [ -n "$path" ]; then status=ok; else status=MISSING; fi
+        printf '[%-7s] %-36s %-8s %s\n' "$status" "$command" "$kind" "$description"
+        [ -z "$path" ] || printf '          %s\n' "$path"
+    fi
+done <<EOF
+$TOOLS
+EOF
+if [ "$JSON" -eq 1 ]; then printf '\n]\n'; else
+    printf '\nEditors:\n'
+    command -v emacs >/dev/null 2>&1 && emacs --version | sed -n '1p' || echo 'Emacs: missing'
+    command -v nvim >/dev/null 2>&1 && nvim --version | sed -n '1p' || echo 'Neovim: missing'
+    command -v tree-sitter >/dev/null 2>&1 && tree-sitter --version || true
+fi
+[ "$missing_required" -eq 0 ]

@@ -13,12 +13,15 @@
 ;; `M-x my/install-missing-grammars'.
 (setq treesit-language-source-alist
       '((bash       "https://github.com/tree-sitter/tree-sitter-bash")
+        (go         "https://github.com/tree-sitter/tree-sitter-go")
+        (haskell    "https://github.com/tree-sitter/tree-sitter-haskell")
         (c          "https://github.com/tree-sitter/tree-sitter-c")
         (cpp        "https://github.com/tree-sitter/tree-sitter-cpp")
         (css        "https://github.com/tree-sitter/tree-sitter-css")
         (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
         (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
         (json       "https://github.com/tree-sitter/tree-sitter-json")
+        (lua        "https://github.com/tree-sitter-grammars/tree-sitter-lua")
         (python     "https://github.com/tree-sitter/tree-sitter-python")
         (rust       "https://github.com/tree-sitter/tree-sitter-rust")
         (toml       "https://github.com/tree-sitter/tree-sitter-toml")
@@ -50,7 +53,8 @@ With prefix argument FORCE, reinstall grammars that are already present."
                 (json-mode       . json-ts-mode)
                 (js-json-mode    . json-ts-mode)
                 (conf-toml-mode  . toml-ts-mode)
-                (sh-mode         . bash-ts-mode)))
+                (sh-mode         . bash-ts-mode)
+                (go-mode         . go-ts-mode)))
   (when (treesit-language-available-p
          (intern (string-remove-suffix "-ts-mode" (symbol-name (cdr pair)))))
     (add-to-list 'major-mode-remap-alist pair)))
@@ -154,6 +158,32 @@ With prefix argument FORCE, reinstall grammars that are already present."
 
 (dolist (hook '(c-ts-mode-hook c++-ts-mode-hook))
   (add-hook hook #'my/c-mode-defaults))
+
+;; --- Go, Haskell, Lua and shell ------------------------------------------
+
+(defun my/go-mode-defaults ()
+  (my/set-local-compile-command "go test ./...")
+  (setq-local tab-width 4 fill-column 100)
+  (my/eglot-ensure-when-executable "gopls"))
+(add-hook 'go-ts-mode-hook #'my/go-mode-defaults)
+
+(defun my/haskell-mode-defaults ()
+  (my/set-local-compile-command "cabal build all")
+  (setq-local fill-column 100)
+  (my/eglot-ensure-when-executable "haskell-language-server-wrapper"))
+(use-package haskell-mode
+  :mode ("\\.hs\\'" . haskell-mode)
+  :hook (haskell-mode . my/haskell-mode-defaults))
+
+(defun my/lua-mode-defaults ()
+  (setq-local tab-width 2 fill-column 100)
+  (my/eglot-ensure-when-executable "lua-language-server"))
+(use-package lua-mode :hook (lua-mode . my/lua-mode-defaults))
+
+(defun my/shell-mode-defaults ()
+  (my/set-local-compile-command "shellcheck .")
+  (my/eglot-ensure-when-executable "bash-language-server"))
+(add-hook 'bash-ts-mode-hook #'my/shell-mode-defaults)
 
 ;; --- OCaml ---------------------------------------------------------------
 

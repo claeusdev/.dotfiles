@@ -38,6 +38,10 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - Core: build tools, git, curl, wget, cmake
 - Shell: fish, tmux, starship, zoxide
 - CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, btop, yazi, atuin, glow, dust, procs, hyperfine, tokei
+  (on Debian/Ubuntu, neovim and the tree-sitter CLI come from official GitHub
+  release binaries into `~/.local` — the apt packages are too old for this
+  config, which needs Neovim ≥ 0.10 and tree-sitter CLI ≥ 0.22; Emacs likewise
+  comes from the classic snap, since apt ships 29 and the config targets 30)
 - Languages: Node.js, Python (uv), Rust, Go, Lua
 - C/C++: clang/clangd, clang-format, bear, lldb
 - FP: OCaml (opam, dune, merlin, ocaml-lsp, utop), Lisp (sbcl)
@@ -87,6 +91,11 @@ docker run hello-world
 nvim '+Lazy clean' '+Lazy sync'
 ```
 
+### Neovim: `attempt to index field 'uv' (a nil value)` on startup
+The running nvim is older than 0.10 (typically the distro package shadowing
+the tarball install). Check `nvim --version` and that `~/.local/bin` precedes
+`/usr/bin` in `$PATH`; re-run setup.sh to install the official tarball.
+
 ## Updating
 
 Pull the latest dotfiles and re-apply:
@@ -108,3 +117,15 @@ sudo dnf upgrade
 # Arch
 sudo pacman -Syu
 ```
+
+## Shared editor toolchain
+
+Emacs and Neovim use the same PATH-visible language servers, formatters, linters, and debugger adapters. Neovim does not maintain a private Mason toolchain.
+
+```sh
+./setup.sh --check       # read-only bootstrap check
+dev-doctor --all        # complete shared capability report
+dev-doctor --json       # machine-readable report
+```
+
+Resolution order is project environment, `~/.local/bin`, then system PATH. Use project lockfiles and direnv for project-specific versions; global tools follow stable releases while editor plugins remain pinned.

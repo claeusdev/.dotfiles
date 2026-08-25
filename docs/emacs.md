@@ -29,7 +29,7 @@ expects and is the fastest way to find a missing language server.
     completion.el      vertico, orderless, marginalia, consult, embark, corfu, cape
     dev.el             project, eglot, apheleia, magit, forge, diff-hl, vterm, dape
     langs.el           tree-sitter grammars and per-language setup
-    notes.el           org, denote, org-modern, olivetti, jinx, org-present, gptel
+    notes.el           org, denote, org-modern, olivetti, jinx, org-present
     keys.el            every global binding, loaded last
   custom.el            machine-local; holds package-selected-packages
   local-pre.el         optional, loaded before modules; untracked
@@ -84,7 +84,7 @@ point.
   and corfu variants), rainbow-delimiters
 - **Languages** — tuareg, markdown-mode
 - **Notes and writing** — denote, org-modern, olivetti, jinx, org-present
-- **Research** — gptel
+- **Research** — Denote Markdown, Citar, PDF Tools
 
 `package-selected-packages` in `custom.el` is kept in sync with the
 `use-package` declarations, which is what makes `M-x package-autoremove` safe
@@ -200,7 +200,7 @@ Adapters: `debugpy` for Python, `lldb-dap` for Rust and native code.
 | `C-c t l` / `w` / `o` | Line numbers / visual line / olivetti |
 | `C-c e h` | Health check |
 | `C-c e g` | Install missing tree-sitter grammars |
-| `C-c g` / `C-c G` | gptel: send region / open chat |
+| `C-c g g` / `C-c g c` | terminal agent / copy context |
 | `C-c f o` `p` `n` `s` `e` | REPL: OCaml, Python, Node, SQL, elisp |
 | `M-$` | Correct spelling at point |
 
@@ -225,12 +225,7 @@ uv tool install debugpy
 ln -sf "$(xcrun --find lldb-dap)" ~/.local/bin/lldb-dap
 ```
 
-`gptel` reads its key from `~/.authinfo.gpg`, never from the environment, so
-it cannot leak into this repo:
-
-```
-machine api.anthropic.com login apikey password sk-ant-...
-```
+Terminal coding assistance uses the shared `DEV_AGENT` command in a project vterm. No API keys are stored in this repository.
 
 ## Validation
 

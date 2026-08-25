@@ -14,9 +14,9 @@ return {
     scratch = { enabled = true },
   },
   keys = {
-    -- <leader>nh (not <leader>n): the bare key is the notify group prefix.
-    { "<leader>nh", function() Snacks.notifier.show_history() end, desc = "Notification history" },
-    { "<leader>nd", function() Snacks.notifier.hide() end, desc = "Dismiss notifications" },
+    -- <leader>uh (not <leader>n): the bare key is the notify group prefix.
+    { "<leader>uh", function() Snacks.notifier.show_history() end, desc = "Notification history" },
+    { "<leader>ud", function() Snacks.notifier.hide() end, desc = "Dismiss notifications" },
     { "<leader>z", function() Snacks.zen() end, desc = "Zen mode" },
     { "<leader>gg", function() Snacks.lazygit() end, desc = "LazyGit" },
     { "<leader>rf", function() Snacks.rename.rename_file() end, desc = "Rename file" },

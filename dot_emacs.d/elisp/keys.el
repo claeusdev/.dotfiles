@@ -50,7 +50,8 @@
   (define-key project-prefix-map (kbd "s") #'my/project-search)
   (define-key project-prefix-map (kbd "m") #'my/project-compile)
   (define-key project-prefix-map (kbd "t") #'my/project-test)
-  (define-key project-prefix-map (kbd "v") #'my/project-vterm))
+  (define-key project-prefix-map (kbd "v") #'my/project-vterm)
+  (define-key project-prefix-map (kbd "g") #'my/project-agent))
 
 ;; --- LSP -----------------------------------------------------------------
 
@@ -93,6 +94,7 @@
 (define-key my/notes-map (kbd "f") #'my/denote-find)
 (define-key my/notes-map (kbd "s") #'my/denote-search)
 (define-key my/notes-map (kbd "c") #'citar-open)
+(define-key my/notes-map (kbd "C") #'my/citar-insert-pandoc)
 (define-key my/notes-map (kbd "i") (lambda () (interactive) (find-file "~/org/inbox.org")))
 (define-key my/notes-map (kbd "p") (lambda () (interactive) (find-file "~/org/projects.org")))
 (define-key my/notes-map (kbd "j") (lambda () (interactive) (find-file "~/org/journal.org")))
@@ -100,10 +102,12 @@
 (global-set-key (kbd "C-c c") #'org-capture)
 (global-set-key (kbd "C-c a") #'org-agenda)
 
-;; --- LLM -----------------------------------------------------------------
+;; --- Terminal agent -----------------------------------------------------
 
-(global-set-key (kbd "C-c g") #'gptel-send)
-(global-set-key (kbd "C-c G") #'gptel)
+(defvar my/agent-map (make-sparse-keymap) "Shared terminal-agent commands.")
+(global-set-key (kbd "C-c g") my/agent-map)
+(define-key my/agent-map (kbd "g") #'my/project-agent)
+(define-key my/agent-map (kbd "c") #'my/agent-context)
 
 ;; --- REPLs ---------------------------------------------------------------
 
