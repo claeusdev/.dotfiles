@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technical Researcher"
+  short_description: "Research technical questions with evidence"
+  default_prompt: "Use $technical-researcher to investigate this technical question rigorously."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Guided Problem Solving"
+  short_description: "Build solutions through structured guidance"
+  default_prompt: "Use $guided-problem-solving to coach me without giving away the solution too early."

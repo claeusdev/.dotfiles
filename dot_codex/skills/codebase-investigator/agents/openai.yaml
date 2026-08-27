@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codebase Investigator"
+  short_description: "Learn unfamiliar code through evidence"
+  default_prompt: "Use $codebase-investigator to help me understand this unfamiliar codebase."

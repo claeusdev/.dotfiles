@@ -1,0 +1,4 @@
+interface:
+  display_name: "Open Source Contributor"
+  short_description: "Navigate open-source contributions professionally"
+  default_prompt: "Use $open-source-contributor to guide this contribution from issue to patch."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Review"
+  short_description: "Review work with production rigor"
+  default_prompt: "Use $engineering-review to assess this work as a senior engineer."

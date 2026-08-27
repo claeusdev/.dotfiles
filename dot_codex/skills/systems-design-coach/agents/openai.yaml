@@ -1,0 +1,4 @@
+interface:
+  display_name: "Systems Design Coach"
+  short_description: "Practice architecture through design drills"
+  default_prompt: "Use $systems-design-coach to run an interactive system design exercise."

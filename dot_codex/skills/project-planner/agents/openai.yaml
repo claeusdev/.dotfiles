@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Planner"
+  short_description: "Turn ambitious projects into validated milestones"
+  default_prompt: "Use $project-planner to turn this goal into an executable project plan."

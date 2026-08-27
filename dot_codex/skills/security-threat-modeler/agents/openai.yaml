@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security Threat Modeler"
+  short_description: "Model threats and proportionate mitigations"
+  default_prompt: "Use $security-threat-modeler to threat-model this system."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Concept Tutor"
+  short_description: "Learn difficult technical concepts deeply"
+  default_prompt: "Use $concept-tutor to teach me this concept for durable understanding."

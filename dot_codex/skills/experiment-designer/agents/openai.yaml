@@ -1,0 +1,4 @@
+interface:
+  display_name: "Experiment Designer"
+  short_description: "Turn engineering uncertainty into evidence"
+  default_prompt: "Use $experiment-designer to design a reproducible test of this claim."

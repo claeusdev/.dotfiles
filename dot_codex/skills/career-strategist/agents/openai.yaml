@@ -1,0 +1,4 @@
+interface:
+  display_name: "Career Strategist"
+  short_description: "Build an evidence-based engineering career plan"
+  default_prompt: "Use $career-strategist to assess my target role and next steps."

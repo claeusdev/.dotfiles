@@ -1,0 +1,4 @@
+interface:
+  display_name: "Interview Simulator"
+  short_description: "Run realistic software engineering interviews"
+  default_prompt: "Use $interview-simulator to conduct a realistic mock interview."

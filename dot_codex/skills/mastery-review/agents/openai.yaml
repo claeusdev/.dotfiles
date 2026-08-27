@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mastery Review"
+  short_description: "Test retention and plan targeted review"
+  default_prompt: "Use $mastery-review to assess my mastery and create a focused review plan."

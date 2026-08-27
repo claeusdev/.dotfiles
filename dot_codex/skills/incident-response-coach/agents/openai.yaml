@@ -1,0 +1,4 @@
+interface:
+  display_name: "Incident Response Coach"
+  short_description: "Practice calm evidence-driven incident response"
+  default_prompt: "Use $incident-response-coach to run a production incident exercise."

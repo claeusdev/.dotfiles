@@ -1,0 +1,4 @@
+interface:
+  display_name: "Behavioral Story Coach"
+  short_description: "Develop truthful evidence-rich interview stories"
+  default_prompt: "Use $behavioral-story-coach to strengthen this interview story."

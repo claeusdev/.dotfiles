@@ -24,3 +24,10 @@ LICENSE
 .emacs.d/auto-save-list/
 .emacs.d/recentf
 .config/fish/fish_variables
+
+# Codex: manage skills only. Never auth.json, history.jsonl, or the session databases.
+# .system/ is shipped and reinstalled by Codex itself; node_modules restores from package-lock.json.
+.codex/skills/.system
+.codex/skills/**/node_modules
+# Held out of this public repo pending confirmation of its origin (no LICENSE/author recorded).
+.codex/skills/ui-ux-pro-max

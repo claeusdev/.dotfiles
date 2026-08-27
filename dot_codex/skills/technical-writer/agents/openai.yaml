@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technical Writer"
+  short_description: "Write clear engineering decision documents"
+  default_prompt: "Use $technical-writer to draft this technical document clearly."
