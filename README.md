@@ -434,10 +434,39 @@ Active in `eglot-mode-map` when an LSP server is attached.
 | `nb`  | `jupyter notebook`       |
 | `tb`  | `tensorboard --logdir`   |
 
-| Function | Description                                          |
-| :------- | :--------------------------------------------------- |
+**Navigation**
+
+| Function | Description |
+| :------- | :---------- |
+| `mkcd <dir>` | Create a directory (with parents) and cd into it |
+| `up [n\|name]` | Up one level, up `n` levels, or to the nearest ancestor named `name` |
+| `cdr` | cd to the root of the current git repository |
+| `scratch [name]` | cd into a dated throwaway dir under `~/scratch` |
+
+**Git**
+
+| Function | Description |
+| :------- | :---------- |
+| `clone <url> [dir]` | git clone and cd into the result |
+| `gwt [branch]` | List worktrees, or add one for `branch` and cd into it |
+
+**Utilities**
+
+| Function | Description |
+| :------- | :---------- |
+| `dotenv [file]` | Load a `.env` into the shell (fish cannot `source` one) |
+| `extract <archive>` | Extract any common archive format |
+| `bak <file>` | Timestamped backup copy beside the original |
+
+**Projects & tooling**
+
+| Function | Description |
+| :------- | :---------- |
+| `dev` | tmux dev session: nvim left, claude right |
 | `mlenv <name> [type]` | Bootstrap a uv ML project (`dl`, `ml`, `llm`) |
-| `jk`     | Register current uv venv as a Jupyter kernel         |
+| `jk` | Register current uv venv as a Jupyter kernel |
+| `ocaml-new <name>` | Bootstrap a dune project and stamp `.ocamlformat` |
+| `ocamlformat-init` | Stamp the global ocamlformat config into this project |
 
 **Shell integrations:** atuin (history search with `Ctrl+R`), zoxide (`z`/`cd`), starship prompt.
 
