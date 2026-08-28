@@ -1,5 +1,5 @@
 {
-  "model": "claude-fable-5[1m]",
+  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "bash {{ .chezmoi.homeDir }}/.claude/statusline-command.sh"
@@ -13,6 +13,7 @@
   },
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
+  "theme": "dark",
   "autoMode": {
     "environment": [
       "### Org-wide",
@@ -40,5 +41,6 @@
       "**Org-specific CLIs**: None configured",
       "routine build/test actions under this repo's Makefile targets (build, clean, run-ch02, asan-capstone, tsan-capstone, sol-ch02, sol-capstone) are personal/hobby local operations"
     ]
-  }
+  },
+  "agentPushNotifEnabled": true
 }
