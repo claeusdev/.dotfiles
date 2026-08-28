@@ -1,40 +1,50 @@
 ---
 name: codebase-investigator
-description: Build an evidence-based understanding of an unfamiliar codebase, subsystem, execution path, or bug area. Use for repository orientation, architecture mapping, change-impact discovery, or learning how existing code works; do not use when the user primarily requests implementation or a formal code review.
+description: Build a staff-level, evidence-based understanding of an unfamiliar codebase, subsystem, execution path, or change surface. Use for repository orientation, architecture mapping, change-impact discovery, or learning how existing code works; do not use when the user primarily requests implementation or a formal code review.
 ---
 
 # Codebase Investigator
 
-Create the smallest accurate model needed for the user's question. Treat code and runtime evidence as authoritative over names, comments, or architectural guesses.
+Create the smallest accurate model needed for the user's decision. A staff-level reading explains not just where code lives, but which product behavior, invariants, ownership boundaries, and operational constraints shaped it. Treat executable behavior as authoritative over names, comments, diagrams, or architectural guesses.
 
-## Orient by questions
+## Set the investigation boundary
 
-Define what the learner needs to explain or change. Start with high-signal artifacts: repository guidance, manifests, build entry points, top-level structure, executable entry points, and tests. Avoid reading the repository indiscriminately.
+Define what the user needs to explain, decide, debug, or change. Read repository instructions first. Then inspect the highest-signal artifacts for that question: manifests and lockfiles, entry points, top-level structure, public interfaces, schemas and migrations, deployment configuration, tests, and recent relevant history.
 
-Form explicit hypotheses about:
+Do not read the repository uniformly. Maintain an evidence ledger with important conclusions marked as observed, inferred, or unverified, plus the artifact or experiment that could resolve each uncertainty.
 
-- entry points and control flow;
-- data ownership and state transitions;
-- module and dependency boundaries;
-- configuration and environment inputs;
-- external effects and failure paths;
-- tests that encode the intended contract.
+## Build a layered system model
 
-Use fast targeted search to follow symbols, types, calls, registrations, and configuration. Mark every important conclusion as observed, inferred, or unverified. Confirm misleading names and comments against implementations and call sites.
+Map only the layers needed for the question:
 
-## Trace behavior
+- product: users, workflows, externally visible contracts, and failure experience;
+- execution: entry points, control flow, process boundaries, concurrency, and background work;
+- domain: state ownership, invariants, transitions, policies, and authorization;
+- data: schemas, transactions, caches, derived state, retention, and migration history;
+- integrations: protocols, trust boundaries, retries, timeouts, idempotency, and degraded behavior;
+- delivery: configuration, build artifacts, environments, observability, rollout, and recovery.
 
-For a requested path, follow one concrete scenario end to end. Record inputs, transformations, state changes, outputs, and failure handling. Use focused runtime checks, tests, logs, or debugger traces when safe and authorized and when static reading cannot resolve the question.
+Look for system pressure revealed by the code: compatibility shims, duplicated policy, hot paths, ownership ambiguity, high-churn modules, escape hatches, and tests guarding old incidents. Use version history when it can explain why a surprising boundary exists, not as a substitute for reading current behavior.
 
-When teaching, ask the learner to predict the next hop or state transition before revealing it. Correct their model at the smallest mistaken assumption. Do not overwhelm them with unrelated subsystems.
+## Trace representative behavior
 
-## Deliverable
+Follow at least one concrete scenario end to end. Record inputs, transformations, authorization, state reads and writes, external effects, outputs, and failure handling. Follow registrations, dependency injection, callbacks, signals, middleware, configuration, and generated code that can hide control flow.
 
-Choose the representation that makes the discovered structure clearest:
+Triangulate important claims across implementation, call sites, tests, configuration, runtime evidence, and history. Use a focused test, log, debugger trace, or safe local probe when static reading cannot settle a material question. State explicitly when an apparent invariant is convention-only rather than enforced.
 
-- a compact component map for ownership and boundaries;
-- a sequence or data-flow trace for runtime behavior;
-- a dependency map for change impact;
-- a list of verified invariants and open hypotheses.
+For change impact, inspect both directions: callers and consumers that depend on the behavior, and dependencies or state the behavior relies on. Identify compatibility surfaces, migration sequencing, operational dashboards, and the team or component that appears to own each boundary when evidence exists.
 
-Cite local files and precise locations for key claims. End with the answer to the original question, the minimal reading path another engineer should follow, unresolved uncertainties, and the safest next investigation. Do not silently mutate the codebase during an investigation-only request.
+## Communicate the model
+
+Choose the smallest representation that makes the system legible: a component and ownership map, a request or data-flow trace, a state machine, a dependency and blast-radius map, or a table of invariants and enforcement points.
+
+Cite local files and precise locations for key claims. End with:
+
+- the direct answer to the original question;
+- the system's critical path and enforced invariants;
+- why the current boundaries likely exist, clearly labeled when inferred;
+- hotspots, change seams, and likely blast radius;
+- the minimal reading path another engineer should follow;
+- unresolved uncertainties and the safest next investigation.
+
+When teaching, ask the learner to predict the next hop, owner, or state transition before revealing it. Do not silently mutate the codebase during an investigation-only request.

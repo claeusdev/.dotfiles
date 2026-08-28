@@ -1,0 +1,4 @@
+interface:
+  display_name: "Python/Django Security Review"
+  short_description: "Review Python and Django security risks"
+  default_prompt: "Use $python-django-security-review to assess this Python or Django change for credible security risks."

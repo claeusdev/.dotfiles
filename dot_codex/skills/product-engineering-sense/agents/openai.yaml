@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product Engineering Sense"
+  short_description: "Connect product value to engineering choices"
+  default_prompt: "Use $product-engineering-sense to shape this feature around user value, scope, evidence, and rollout."

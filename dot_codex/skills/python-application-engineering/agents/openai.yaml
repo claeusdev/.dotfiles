@@ -1,0 +1,4 @@
+interface:
+  display_name: "Python Application Engineering"
+  short_description: "Build production Python and Django systems"
+  default_prompt: "Use $python-application-engineering to implement this production Python application change."
