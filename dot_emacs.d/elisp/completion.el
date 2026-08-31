@@ -10,7 +10,7 @@
   "Add supplemental completion sources to programming buffers."
   (setq-local completion-cycle-threshold 3
               tab-always-indent 'complete)
-  (add-hook 'completion-at-point-functions #'tempel-complete -90 t)
+  (add-hook 'completion-at-point-functions #'my/tempel-capf -90 t)
   (add-hook 'completion-at-point-functions #'cape-file nil t)
   (add-hook 'completion-at-point-functions #'cape-dabbrev t t))
 
@@ -18,7 +18,7 @@
   "Add supplemental completion sources to text buffers."
   (setq-local completion-cycle-threshold 3
               tab-always-indent 'complete)
-  (add-hook 'completion-at-point-functions #'tempel-complete -90 t)
+  (add-hook 'completion-at-point-functions #'my/tempel-capf -90 t)
   (add-hook 'completion-at-point-functions #'cape-dabbrev nil t)
   (add-hook 'completion-at-point-functions #'cape-file t t))
 
@@ -134,12 +134,33 @@
   (corfu-popupinfo-mode 1))
 
 ;; Snippets.  Type `<' and a name (`<match', `<def', `<src'): the matching
-;; templates show in the completion popup (tempel-complete is the first
-;; capf, and only fires after the `<' prefix so LSP candidates stay clean);
-;; TAB accepts and expands, then TAB / S-TAB move between fields.  `M-*'
-;; picks a template from a list without typing the prefix.  Templates live
-;; in ~/.emacs.d/templates (chezmoi-managed); tempel-collection adds a stock
-;; set for many modes.
+;; templates show in the completion popup; TAB accepts and expands (the `<'
+;; goes away), then TAB / S-TAB move between fields.  `M-*' picks a template
+;; from a list and `M-+' completes a bare name at point, no prefix needed.
+;; Templates live in ~/.emacs.d/templates (chezmoi-managed); tempel-collection
+;; adds a stock set for many modes.
+(defun my/tempel-capf ()
+  "`tempel-complete' as a capf that only fires after a `<' trigger.
+Without the trigger, template names would shadow LSP candidates for any
+word that happens to prefix-match one (tempel dropped its own
+`tempel-trigger-prefix' option).  Falls through to the next capf when
+nothing matches, so `a<b' comparisons are unaffected."
+  (when (looking-back "<\\([[:alnum:]_*-]*\\)" (line-beginning-position))
+    (let ((beg (match-beginning 1))
+          (templates (tempel--templates)))
+      (when templates
+        (list beg (point) templates
+              :category 'tempel
+              :exclusive 'no
+              :company-kind (lambda (_) 'snippet)
+              :exit-function
+              (lambda (name status)
+                ;; Drop the trigger that sits just before the completed name.
+                (save-excursion
+                  (goto-char (- (point) (length name)))
+                  (when (eq (char-before) ?<) (delete-char -1)))
+                (tempel--exit templates nil name status)))))))
+
 (use-package tempel
   :bind (("M-+" . tempel-complete)
          ("M-*" . tempel-insert)
@@ -150,8 +171,7 @@
          ([backtab] . tempel-previous)
          ("C-g"     . tempel-abort))
   :custom
-  (tempel-path (expand-file-name "templates" user-emacs-directory))
-  (tempel-trigger-prefix "<"))
+  (tempel-path (expand-file-name "templates" user-emacs-directory)))
 
 (use-package tempel-collection
   :after tempel)
