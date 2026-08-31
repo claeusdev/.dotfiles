@@ -42,21 +42,24 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
   release binaries into `~/.local` — the apt packages are too old for this
   config, which needs Neovim ≥ 0.10 and tree-sitter CLI ≥ 0.22; Emacs likewise
   comes from the classic snap, since apt ships 29 and the config targets 30)
-- Languages: Node.js, Python (uv), Rust, Go, Lua
+- Languages: Node.js, Python (uv), Rust (+ rust-analyzer), Go, Lua
 - C/C++: clang/clangd, clang-format, bear, lldb
-- FP: OCaml (opam, dune, merlin, ocaml-lsp, utop), Lisp (sbcl)
+- FP: OCaml (opam, dune, merlin, ocaml-lsp, utop), Haskell (ghc, cabal, HLS, ormolu),
+  Racket (minimal-racket), Standard ML (SML/NJ, millet), Lisp (sbcl)
 - ML/AI & Scientific: jupyterlab, ipython, pandoc, typst, ollama
 - MLOps (via uv tool): mlflow, dvc, tensorboard
-- LSP/Formatters: language servers, prettier, sql-formatter, stylua, ruff, basedpyright, shellcheck
+- LSP/Formatters: language servers, prettier, sql-formatter, stylua, ruff, basedpyright (uv tool), jupytext (uv tool), shellcheck, enchant (spellcheck)
 - Emacs pdf-tools build deps: poppler, automake
 - Treesitter: tree-sitter CLI (parser compilation for Neovim)
 - Git: gh, lazygit, git-delta
 - Databases: PostgreSQL, SQLite
 - Containers: Docker + lazydocker — **opt-in**, set `INSTALL_DOCKER=1`
-- Fonts: JetBrains Mono, Inconsolata (Nerd Font patched)
+- Fonts: JetBrains Mono, Fira Code, Inconsolata (Nerd Font patched); macOS also Iosevka Comfy, Commit Mono
 
 ### macOS Only
 - Homebrew (installed automatically)
+- Emacs: `emacs-app` cask (native-comp build), linked into `~/.local/bin` as `emacs`/`emacsclient`
+- GNU coreutils (`gls` for Emacs Dired)
 - Cloud/DevOps: awscli, terraform, kubectl, k9s
 - LaTeX: MacTeX (mactex-no-gui)
 - Window management: Rectangle, AeroSpace (tiling WM)

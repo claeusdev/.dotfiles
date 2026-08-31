@@ -172,7 +172,24 @@ if [ "$PLATFORM" = "mac" ]; then
 
     echo ""
     echo "Installing shell and terminal tools..."
-    brew_install fish tmux emacs starship zoxide direnv fnm sesh
+    brew_install fish tmux starship zoxide direnv fnm sesh
+    # GNU coreutils (as g-prefixed binaries): Emacs Dired uses `gls' for
+    # --group-directories-first, which BSD ls lacks.
+    brew_install coreutils
+
+    # The `emacs' formula is built without native compilation; the emacs-app
+    # cask (emacsformacosx.com build) has it, so the config is much faster
+    # with the cask.  Link its binaries into ~/.local/bin, which the fish
+    # config puts ahead of /opt/homebrew/bin.
+    if brew list --formula emacs &> /dev/null; then
+        brew uninstall emacs || true
+    fi
+    brew_cask_install emacs-app
+    if [ -x /Applications/Emacs.app/Contents/MacOS/Emacs ]; then
+        mkdir -p "$HOME/.local/bin"
+        ln -sf /Applications/Emacs.app/Contents/MacOS/Emacs "$HOME/.local/bin/emacs"
+        ln -sf /Applications/Emacs.app/Contents/MacOS/bin/emacsclient "$HOME/.local/bin/emacsclient"
+    fi
 
     echo ""
     echo "Installing modern CLI utilities..."
@@ -187,15 +204,26 @@ if [ "$PLATFORM" = "mac" ]; then
 
     echo ""
     echo "Installing programming languages and runtimes..."
-    brew_install go rust lua uv ghc cabal-install haskell-language-server ormolu
+    # brew's haskell-language-server is built against brew's ghc, so keep the
+    # two in step (both from brew, upgraded together) rather than mixing in
+    # ghcup.
+    brew_install go rust rust-analyzer lua uv ghc cabal-install haskell-language-server ormolu
 
     echo ""
-    echo "Installing C/C++, OCaml, and Lisp toolchains..."
+    echo "Installing C/C++, OCaml, FP and Lisp toolchains..."
     # clangd comes from the Xcode CLT; brew llvm is keg-only, so install
-    # clang-format standalone to get it on PATH.
+    # clang-format standalone to get it on PATH.  lldb-dap (for Emacs dape)
+    # is linked out of the keg below.
     brew_install llvm bear clang-format
     brew_install ocaml opam dune
+    # Racket (minimal distribution; `raco pkg install' adds libraries),
+    # Standard ML (SML/NJ REPL + millet language server), Common Lisp.
+    brew_install minimal-racket smlnj millet
     brew_install sbcl
+    if [ -x /opt/homebrew/opt/llvm/bin/lldb-dap ] && ! command -v lldb-dap &> /dev/null; then
+        mkdir -p "$HOME/.local/bin"
+        ln -sf /opt/homebrew/opt/llvm/bin/lldb-dap "$HOME/.local/bin/lldb-dap"
+    fi
 
     # ocaml-lsp-server, ocamlformat and merlin are OPAM packages, not Homebrew
     # formulae — installing them with brew always failed silently.
@@ -212,6 +240,8 @@ if [ "$PLATFORM" = "mac" ]; then
     brew_install lua-language-server stylua ruff shfmt shellcheck
     # Emacs pdf-tools compiles its epdfinfo server against these on first use.
     brew_install poppler automake
+    # Spellchecking backend for Emacs jinx.
+    brew_install enchant
 
     echo ""
     echo "Installing database tools..."
@@ -243,6 +273,9 @@ if [ "$PLATFORM" = "mac" ]; then
     echo ""
     echo "Installing fonts..."
     brew_cask_install font-jetbrains-mono-nerd-font font-fira-code-nerd-font font-hack-nerd-font font-inconsolata-nerd-font
+    # Emacs offers these as fontaine presets (C-c t f); Iosevka Comfy is
+    # Protesilaos's font, tuned for exactly this kind of setup.
+    brew_cask_install font-iosevka-comfy font-commit-mono-nerd-font
 
     echo ""
     echo "Setting up fzf key bindings..."
@@ -303,7 +336,7 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo "Installing shell and terminal tools..."
     if [ "$PKG_MGR" = "apt" ]; then
         install_pkg fish tmux
-        # Debian/Ubuntu package Emacs 29, but the config targets Emacs 30
+        # Debian/Ubuntu package Emacs 29, but the config targets Emacs 30+
         # (which-key and editorconfig are expected as built-ins). The
         # classic-confined snap tracks current releases; symlink it into
         # ~/.local/bin so it shadows any apt-installed /usr/bin/emacs.
@@ -505,6 +538,12 @@ elif [ "$PLATFORM" = "linux" ]; then
     install_optional_pkg dune
     install_optional_pkg ocaml-dune
     install_optional_pkg sbcl
+    # Racket and Standard ML for the Emacs racket-mode / sml-mode setup;
+    # millet (SML LSP) is a cargo install below.  Enchant backs Emacs jinx.
+    install_optional_pkg racket
+    install_optional_pkg smlnj
+    install_optional_pkg enchant-2
+    install_optional_pkg libenchant-2-2
 
     if command -v opam &> /dev/null; then
         if [ ! -d "$HOME/.opam" ]; then
@@ -518,7 +557,7 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo "Installing language servers and formatters..."
     if command -v npm &> /dev/null; then
         npm install -g --prefix "$HOME/.local" \
-            typescript prettier eslint @vtsls/language-server basedpyright \
+            typescript prettier eslint @vtsls/language-server \
             vscode-langservers-extracted yaml-language-server \
             dockerfile-language-server-nodejs bash-language-server \
             sql-formatter || FAILED_PACKAGES+=(node-editor-tools)
@@ -526,6 +565,7 @@ elif [ "$PLATFORM" = "linux" ]; then
 
     if command -v cargo &> /dev/null; then
         cargo install stylua || true
+        cargo install millet-ls || true
         rustup component add rust-analyzer rustfmt clippy 2>/dev/null || true
     fi
 
@@ -675,6 +715,14 @@ if command -v uv &> /dev/null; then
     uv tool install tensorboard || true
 fi
 
+# Python editor tools shared by Emacs and Neovim.  basedpyright is a PyPI
+# package too, so it lives with the other uv tools rather than in the npm
+# prefix; jupytext lets Emacs code-cells open .ipynb files as scripts.
+if command -v uv &> /dev/null; then
+    uv tool install basedpyright || FAILED_PACKAGES+=(basedpyright)
+    uv tool install jupytext || FAILED_PACKAGES+=(jupytext)
+fi
+
 # Install Node.js LTS via fnm
 if command -v fnm &> /dev/null; then
     echo "Installing Node.js LTS via fnm..."
@@ -734,7 +782,7 @@ fi
 # the same binaries regardless of the active Node version manager.
 if command -v npm &> /dev/null; then
     npm install -g --prefix "$HOME/.local" \
-        typescript prettier eslint @vtsls/language-server basedpyright \
+        typescript prettier eslint @vtsls/language-server \
         vscode-langservers-extracted yaml-language-server \
         dockerfile-language-server-nodejs bash-language-server \
         sql-formatter || FAILED_PACKAGES+=(node-editor-tools)
