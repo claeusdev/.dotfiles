@@ -348,6 +348,16 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo ""
     echo "Installing shell and terminal tools..."
     if [ "$PKG_MGR" = "apt" ]; then
+        # Ubuntu ships fish 3.x (noble: 3.7.0) but the config targets fish 4:
+        # atuin's init picks its `bind` syntax off $version, and fish 4.3
+        # drops conf.d/fish_frozen_key_bindings.fish into the config. macOS
+        # gets current fish from brew, so use upstream's PPA to match.
+        # add-apt-repository is idempotent, and the PPA is Ubuntu-only, so
+        # Debian keeps the distro package.
+        if [ "$(. /etc/os-release 2>/dev/null && echo "$ID")" = "ubuntu" ]; then
+            install_optional_pkg software-properties-common
+            sudo add-apt-repository -y ppa:fish-shell/release-4 && $PKG_UPDATE
+        fi
         install_pkg fish tmux
         # Debian/Ubuntu package Emacs 29, but the config targets Emacs 30+
         # (which-key and editorconfig are expected as built-ins). The
