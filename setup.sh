@@ -176,6 +176,9 @@ if [ "$PLATFORM" = "mac" ]; then
     # GNU coreutils (as g-prefixed binaries): Emacs Dired uses `gls' for
     # --group-directories-first, which BSD ls lacks.
     brew_install coreutils
+    # emacs-libvterm compiles a native module against the system libvterm and
+    # needs its headers, not just the runtime library.
+    brew_install libvterm
 
     # The `emacs' formula is built without native compilation; the emacs-app
     # cask (emacsformacosx.com build) has it, so the config is much faster
@@ -364,6 +367,18 @@ elif [ "$PLATFORM" = "linux" ]; then
         fi
     else
         install_pkg fish tmux emacs
+    fi
+
+    # emacs-libvterm compiles a native module against the system libvterm and
+    # needs its headers, not just the runtime library. Without them the build
+    # fails with LIBVTERM_INCLUDE_DIR-NOTFOUND and vterm reports at runtime
+    # that libvterm does not exist.
+    if [ "$PKG_MGR" = "apt" ]; then
+        install_pkg libvterm-dev
+    elif [ "$PKG_MGR" = "dnf" ]; then
+        install_pkg libvterm-devel
+    elif [ "$PKG_MGR" = "pacman" ]; then
+        install_pkg libvterm
     fi
 
     if ! command -v starship &> /dev/null; then

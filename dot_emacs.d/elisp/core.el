@@ -513,6 +513,13 @@ the project environment, so install it per project with `uv add --dev debugpy'."
                        '(typescript tsx javascript rust python c cpp cmake lua
                          bash yaml json toml dockerfile)
                        " ")))
+      ;; vterm builds a native module against the system libvterm; without
+      ;; its headers the build fails and vterm reports libvterm as missing.
+      (insert (format "\nNative modules: vterm-module %s\n"
+                      (if (locate-file "vterm-module" load-path
+                                       (list module-file-suffix))
+                          "built"
+                        "MISSING (needs libvterm headers; see setup.sh)")))
       (insert "\nLocal overrides:\n")
       (dolist (file '("local-pre.el" "local-post.el" "custom.el"))
         (insert (format "  %-16s %s\n" file
