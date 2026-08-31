@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product Ticket Delivery"
+  short_description: "Take a product ticket from discovery to PR"
+  default_prompt: "Use $product-ticket-delivery to take this product engineering ticket from discovery through a review-ready pull request."

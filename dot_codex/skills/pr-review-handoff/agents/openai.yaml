@@ -1,0 +1,4 @@
+interface:
+  display_name: "PR Review Handoff"
+  short_description: "Prepare human review and open a pull request"
+  default_prompt: "Use $pr-review-handoff to prepare this change for human review and open the approved pull request."

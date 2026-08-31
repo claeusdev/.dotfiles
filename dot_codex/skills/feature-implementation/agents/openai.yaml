@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Implementation"
+  short_description: "Implement a verified vertical product slice"
+  default_prompt: "Use $feature-implementation to implement this feature as a tested, repository-native vertical slice."

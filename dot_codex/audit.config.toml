@@ -1,0 +1,4 @@
+# Use for analysis or review sessions that must not modify the workspace.
+model_reasoning_effort = "high"
+sandbox_mode = "read-only"
+approval_policy = "never"
