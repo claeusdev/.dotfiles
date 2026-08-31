@@ -220,9 +220,13 @@ if [ "$PLATFORM" = "mac" ]; then
     # Standard ML (SML/NJ REPL + millet language server), Common Lisp.
     brew_install minimal-racket smlnj millet
     brew_install sbcl
-    if [ -x /opt/homebrew/opt/llvm/bin/lldb-dap ] && ! command -v lldb-dap &> /dev/null; then
+    # Prefer the Xcode CLT copy: brew's llvm keg can be autoremoved, which
+    # leaves a dangling link.
+    LLDB_DAP="$(xcrun -f lldb-dap 2>/dev/null || true)"
+    [ -x "$LLDB_DAP" ] || LLDB_DAP=/opt/homebrew/opt/llvm/bin/lldb-dap
+    if [ -x "$LLDB_DAP" ]; then
         mkdir -p "$HOME/.local/bin"
-        ln -sf /opt/homebrew/opt/llvm/bin/lldb-dap "$HOME/.local/bin/lldb-dap"
+        ln -sf "$LLDB_DAP" "$HOME/.local/bin/lldb-dap"
     fi
 
     # ocaml-lsp-server, ocamlformat and merlin are OPAM packages, not Homebrew
@@ -263,6 +267,9 @@ if [ "$PLATFORM" = "mac" ]; then
     echo ""
     echo "Installing ML/AI & scientific tools..."
     brew_install jupyterlab ipython pandoc typst ollama
+    # Org LaTeX previews render through dvisvgm; core.el points it at the
+    # texlive formula's TEXMF tree.
+    brew_install dvisvgm
     brew_cask_install mactex-no-gui
 
     echo ""

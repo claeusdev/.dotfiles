@@ -10,6 +10,7 @@
   "Add supplemental completion sources to programming buffers."
   (setq-local completion-cycle-threshold 3
               tab-always-indent 'complete)
+  (add-hook 'completion-at-point-functions #'tempel-complete -90 t)
   (add-hook 'completion-at-point-functions #'cape-file nil t)
   (add-hook 'completion-at-point-functions #'cape-dabbrev t t))
 
@@ -17,6 +18,7 @@
   "Add supplemental completion sources to text buffers."
   (setq-local completion-cycle-threshold 3
               tab-always-indent 'complete)
+  (add-hook 'completion-at-point-functions #'tempel-complete -90 t)
   (add-hook 'completion-at-point-functions #'cape-dabbrev nil t)
   (add-hook 'completion-at-point-functions #'cape-file t t))
 
@@ -38,14 +40,15 @@
               ("M-DEL" . vertico-directory-delete-word))
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
-;; Space-separated components in any order; each component also matches as a
-;; subsequence (`fbz' finds foo_bar.zig), so short fuzzy queries work the way
-;; they do in VS Code or Telescope.  Prefix-style dispatchers still apply:
-;; `=foo' literal, `!foo' exclude, `foo~' forces flex, `foo,' regexp.
+;; Space-separated components in any order.  Each component matches
+;; literally, as a regexp, or as an initialism (`fbz' finds foo_bar.zig by
+;; word initials), which keeps short queries precise; `foo~' forces true
+;; subsequence (flex) matching when you want it, `=foo' literal only, `!foo'
+;; excludes.
 (use-package orderless
   :custom
   (completion-styles '(orderless basic))
-  (orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex))
+  (orderless-matching-styles '(orderless-literal orderless-regexp orderless-initialism))
   (completion-category-overrides '((file (styles partial-completion orderless)))))
 
 (use-package marginalia
@@ -102,31 +105,56 @@
 
 ;; --- In-buffer -----------------------------------------------------------
 
-;; TAB cycles candidates, RET inserts.  Snippet-free, so TAB never fights
-;; indentation the way a yasnippet binding would.
+;; Editor-style popup: the best candidate is preselected, TAB or RET
+;; accepts it, C-n/C-p (C-j/C-k in evil) move, and the popup closes as soon
+;; as nothing matches so RET is never hijacked on a plain word.
 (use-package corfu
   :init (global-corfu-mode)
   :bind (:map corfu-map
-         ("TAB"     . corfu-next)
-         ([tab]     . corfu-next)
+         ("TAB"     . corfu-insert)
+         ([tab]     . corfu-insert)
          ("S-TAB"   . corfu-previous)
          ([backtab] . corfu-previous))
   :custom
   (corfu-auto t)
   (corfu-auto-prefix 2)
-  (corfu-auto-delay 0.1)
+  (corfu-auto-delay 0.08)
   (corfu-cycle t)
-  (corfu-preselect 'prompt)
-  (corfu-quit-at-boundary nil)
-  (corfu-quit-no-match 'separator)
-  (corfu-preview-current 'insert)
-  (corfu-popupinfo-delay '(0.25 . 0.1))
+  (corfu-preselect 'first)
+  (corfu-on-exact-match nil)          ; never auto-insert behind your back
+  (corfu-preview-current nil)         ; no ghost text in the buffer while browsing
+  (corfu-quit-at-boundary 'separator)
+  (corfu-quit-no-match t)
+  (corfu-popupinfo-delay '(0.4 . 0.1))
   (corfu-min-width 30)
   (corfu-max-width 90)
-  (corfu-count 14)
+  (corfu-count 12)
   :config
   (corfu-history-mode 1)
   (corfu-popupinfo-mode 1))
+
+;; Snippets.  Type `<' and a name (`<match', `<def', `<src'): the matching
+;; templates show in the completion popup (tempel-complete is the first
+;; capf, and only fires after the `<' prefix so LSP candidates stay clean);
+;; TAB accepts and expands, then TAB / S-TAB move between fields.  `M-*'
+;; picks a template from a list without typing the prefix.  Templates live
+;; in ~/.emacs.d/templates (chezmoi-managed); tempel-collection adds a stock
+;; set for many modes.
+(use-package tempel
+  :bind (("M-+" . tempel-complete)
+         ("M-*" . tempel-insert)
+         :map tempel-map
+         ("TAB"     . tempel-next)
+         ([tab]     . tempel-next)
+         ("S-TAB"   . tempel-previous)
+         ([backtab] . tempel-previous)
+         ("C-g"     . tempel-abort))
+  :custom
+  (tempel-path (expand-file-name "templates" user-emacs-directory))
+  (tempel-trigger-prefix "<"))
+
+(use-package tempel-collection
+  :after tempel)
 
 (use-package cape
   :init

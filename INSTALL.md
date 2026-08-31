@@ -46,7 +46,7 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - C/C++: clang/clangd, clang-format, bear, lldb
 - FP: OCaml (opam, dune, merlin, ocaml-lsp, utop), Haskell (ghc, cabal, HLS, ormolu),
   Racket (minimal-racket), Standard ML (SML/NJ, millet), Lisp (sbcl)
-- ML/AI & Scientific: jupyterlab, ipython, pandoc, typst, ollama
+- ML/AI & Scientific: jupyterlab, ipython, pandoc, typst, ollama, dvisvgm (Org LaTeX previews)
 - MLOps (via uv tool): mlflow, dvc, tensorboard
 - LSP/Formatters: language servers, prettier, sql-formatter, stylua, ruff, basedpyright (uv tool), jupytext (uv tool), shellcheck, enchant (spellcheck)
 - Emacs pdf-tools build deps: poppler, automake

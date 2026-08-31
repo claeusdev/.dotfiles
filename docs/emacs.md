@@ -96,6 +96,9 @@ alongside basedpyright, since Eglot runs one server per buffer.
 
 - **Completion** — vertico (+ vertico-directory), orderless, marginalia,
   consult, consult-eglot, embark, embark-consult, corfu, cape
+- **Snippets** — tempel (+ tempel-collection); own templates in
+  `~/.emacs.d/templates` for OCaml, Haskell, Racket, SML, Python, C, Rust,
+  Org, Markdown and Elisp
 - **Git** — magit, forge, diff-hl
 - **Editing** — expreg (tree-sitter region expansion), substitute, paredit
   (Lisps only), avy, ws-butler, built-in `repeat-mode`
@@ -271,6 +274,9 @@ Adapters: `debugpy` for Python, `lldb-dap` for Rust and native code.
 | `M-g f`, `C-c s d` | Jump to a Flymake diagnostic |
 | `C-x C-r` | Recent files |
 | `M-$` | Correct spelling at point |
+| `<name` then `TAB` | Expand a snippet (e.g. `<match`, `<def`, `<src`); `TAB`/`S-TAB` move between fields |
+| `M-*` / `M-+` | Pick a snippet from a list / complete a `<name` at point |
+| popup: `TAB`/`RET` accept, `C-n`/`C-p` (`C-j`/`C-k`) move, `ESC` close | Corfu completion |
 
 Pause after any prefix and which-key lists what follows.
 
