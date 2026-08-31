@@ -21,6 +21,16 @@ a `C-g` and a save won't fix.
 
 > **Practice** — Press `C-c` and wait one second. Read the popup. Dismiss it with `C-g`.
 
+## Vim keys
+
+This config runs **evil**: buffers open in *normal* state (`hjkl` move, `v`
+selects, `i` inserts, `ESC` returns). Every `C-c` key in this lesson works in
+any state, and in normal state the same prefixes live under **`SPC`**:
+`SPC p f` is `C-c p f`, `SPC s s` is `C-c s s`. `SPC SPC` is `M-x`, `SPC b`
+switches buffers, `SPC '` toggles the terminal, `SPC o` the file sidebar,
+`gd` jumps to a definition, `K` shows documentation. Use whichever style you
+like; the lesson writes `C-c` because it is unambiguous.
+
 ---
 
 ## 0. The shape of this config
@@ -35,8 +45,10 @@ Almost everything hangs off seven prefixes. Learn these and you can find the res
 | `C-c n`         | **Notes** (Denote) and the org inbox                       |
 | `C-c c` / `C-c a` | **Capture** / **Agenda**                                 |
 | `C-c d`         | **Debug** (dape)                                           |
-| `C-c f`         | Language **REPLs** (OCaml `o`, Python `p`, Node `n`, Elisp `e`) |
-| `C-c t`         | **Toggles** — theme (`t`), line numbers, centring          |
+| `C-c f`         | Language **REPLs** (OCaml `o`, Python `p`, Racket `r`, SML `m`, Haskell `h`, Elisp `e`) |
+| `C-c t`         | **Toggles** — theme (`t`), font preset (`f`), sidebar (`s`), line numbers |
+| `C-c TAB`       | **Tabs** — one workspace per project (`gt` / `gT` to switch) |
+| `C-c '`         | **Terminal** — toggle the project shell on the right        |
 | `C-x g`         | **Magit** (git) — `'` for Forge pull requests              |
 
 Run a **health check** any time with `C-c e h` — it lists which external tools
