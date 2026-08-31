@@ -1,15 +1,50 @@
 {
   "model": "opus",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "atuin hook claude-code"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "atuin hook claude-code"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "atuin hook claude-code"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "bash {{ .chezmoi.homeDir }}/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
+    "clangd-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "stripe@claude-plugins-official": true,
-    "vercel@claude-plugins-official": true,
-    "clangd-lsp@claude-plugins-official": true
+    "vercel@claude-plugins-official": true
   },
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
