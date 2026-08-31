@@ -678,21 +678,63 @@ elif [ "$PLATFORM" = "linux" ]; then
     echo "Installing fonts..."
     mkdir -p ~/.local/share/fonts
 
-    if [ ! -f ~/.local/share/fonts/JetBrainsMonoNerdFont-Regular.ttf ]; then
-        echo "Installing JetBrains Mono Nerd Font..."
-        wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip
-        unzip -o JetBrainsMono.zip -d ~/.local/share/fonts/
-        rm JetBrainsMono.zip
+    NERD_FONTS_VERSION="v3.1.1"
+
+    # $1 = release asset basename, $2 = installed-filename prefix used to
+    # detect an existing install. Downloads into a temp dir so a failed or
+    # interrupted run leaves no zip behind in the working directory.
+    install_nerd_font() {
+        if compgen -G "$HOME/.local/share/fonts/$2*" > /dev/null; then
+            return
+        fi
+        echo "Installing $1 Nerd Font..."
+        local tmp
+        tmp="$(mktemp -d)" || { FAILED_PACKAGES+=("font:$1"); return; }
+        if wget -q --show-progress -O "$tmp/$1.zip" \
+            "https://github.com/ryanoasis/nerd-fonts/releases/download/$NERD_FONTS_VERSION/$1.zip" \
+            && unzip -oq "$tmp/$1.zip" -d "$tmp/extract"; then
+            # Font files only; the archives also carry LICENSE and README.md.
+            find "$tmp/extract" \( -name '*.ttf' -o -name '*.otf' \) \
+                -exec cp -f {} ~/.local/share/fonts/ \;
+        else
+            FAILED_PACKAGES+=("font:$1")
+        fi
+        rm -rf "$tmp"
+    }
+
+    install_nerd_font JetBrainsMono JetBrainsMonoNerdFont
+    install_nerd_font FiraCode FiraCodeNerdFont
+    install_nerd_font Hack HackNerdFont
+    install_nerd_font Inconsolata InconsolataNerdFont
+    # Emacs offers these as fontaine presets (C-c t f); Iosevka Comfy is
+    # Protesilaos's font, tuned for exactly this kind of setup.
+    install_nerd_font CommitMono CommitMonoNerdFont
+    # Icon glyphs for nerd-icons/doom-modeline when the main font is not a
+    # Nerd Font (core.el routes the private-use ranges to it).
+    install_nerd_font NerdFontsSymbolsOnly SymbolsNerdFont
+
+    # Iosevka Comfy publishes no release archive, so the Homebrew cask builds
+    # from the tag tarball and installs every */TTF/*.ttf. Mirror that. It is
+    # ~1 GB unpacked across 126 files, so it is skipped when already present.
+    IOSEVKA_COMFY_VERSION="2.1.0"
+    if ! compgen -G "$HOME/.local/share/fonts/iosevka-comfy*" > /dev/null; then
+        echo "Installing Iosevka Comfy (large download, ~1 GB unpacked)..."
+        iosevka_tmp="$(mktemp -d)"
+        if wget -q --show-progress -O "$iosevka_tmp/iosevka-comfy.tar.gz" \
+            "https://github.com/protesilaos/iosevka-comfy/archive/refs/tags/$IOSEVKA_COMFY_VERSION.tar.gz"; then
+            if tar -xzf "$iosevka_tmp/iosevka-comfy.tar.gz" -C "$iosevka_tmp" \
+                --wildcards '*/TTF/*.ttf'; then
+                find "$iosevka_tmp" -name '*.ttf' -exec cp -f {} ~/.local/share/fonts/ \;
+            else
+                FAILED_PACKAGES+=("font:iosevka-comfy")
+            fi
+        else
+            FAILED_PACKAGES+=("font:iosevka-comfy")
+        fi
+        rm -rf "$iosevka_tmp"
     fi
 
-    if [ ! -f ~/.local/share/fonts/InconsolataNerdFont-Regular.ttf ]; then
-        echo "Installing Inconsolata Nerd Font..."
-        wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Inconsolata.zip
-        unzip -o Inconsolata.zip -d ~/.local/share/fonts/
-        rm Inconsolata.zip
-    fi
-
-    fc-cache -fv
+    fc-cache -f
 fi
 
 # ── 5. Post-install setup ─────────────────────────────────────
