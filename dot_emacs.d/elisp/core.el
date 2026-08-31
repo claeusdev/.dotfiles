@@ -395,6 +395,20 @@ mixed-font buffers match code buffers exactly."
                              saved
                            (caar my/mono-families)))))
 
+;; Icon glyphs live in the Unicode private-use areas.  Fonts like Iosevka
+;; Comfy and Commit Mono have nothing there, and macOS fallback only covers
+;; the older U+E000 block, so the Material Design range (U+F0000+) used by
+;; nerd-icons and doom-modeline rendered as hex boxes.  Route both ranges to
+;; the symbols-only Nerd Font whatever the main family is.
+(defconst my/symbol-font
+  (seq-find #'my/font-installed-p
+            '("Symbols Nerd Font Mono" "JetBrainsMono Nerd Font" "FiraCode Nerd Font"))
+  "Family that supplies Nerd Font icon glyphs.")
+
+(when (and (display-graphic-p) my/symbol-font)
+  (dolist (range '((#xe000 . #xf8ff) (#xf0000 . #xfffff)))
+    (set-fontset-font t range my/symbol-font nil 'prepend)))
+
 ;; Briefly highlight the current line after jumps and window switches, so
 ;; the eye finds point without hunting.
 (use-package pulsar

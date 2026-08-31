@@ -283,6 +283,9 @@ if [ "$PLATFORM" = "mac" ]; then
     # Emacs offers these as fontaine presets (C-c t f); Iosevka Comfy is
     # Protesilaos's font, tuned for exactly this kind of setup.
     brew_cask_install font-iosevka-comfy font-commit-mono-nerd-font
+    # Icon glyphs for nerd-icons/doom-modeline when the main font is not a
+    # Nerd Font (core.el routes the private-use ranges to it).
+    brew_cask_install font-symbols-only-nerd-font
 
     echo ""
     echo "Setting up fzf key bindings..."

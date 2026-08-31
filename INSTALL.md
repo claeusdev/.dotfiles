@@ -54,7 +54,7 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - Git: gh, lazygit, git-delta
 - Databases: PostgreSQL, SQLite
 - Containers: Docker + lazydocker — **opt-in**, set `INSTALL_DOCKER=1`
-- Fonts: JetBrains Mono, Fira Code, Inconsolata (Nerd Font patched); macOS also Iosevka Comfy, Commit Mono
+- Fonts: JetBrains Mono, Fira Code, Inconsolata (Nerd Font patched); macOS also Iosevka Comfy, Commit Mono, Symbols Nerd Font (icons)
 
 ### macOS Only
 - Homebrew (installed automatically)
