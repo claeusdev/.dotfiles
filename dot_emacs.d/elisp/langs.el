@@ -1,22 +1,27 @@
 ;;; langs.el --- Tree-sitter grammars and per-language setup -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; Scope: TypeScript, JavaScript, React/TSX, Rust, OCaml, Python, SQL, plus
-;; YAML, Dockerfile, JSON, TOML, CSV and Markdown for configuration, data
-;; and notes.
+;; Scope: Python (incl. notebooks), the FP stack (Racket, Standard ML, Haskell,
+;; OCaml), systems programming (C, C++, Rust, CMake), TypeScript/JavaScript,
+;; Go, Lua, shell, SQL, plus YAML, Dockerfile, JSON, TOML, CSV and Markdown.
 
 ;;; Code:
 
 ;; --- Tree-sitter ---------------------------------------------------------
 
+;; Grammars support more highlighting than the default level 3 enables.
+(setq treesit-font-lock-level 4)
+
 ;; Emacs ships tree-sitter support but no grammars.  Compile them once with
-;; `M-x my/install-missing-grammars'.
+;; `M-x my/install-missing-grammars'.  Racket, SML, Haskell and OCaml use
+;; their classic major modes, which are still more complete than the
+;; tree-sitter ones.
 (setq treesit-language-source-alist
       '((bash       "https://github.com/tree-sitter/tree-sitter-bash")
         (go         "https://github.com/tree-sitter/tree-sitter-go")
-        (haskell    "https://github.com/tree-sitter/tree-sitter-haskell")
         (c          "https://github.com/tree-sitter/tree-sitter-c")
         (cpp        "https://github.com/tree-sitter/tree-sitter-cpp")
+        (cmake      "https://github.com/uyha/tree-sitter-cmake")
         (css        "https://github.com/tree-sitter/tree-sitter-css")
         (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
         (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
@@ -44,6 +49,13 @@ With prefix argument FORCE, reinstall grammars that are already present."
              (if installed (mapconcat #'symbol-name (nreverse installed) ", ") "none")
              (if failed (format " | failed: %s" (mapcar #'car failed)) ""))))
 
+;; `treesit-language-available-p' dlopens the grammar to answer, ~5ms each
+;; and there are fifteen; at startup a file check is enough.
+(defun my/grammar-installed-p (lang)
+  "Whether the compiled grammar for LANG exists in the user grammar directory."
+  (file-exists-p (expand-file-name (format "libtree-sitter-%s%s" lang module-file-suffix)
+                                   (expand-file-name "tree-sitter" user-emacs-directory))))
+
 ;; Prefer the tree-sitter major modes wherever a grammar is present.  This is
 ;; the Emacs 30 idiom, and degrades to the classic mode when one is missing.
 (dolist (pair '((js-mode         . js-ts-mode)
@@ -55,32 +67,36 @@ With prefix argument FORCE, reinstall grammars that are already present."
                 (conf-toml-mode  . toml-ts-mode)
                 (sh-mode         . bash-ts-mode)
                 (go-mode         . go-ts-mode)))
-  (when (treesit-language-available-p
+  (when (my/grammar-installed-p
          (intern (string-remove-suffix "-ts-mode" (symbol-name (cdr pair)))))
     (add-to-list 'major-mode-remap-alist pair)))
 
 ;; The C++ grammar is named `cpp', which the suffix rule above cannot derive,
 ;; so the C family is remapped explicitly (c-or-c++-ts-mode needs both).
-(when (and (treesit-language-available-p 'c)
-           (treesit-language-available-p 'cpp))
+(when (and (my/grammar-installed-p 'c)
+           (my/grammar-installed-p 'cpp))
   (dolist (pair '((c-mode        . c-ts-mode)
                   (c++-mode      . c++-ts-mode)
                   (c-or-c++-mode . c-or-c++-ts-mode)))
     (add-to-list 'major-mode-remap-alist pair)))
 
-(when (treesit-language-available-p 'typescript)
+(when (my/grammar-installed-p 'typescript)
   (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode)))
-(when (treesit-language-available-p 'tsx)
+(when (my/grammar-installed-p 'tsx)
   (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . tsx-ts-mode)))
-(when (treesit-language-available-p 'rust)
+(when (my/grammar-installed-p 'rust)
   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode)))
-(when (treesit-language-available-p 'yaml)
+(when (my/grammar-installed-p 'yaml)
   (add-to-list 'auto-mode-alist '("\\.ya?ml\\'" . yaml-ts-mode)))
-(when (treesit-language-available-p 'dockerfile)
+(when (my/grammar-installed-p 'dockerfile)
   (add-to-list 'auto-mode-alist '("\\(?:Dockerfile\\|\\.dockerfile\\)\\'" . dockerfile-ts-mode)))
-(when (treesit-language-available-p 'toml)
+(when (my/grammar-installed-p 'toml)
   (add-to-list 'auto-mode-alist '("\\.toml\\'" . toml-ts-mode)))
+(when (my/grammar-installed-p 'lua)
+  (add-to-list 'auto-mode-alist '("\\.lua\\'" . lua-ts-mode)))
+;; cmake-ts-mode registers CMakeLists.txt / *.cmake itself once its grammar
+;; is present.
 
 ;; --- Shared helpers ------------------------------------------------------
 
@@ -151,13 +167,75 @@ With prefix argument FORCE, reinstall grammars that are already present."
 ;; overrides the indentation defaults below.
 (defun my/c-mode-defaults ()
   "Defaults for C and C++ buffers."
-  (my/set-local-compile-command "make -k")
+  (my/set-local-compile-command
+   (if (my/project-file-path "CMakeLists.txt") "cmake --build build" "make -k"))
   (setq-local tab-width 4 fill-column 100)
   (setq-local c-ts-mode-indent-offset 4)
   (my/eglot-ensure-when-executable "clangd"))
 
 (dolist (hook '(c-ts-mode-hook c++-ts-mode-hook))
   (add-hook hook #'my/c-mode-defaults))
+
+(use-package c-ts-mode
+  :ensure nil
+  :custom (c-ts-mode-indent-style 'linux))
+
+;; --- Lisps: Racket and Emacs Lisp ----------------------------------------
+
+;; Structural editing for s-expression languages only; elsewhere the plain
+;; `electric-pair-mode' from core.el stays in charge.  REPL buffers are left
+;; out so RET always submits input.
+(defconst my/lisp-mode-hooks
+  '(emacs-lisp-mode-hook lisp-interaction-mode-hook lisp-mode-hook
+    scheme-mode-hook racket-mode-hook)
+  "Hooks of source modes that get paredit.")
+
+(use-package paredit
+  :init
+  (dolist (hook my/lisp-mode-hooks)
+    (add-hook hook #'enable-paredit-mode))
+  :config
+  ;; paredit inserts and balances its own pairs.
+  (add-hook 'paredit-mode-hook (lambda () (electric-pair-local-mode -1)))
+  ;; Keep M-j for avy (core.el) and M-s for consult's search map.
+  (define-key paredit-mode-map (kbd "M-j") nil)
+  (define-key paredit-mode-map (kbd "M-s") nil))
+
+;; racket-mode talks to a Racket back end of its own, which gives it
+;; check-syntax-driven navigation, rename, eldoc and Flymake diagnostics
+;; (`racket-xp-mode') without an LSP.  C-c C-c runs the file, C-c C-z visits
+;; the REPL, C-M-x sends the definition at point.
+(defun my/racket-mode-defaults ()
+  "Defaults for Racket buffers."
+  (my/set-local-compile-command "raco test .")
+  (setq-local fill-column 100))
+
+(use-package racket-mode
+  :mode ("\\.rkt\\'" . racket-mode)
+  :hook ((racket-mode . my/racket-mode-defaults)
+         (racket-mode . racket-xp-mode))
+  :custom
+  (racket-program "racket")
+  (racket-show-functions '(racket-show-echo-area)))
+
+;; --- Standard ML ---------------------------------------------------------
+
+;; sml-mode drives the SML/NJ REPL (`sml-run', C-c C-l loads the buffer,
+;; C-c C-r the region).  millet-ls adds diagnostics and navigation; it
+;; expects a `millet.toml' or a lone project root and is optional.
+(defun my/sml-mode-defaults ()
+  "Defaults for Standard ML buffers."
+  (setq-local fill-column 100)
+  (my/eglot-ensure-when-executable "millet-ls"))
+
+(use-package sml-mode
+  :mode (("\\.sml\\'" . sml-mode)
+         ("\\.sig\\'" . sml-mode)
+         ("\\.fun\\'" . sml-mode))
+  :hook (sml-mode . my/sml-mode-defaults)
+  :custom
+  (sml-program-name "sml")
+  (sml-indent-level 2))
 
 ;; --- Go, Haskell, Lua and shell ------------------------------------------
 
@@ -173,12 +251,15 @@ With prefix argument FORCE, reinstall grammars that are already present."
   (my/eglot-ensure-when-executable "haskell-language-server-wrapper"))
 (use-package haskell-mode
   :mode ("\\.hs\\'" . haskell-mode)
-  :hook (haskell-mode . my/haskell-mode-defaults))
+  :hook ((haskell-mode . my/haskell-mode-defaults)
+         ;; Owns C-c C-l (load into GHCi), C-c C-z (switch to REPL), etc.
+         (haskell-mode . interactive-haskell-mode)))
 
+;; `lua-ts-mode' is built in since Emacs 30; needs the lua grammar.
 (defun my/lua-mode-defaults ()
   (setq-local tab-width 2 fill-column 100)
   (my/eglot-ensure-when-executable "lua-language-server"))
-(use-package lua-mode :hook (lua-mode . my/lua-mode-defaults))
+(add-hook 'lua-ts-mode-hook #'my/lua-mode-defaults)
 
 (defun my/shell-mode-defaults ()
   (my/set-local-compile-command "shellcheck .")
@@ -217,6 +298,14 @@ With prefix argument FORCE, reinstall grammars that are already present."
   :custom
   (utop-edit-command nil))
 
+;; dune.el ships with the opam dune package: syntax for `dune',
+;; `dune-project' and `dune-workspace' files.
+(use-package dune
+  :ensure nil
+  :if (file-exists-p "~/.opam/default/share/emacs/site-lisp/dune.el")
+  :load-path "~/.opam/default/share/emacs/site-lisp"
+  :mode ("\\(?:\\`\\|/\\)dune\\(?:-project\\|-workspace\\)?\\'" . dune-mode))
+
 ;; Merlin features plain Eglot drops: `ocaml-eglot-construct' fills a typed
 ;; hole, `ocaml-eglot-destruct' generates exhaustive match arms, plus
 ;; type-driven search and enclosing-type navigation.
@@ -237,6 +326,18 @@ With prefix argument FORCE, reinstall grammars that are already present."
   "Return a test command for the current Python project."
   (if (my/python-uv-project-p) "uv run pytest" "python3 -m pytest"))
 
+(defun my/python-set-interpreter ()
+  "Point `run-python' at the best interpreter for this buffer.
+Prefers the project venv's ipython, then its python, then a global ipython
+\(installed with `uv tool install ipython'), then python3.  envrc has
+already put the venv on PATH, so `executable-find' sees it."
+  (let ((ipython (executable-find "ipython")))
+    (if ipython
+        (setq-local python-shell-interpreter ipython
+                    python-shell-interpreter-args "-i --simple-prompt --InteractiveShell.display_page=True")
+      (setq-local python-shell-interpreter (or (executable-find "python3") "python3")
+                  python-shell-interpreter-args "-i"))))
+
 (defun my/python-mode-defaults ()
   "Defaults for Python buffers."
   (setq-local tab-width 4 fill-column 88)
@@ -245,7 +346,12 @@ With prefix argument FORCE, reinstall grammars that are already present."
      (if (my/python-uv-project-p)
          (format "uv run python %s" file)
        (format "python3 %s" file))))
-  (my/eglot-ensure-when-executable "basedpyright-langserver"))
+  (my/python-set-interpreter)
+  (if (executable-find "basedpyright-langserver")
+      (eglot-ensure) ; flymake-ruff attaches from eglot-managed-mode-hook (dev.el)
+    (when (fboundp 'flymake-ruff-load)
+      (flymake-ruff-load)
+      (flymake-mode 1))))
 
 (add-hook 'python-ts-mode-hook #'my/python-mode-defaults)
 

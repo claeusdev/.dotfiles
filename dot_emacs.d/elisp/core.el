@@ -2,11 +2,35 @@
 
 ;;; Code:
 
-;; Restore a working GC threshold now that startup is done.
+;; Restore a working GC threshold now that startup is done.  64MB keeps GC
+;; pauses rare during LSP and completion bursts without hoarding memory.
 (add-hook 'emacs-startup-hook
           (lambda ()
-            (setq gc-cons-threshold (* 16 1024 1024)
+            (setq gc-cons-threshold (* 64 1024 1024)
                   gc-cons-percentage 0.1)))
+
+;; --- Responsiveness ------------------------------------------------------
+
+;; Language servers send large JSON messages; the 4kB default makes Emacs
+;; read them in hundreds of tiny chunks.
+(setq read-process-output-max (* 1024 1024)
+      process-adaptive-read-buffering nil)
+
+;; Do not fontify while keys are being typed; scroll without computing
+;; exact line heights first; keep font caches instead of compacting them
+;; (compaction stalls on macOS with many fonts installed).
+(setq redisplay-skip-fontification-on-input t
+      fast-but-imprecise-scrolling t
+      inhibit-compacting-font-caches t
+      auto-window-vscroll nil)
+
+;; Bidirectional text analysis is expensive and never needed for code.
+(setq-default bidi-paragraph-direction 'left-to-right)
+(setq bidi-inhibit-bpa t)
+
+;; Smooth trackpad scrolling.
+(when (fboundp 'pixel-scroll-precision-mode)
+  (pixel-scroll-precision-mode 1))
 
 (defconst my/cache-dir (expand-file-name "var/" user-emacs-directory)
   "Directory for cache-like state that should never be version controlled.")
@@ -112,6 +136,76 @@
   :ensure nil ; built in since Emacs 30
   :config (editorconfig-mode 1))
 
+;; After `C-x o', a bare `o' keeps switching windows; likewise for undo,
+;; window resizing, `M-g n'/`p' and every other command with a repeat map.
+(use-package repeat
+  :ensure nil
+  :custom
+  (repeat-exit-timeout 3)
+  (repeat-exit-key "<escape>")
+  :config (repeat-mode 1))
+
+;; --- Dired ---------------------------------------------------------------
+
+;; macOS ships BSD ls, which lacks --group-directories-first; GNU coreutils
+;; installs it as `gls'.
+(use-package dired
+  :ensure nil
+  :defer t ; `:config' below would otherwise load Dired (and Dirvish) at startup
+  :custom
+  (dired-dwim-target t)                ; copy/move targets the other Dired window
+  (dired-kill-when-opening-new-dired-buffer t)
+  (dired-recursive-copies 'always)
+  (dired-recursive-deletes 'always)
+  (dired-auto-revert-buffer #'dired-directory-changed-p)
+  (dired-create-destination-dirs 'ask)
+  (dired-vc-rename-file t)
+  :hook (dired-mode . dired-hide-details-mode)
+  :config
+  (if (executable-find "gls")
+      (setq insert-directory-program "gls"
+            dired-listing-switches "-AGFhlv --group-directories-first")
+    (setq dired-listing-switches "-AFhlv")))
+
+;; Dirvish takes over every Dired buffer: icons, file size and git state in
+;; the listing, a preview pane, and `dirvish-side' as a project sidebar
+;; (`C-c t s').  It draws the icons itself, so no nerd-icons-dired.
+;; Pinned to MELPA: NonGNU's tarball leaves the extensions (dirvish-side,
+;; dirvish-vc, ...) in a subdirectory that is not on `load-path'.
+(use-package dirvish
+  :pin melpa
+  :after dired
+  :custom
+  (dirvish-attributes '(nerd-icons subtree-state vc-state file-size collapse))
+  (dirvish-side-attributes '(nerd-icons subtree-state vc-state collapse))
+  (dirvish-subtree-state-style 'nerd)
+  (dirvish-use-header-line 'global)
+  (dirvish-header-line-height 28)
+  (dirvish-mode-line-format '(:left (sort symlink) :right (omit yank index)))
+  (dirvish-side-width 34)
+  (dirvish-side-follow-mode t)          ; sidebar tracks the visited file
+  (dirvish-reuse-session t)
+  :config
+  (dirvish-override-dired-mode 1))
+
+(defun my/sidebar-toggle ()
+  "Show the project sidebar, or hide it if it is visible.
+`dirvish-side' itself cycles open -> focus -> close; this is a plain toggle.
+Use `my/sidebar-focus' (C-c t S / SPC O) to jump into an open sidebar."
+  (interactive)
+  (if-let* ((win (dirvish-side--session-visible-p)))
+      ;; `dirvish-quit' reads the session from the *current buffer*, which
+      ;; `with-selected-window' alone does not switch.
+      (with-selected-window win
+        (with-current-buffer (window-buffer win)
+          (dirvish-quit)))
+    (dirvish-side)))
+
+(defun my/sidebar-focus ()
+  "Select the sidebar window, opening it first if needed."
+  (interactive)
+  (dirvish-side))
+
 ;; --- Appearance ----------------------------------------------------------
 
 (defun my/font-installed-p (family)
@@ -128,7 +222,7 @@
 ;; not merely a recoloured background; swap these two values to try it.
 ;; `M-x modus-themes-select' previews every variant interactively.
 (defvar my/light-theme 'modus-operandi "Theme used in light mode.")
-(defvar my/dark-theme 'modus-vivendi "Theme used in dark mode.")
+(defvar my/dark-theme 'modus-vivendi-tinted "Theme used in dark mode.")
 
 (defun my/load-theme (theme)
   "Load THEME, first disabling any currently enabled themes."
@@ -150,27 +244,173 @@
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs t
         modus-themes-mixed-fonts t
-        modus-themes-org-blocks 'gray-background)
+        modus-themes-org-blocks 'gray-background
+        ;; Scaled Org headings.
+        modus-themes-headings '((1 . (1.3)) (2 . (1.2)) (3 . (1.1)) (t . (1.0)))
+        ;; Borderless mode line and invisible fringe: flat, like a modern
+        ;; editor; spacious-padding supplies the breathing room instead.
+        modus-themes-common-palette-overrides
+        '((border-mode-line-active unspecified)
+          (border-mode-line-inactive unspecified)
+          (fringe unspecified)
+          (bg-tab-bar bg-main)
+          (bg-tab-current bg-active)
+          (bg-tab-other bg-dim)
+          (bg-line-number-active unspecified)
+          (bg-line-number-inactive unspecified)))
   :config
+  ;; Start dark; `C-c t t' flips to `my/light-theme'.
   (my/load-theme my/dark-theme))
 
-;; First installed family wins.  `:height' is in tenths of a point, so 155 is
-;; 15.5pt.
-(let ((size (if (eq system-type 'darwin) 155 130)))
-  (when-let* ((family (seq-find #'my/font-installed-p
-                                '("JetBrainsMono Nerd Font"
-                                  "FiraCode Nerd Font"
-                                  "Inconsolata Nerd Font"))))
-    (set-face-attribute 'default nil :family family :height size)
-    ;; Anchor `fixed-pitch' to the same family so code blocks and tables in
-    ;; mixed-font buffers match code buffers exactly.
-    (set-face-attribute 'fixed-pitch nil :family family :height 1.0)))
+;; Padding around windows and a subtle, borderless mode line.
+(use-package spacious-padding
+  :if (display-graphic-p)
+  :custom
+  (spacious-padding-widths
+   '(:internal-border-width 12 :header-line-width 4 :mode-line-width 4
+     :tab-width 4 :right-divider-width 16 :scroll-bar-width 0 :fringe-width 8))
+  (spacious-padding-subtle-mode-line t)
+  :config (spacious-padding-mode 1))
+
+;; One tab per workspace, named after its project.  Tabs hold window
+;; layouts, not buffers, so `SPC b' is still how you move between files.
+(defun my/tab-bar-tab-name ()
+  "Name the tab after the current project, else the current buffer."
+  (if-let* ((project (project-current nil)))
+      (project-name project)
+    (tab-bar-tab-name-current)))
+
+(use-package tab-bar
+  :ensure nil
+  :custom
+  (tab-bar-show 1)                       ; hide when there is a single tab
+  (tab-bar-close-button-show nil)
+  (tab-bar-new-button-show nil)
+  (tab-bar-new-tab-choice "*scratch*")
+  (tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
+  (tab-bar-tab-name-function #'my/tab-bar-tab-name)
+  :config (tab-bar-mode 1))
+
+;; Header line: project › directory › file › enclosing definition.
+(use-package breadcrumb
+  :hook ((prog-mode text-mode) . breadcrumb-local-mode))
+
+;; Highlight the current line where it helps orientation, not in prose.
+(dolist (hook '(prog-mode-hook dired-mode-hook tabulated-list-mode-hook
+                magit-mode-hook compilation-mode-hook))
+  (add-hook hook #'hl-line-mode))
+
+;; Indentation guides, tree-sitter aware where a grammar is present.  The
+;; NS build cannot draw stipples, so on macOS the guides are characters.
+(use-package indent-bars
+  :hook ((python-ts-mode yaml-ts-mode toml-ts-mode json-ts-mode
+          c-ts-mode c++-ts-mode rust-ts-mode go-ts-mode
+          js-ts-mode typescript-ts-mode tsx-ts-mode)
+         . indent-bars-mode)
+  :custom
+  (indent-bars-prefer-character (eq system-type 'darwin))
+  (indent-bars-treesit-support t)
+  (indent-bars-no-descend-string t)
+  (indent-bars-treesit-ignore-blank-lines-types '("module"))
+  (indent-bars-color '(highlight :face-bg t :blend 0.25))
+  (indent-bars-highlight-current-depth '(:blend 0.55))
+  (indent-bars-width-frac 0.2))
+
+;; TODO / FIXME / NOTE / HACK stand out in comments.
+(use-package hl-todo
+  :hook (prog-mode . hl-todo-mode))
+
+;; Ligatures for the operators these fonts draw specially (Iosevka Comfy,
+;; Commit Mono, FiraCode and JetBrains Mono all support this set).
+(use-package ligature
+  :if (display-graphic-p)
+  :config
+  (ligature-set-ligatures
+   'prog-mode
+   '("->" "->>" "-<" "<-" "<--" "<->" "=>" "==>" "<=>" "<==" "=>>" ">>=" "=<<"
+     "==" "!=" "===" "!==" "<=" ">=" "<<" ">>" "<<<" ">>>" "::" ":::" "..."
+     ".." "&&" "||" "|>" "<|" "<|>" "//" "/*" "*/" "++" "+++" "--" "__" "~>"
+     "<~" "~~" "~=" "/=" "=~" "#{" "#(" "#_" "#?" "#[" ";;" ":=" "=:" "<>"))
+  (global-ligature-mode 1))
+
+;; Candidate monospace families, in preference order: preset name, family,
+;; weight, and a height adjustment in tenths of a point (Iosevka is narrow
+;; and reads small, so it gets a bump; FiraCode's Regular is heavy, so it
+;; gets Light).  Only installed families become presets.
+(defconst my/mono-candidates
+  '((iosevka   "Iosevka Comfy"            regular 10)
+    (commit    "CommitMono Nerd Font"     regular 0)
+    (jetbrains "JetBrainsMono Nerd Font"  regular 0)
+    (fira      "FiraCode Nerd Font"       light   0)
+    (inconsolata "Inconsolata Nerd Font"  regular 5))
+  "Monospace families to offer as fontaine presets.")
+
+(defconst my/mono-families
+  (seq-filter (lambda (c) (my/font-installed-p (nth 1 c))) my/mono-candidates)
+  "The installed subset of `my/mono-candidates'.")
+
+(defconst my/mono-family (nth 1 (car my/mono-families))
+  "Preferred monospace family, for packages that need one outside fontaine.")
 
 ;; Prose face for org/markdown (`variable-pitch-mode' in notes.el).  Charter
-;; ships with macOS; on machines without any of these, prose stays monospace.
-(when-let* ((family (seq-find #'my/font-installed-p
-                              '("Charter" "Georgia"))))
-  (set-face-attribute 'variable-pitch nil :family family :height 1.05))
+;; ships with macOS; without any of these, prose stays monospace.
+(defconst my/prose-family
+  (seq-find #'my/font-installed-p '("Charter" "Georgia"))
+  "Proportional family for `variable-pitch'.")
+
+(defun my/fontaine-presets ()
+  "Build fontaine presets: one per installed family, plus a large and a
+presentation size of each (`iosevka', `iosevka-large', `iosevka-present').
+`fixed-pitch' anchors to the same family so code blocks and tables in
+mixed-font buffers match code buffers exactly."
+  (let ((base (if (eq system-type 'darwin) 155 130))
+        presets)
+    (pcase-dolist (`(,name ,family ,weight ,adjust) my/mono-families)
+      (dolist (size `((""         . ,(+ base adjust))
+                      ("-large"   . ,(+ base adjust 35))
+                      ("-present" . ,(+ base adjust 105))))
+        (push `(,(intern (format "%s%s" name (car size)))
+                :default-family ,family
+                :default-weight ,weight
+                :default-height ,(cdr size)
+                :fixed-pitch-family ,family)
+              presets)))
+    (append (nreverse presets)
+            `((t :bold-weight semibold
+                 :fixed-pitch-height 1.0
+                 :variable-pitch-family ,my/prose-family
+                 :variable-pitch-height 1.05)))))
+
+;; `C-c t f' switches family or size live; the last choice persists across
+;; sessions.  The `t' entry holds the shared defaults.
+(use-package fontaine
+  :if (and (display-graphic-p) my/mono-families)
+  :custom
+  (fontaine-latest-state-file (expand-file-name "fontaine-latest-state.eld" my/cache-dir))
+  :config
+  (setq fontaine-presets (my/fontaine-presets))
+  (fontaine-mode 1)
+  (let ((saved (fontaine-restore-latest-preset)))
+    (fontaine-set-preset (if (assq saved fontaine-presets)
+                             saved
+                           (caar my/mono-families)))))
+
+;; Briefly highlight the current line after jumps and window switches, so
+;; the eye finds point without hunting.
+(use-package pulsar
+  :custom
+  (pulsar-pulse t)
+  (pulsar-delay 0.055)
+  (pulsar-iterations 8)
+  :config
+  (dolist (fn '(avy-goto-char-timer other-window recenter-top-bottom
+                flymake-goto-next-error flymake-goto-prev-error))
+    (add-to-list 'pulsar-pulse-functions fn))
+  (add-hook 'minibuffer-setup-hook #'pulsar-pulse-line)
+  (with-eval-after-load 'consult
+    (add-hook 'consult-after-jump-hook #'pulsar-recenter-top)
+    (add-hook 'consult-after-jump-hook #'pulsar-reveal-entry))
+  (pulsar-global-mode 1))
 
 (use-package nerd-icons
   :if my/nerd-font-installed-p)
@@ -225,7 +465,12 @@
     (optional "utop"                     "OCaml REPL (ships utop.el)")
     (optional "lldb-dap"                 "dape: Rust / native debugging")
     (optional "gh"                       "Forge authentication")
-    (optional "enchant-2"                "jinx spellchecker backend"))
+    (optional "enchant-2"                "jinx spellchecker backend")
+    (optional "racket"                   "racket-mode back end and REPL")
+    (optional "sml"                      "SML/NJ REPL for sml-mode")
+    (optional "millet-ls"                "Standard ML LSP")
+    (optional "ipython"                  "Richer Python REPL (falls back to python3)")
+    (optional "gls"                      "GNU ls: Dired directories-first listing"))
   "External tools this configuration expects, checked by `my/emacs-health-check'.
 debugpy is deliberately absent: it is a Python module dape resolves through
 the project environment, so install it per project with `uv add --dev debugpy'.")
@@ -251,7 +496,8 @@ the project environment, so install it per project with `uv add --dev debugpy'."
                       (mapconcat
                        (lambda (l)
                          (format "%s%s" l (if (treesit-language-available-p l) "" "(!)")))
-                       '(typescript tsx javascript rust python c cpp yaml json toml dockerfile)
+                       '(typescript tsx javascript rust python c cpp cmake lua
+                         bash yaml json toml dockerfile)
                        " ")))
       (insert "\nLocal overrides:\n")
       (dolist (file '("local-pre.el" "local-post.el" "custom.el"))

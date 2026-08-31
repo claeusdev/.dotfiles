@@ -2,7 +2,7 @@
 
 ;;; Commentary:
 ;; Modules live in elisp/ and load in dependency order.  keys.el is last so
-;; every map it binds into already exists.
+;; every map it binds into (including evil's states) already exists.
 
 ;;; Code:
 
@@ -23,6 +23,11 @@
       ;; Prefer stable GNU/NonGNU where a package exists in both.
       package-archive-priorities '(("gnu" . 3) ("nongnu" . 2) ("melpa" . 1)))
 
+;; One generated autoload file for all packages instead of ~70; package.el
+;; regenerates it after every install or removal (`package-quickstart-refresh'
+;; by hand if it ever looks stale).  Machine-local, never in chezmoi.
+(setq package-quickstart t
+      package-quickstart-file (expand-file-name "package-quickstart.el" user-emacs-directory))
 (package-initialize)
 
 ;; use-package is built into Emacs since 29; no bootstrap needed.
@@ -36,6 +41,7 @@
 (require 'dev)
 (require 'langs)
 (require 'notes)
+(require 'vim)
 (require 'keys)
 
 ;; Keep Customize's scribbles out of this file.
@@ -49,3 +55,4 @@
 
 (provide 'init)
 ;;; init.el ends here
+(put 'dired-find-alternate-file 'disabled nil)

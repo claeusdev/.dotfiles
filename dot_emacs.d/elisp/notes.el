@@ -61,20 +61,24 @@
           ("w" "Writing" tags-todo "@writing")))
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((emacs-lisp . t) (python . t) (shell . t)))
+   '((emacs-lisp . t) (python . t) (shell . t) (haskell . t) (ocaml . t) (C . t)))
   ;; SVG previews stay crisp on retina displays; dvisvgm ships with MacTeX.
   (when (executable-find "dvisvgm")
     (setq org-preview-latex-default-process 'dvisvgm)))
 
 ;; --- Denote --------------------------------------------------------------
 
+;; Loaded one idle second after startup rather than during it: denote
+;; requires dired, which brings dirvish and transient along.  Commands are
+;; autoloaded, so using one earlier just loads it then.
 (use-package denote
+  :defer 1
   :custom
   (denote-directory my/notes-directory)
   (denote-file-type 'markdown-yaml)
   (denote-known-keywords
-   '("emacs" "typescript" "rust" "ocaml" "python" "sql"
-     "systems" "research" "project" "reading"))
+   '("emacs" "typescript" "rust" "ocaml" "haskell" "racket" "sml" "python" "ml"
+     "c" "sql" "systems" "research" "project" "reading"))
   (denote-prompts '(title keywords))
   (denote-date-prompt-use-org-read-date t)
   :config
@@ -105,7 +109,10 @@
 
 ;; One bibliography for everything: org-cite inserts citations (C-c C-x @),
 ;; citar browses, previews and opens entries.
+;; Loads with Org (which registers the citar org-cite processors); the
+;; `citar-open' binding is autoloaded for use outside Org.
 (use-package citar
+  :after org
   :custom
   (citar-bibliography (list my/bibliography-file))
   (org-cite-global-bibliography (list my/bibliography-file))
@@ -146,9 +153,16 @@
 
 ;; --- Math ------------------------------------------------------------------
 
+;; cdlatex needs `texmathp' (is point inside math?), which ships with AUCTeX;
+;; without it `org-cdlatex-mode' errors in every Org buffer's mode hook.
+;; AUCTeX also makes .tex files first class (`LaTeX-mode', preview).
+(use-package auctex
+  :defer t)
+
 ;; Fast LaTeX math entry inside Org: ` opens a symbol menu, _ and ^ insert
 ;; scripts with braces, TAB expands templates like fr and env names.
 (use-package cdlatex
+  :after auctex
   :hook (org-mode . org-cdlatex-mode))
 
 ;; Render a LaTeX fragment when the cursor leaves it, un-render on re-entry.

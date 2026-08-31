@@ -37,12 +37,36 @@
   (consult-ripgrep (my/project-root)))
 
 (defun my/project-vterm ()
-  "Open a vterm at the current project root."
+  "Pop the project's terminal, creating it on first use.
+Outside a project the terminal belongs to `default-directory'.  `vterm'
+given a name always makes a new buffer, so reuse is checked here."
   (interactive)
-  (let ((default-directory (my/project-root)))
-    (vterm (format "*vterm: %s*"
-                   (file-name-nondirectory
-                    (directory-file-name default-directory))))))
+  (let* ((root (if-let* ((project (project-current nil)))
+                   (expand-file-name (project-root project))
+                 default-directory))
+         (default-directory root)
+         (name (format "*vterm: %s*"
+                       (file-name-nondirectory (directory-file-name root)))))
+    (if (get-buffer name)
+        (pop-to-buffer name)
+      (vterm name))))
+
+(defun my/vterm-window ()
+  "Return a window showing a vterm buffer on this frame, or nil."
+  (seq-find (lambda (w)
+              (with-current-buffer (window-buffer w)
+                (derived-mode-p 'vterm-mode)))
+            (window-list)))
+
+(defun my/vterm-toggle ()
+  "Show the project terminal, or hide it if one is visible.
+Works from inside the terminal too: `C-c' is passed through to Emacs."
+  (interactive)
+  (if-let* ((win (my/vterm-window)))
+      (if (one-window-p)
+          (with-selected-window win (bury-buffer))
+        (delete-window win))
+    (my/project-vterm)))
 
 (defvar my/project-test-command-alist
   '((typescript-ts-mode . my/node-test-command)
@@ -52,6 +76,7 @@
     (rust-ts-mode       . "cargo test")
     (go-ts-mode         . "go test ./...")
     (haskell-mode       . "cabal test all")
+    (racket-mode        . "raco test .")
     (tuareg-mode        . "dune test"))
   "Default test command per major mode.
 Values are either a literal string or a function returning one.")
@@ -139,15 +164,20 @@ Values are either a literal string or a function returning one.")
   (when (executable-find command)
     (eglot-ensure)))
 
+;; Deferred: `eglot-ensure' is autoloaded, so Eglot loads with the first
+;; buffer that wants it rather than at startup (it pulls in ert, jsonrpc,
+;; xref, flymake...).
 (use-package eglot
   :ensure nil
+  :defer t
   :custom
   (eglot-autoshutdown t)
   (eglot-send-changes-idle-time 0.1)
   (eglot-extend-to-xref t)
-  ;; `eglot-events-buffer-size' was obsoleted in Eglot 1.16 in favour of this
-  ;; plist.
-  (eglot-events-buffer-config '(:size 2000000 :format full))
+  ;; Logging every JSON-RPC message is the single biggest Eglot slowdown on
+  ;; busy servers.  Off by default; set `:size 2000000' temporarily and
+  ;; restart the server when debugging a language server.
+  (eglot-events-buffer-config '(:size 0 :format short))
   :config
   ;; NOTE: never add `flymake' to `eglot-stay-out-of'.  That list is matched as
   ;; a regexp against variable names, so "flymake" also matches
@@ -159,10 +189,11 @@ Values are either a literal string or a function returning one.")
              ((rust-ts-mode)      . ("rust-analyzer"))
              ((go-ts-mode)        . ("gopls"))
              ((haskell-mode)      . ("haskell-language-server-wrapper" "--lsp"))
-             ((lua-mode)          . ("lua-language-server"))
+             ((lua-ts-mode)       . ("lua-language-server"))
              ((bash-ts-mode)      . ("bash-language-server" "start"))
              ((c-ts-mode c++-ts-mode) . ("clangd"))
              ((tuareg-mode)       . ("ocamllsp"))
+             ((sml-mode)          . ("millet-ls"))
              ((python-ts-mode)    . ("basedpyright-langserver" "--stdio"))
              ((json-ts-mode)      . ("vscode-json-language-server" "--stdio"))
              ((css-ts-mode)       . ("vscode-css-language-server" "--stdio"))
@@ -176,9 +207,30 @@ Values are either a literal string or a function returning one.")
                           '((eglot (styles orderless basic))
                             (file (styles partial-completion)))))))
 
+;; Workspace-wide symbol search through the language server (`C-c l s').
+(use-package consult-eglot
+  :after (consult eglot))
+
+;; Documentation at point in a childframe, on demand (`K' in normal state);
+;; the echo-area eldoc stays as it is.
+(use-package eldoc-box
+  :commands (eldoc-box-help-at-point))
+
 (with-eval-after-load 'flymake
   (setq flymake-fringe-indicator-position 'right-fringe
         flymake-show-diagnostics-at-end-of-line 'short))
+
+;; Eglot runs one server per buffer, so ruff's lint rules arrive through
+;; Flymake directly rather than as a second LSP.  Registered from
+;; `eglot-managed-mode-hook' because Eglot resets the diagnostic backends when
+;; it takes over a buffer; langs.el handles the no-basedpyright fallback.
+(use-package flymake-ruff
+  :if (executable-find "ruff")
+  :init
+  (defun my/flymake-ruff-after-eglot ()
+    (when (derived-mode-p 'python-base-mode)
+      (flymake-ruff-load)))
+  (add-hook 'eglot-managed-mode-hook #'my/flymake-ruff-after-eglot))
 
 ;; --- Formatting ----------------------------------------------------------
 
@@ -193,13 +245,13 @@ Values are either a literal string or a function returning one.")
      (yaml-ts-mode       . prettier)
      (css-ts-mode        . prettier)
      (markdown-mode      . prettier)
-     (python-ts-mode     . ruff-format)
+     (python-ts-mode     . (ruff-isort ruff-format)) ; sort imports, then format
      (rust-ts-mode       . rustfmt)
      (c-ts-mode          . clang-format)
      (c++-ts-mode        . clang-format)
      (go-ts-mode         . goimports)
      (haskell-mode       . ormolu)
-     (lua-mode           . stylua)
+     (lua-ts-mode        . stylua)
      (bash-ts-mode       . shfmt)
      (tuareg-mode        . ocamlformat)
      (sql-mode           . sql-formatter)))
@@ -223,10 +275,12 @@ Values are either a literal string or a function returning one.")
   (magit-save-repository-buffers 'dontask))
 
 ;; Forge puts GitHub pull requests and issues in the Magit status buffer.
-;; It reuses the token from `gh auth`, read via auth-source.
+;; It reuses the token from `gh auth`, read via auth-source.  Its default
+;; Magit bindings are off because evil-collection (vim.el) installs its own
+;; Vim-compatible set and warns otherwise.
 (use-package forge
   :after magit
-  :custom (forge-add-default-bindings t))
+  :custom (forge-add-default-bindings nil))
 
 (use-package diff-hl
   :hook ((prog-mode . diff-hl-mode)
@@ -243,19 +297,20 @@ Values are either a literal string or a function returning one.")
   :commands vterm
   :custom (vterm-max-scrollback 10000)
   :init
-  ;; Open vterm in a split below instead of replacing the current window;
-  ;; reuse the window if a vterm is already showing.
+  ;; Open vterm in a side split on the right instead of replacing the
+  ;; current window; reuse the window if a vterm is already showing.
   (add-to-list 'display-buffer-alist
                '("\\*vterm"
                  (display-buffer-reuse-window display-buffer-in-direction)
-                 (direction . below)
-                 (window-height . 0.3))))
+                 (direction . right)
+                 (window-width . 0.4))))
 
 ;; --- Debugging -----------------------------------------------------------
 
 ;; dape is the DAP client built for Eglot; it replaces dap-mode, which belonged
 ;; to the lsp-mode ecosystem.  Adapters ship as built-in configurations, so
-;; only the binaries need installing.  lldb-dap is a global install; debugpy
+;; only the binaries need installing.  lldb-dap is a global install (on macOS
+;; setup.sh links the one from brew's llvm into ~/.local/bin); debugpy
 ;; is a Python module dape imports via the project's own `python' (envrc puts
 ;; the venv on PATH), so add it per project with `uv add --dev debugpy' —
 ;; dape errors clearly when it is missing.

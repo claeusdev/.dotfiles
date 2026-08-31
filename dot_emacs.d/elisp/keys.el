@@ -3,7 +3,11 @@
 ;;; Commentary:
 ;; Loaded last so every referenced command and map already exists.
 ;; Prefixes: C-c p project, C-c s search, C-c l LSP, C-c n notes,
-;;           C-c d debug, C-c f REPL, C-c t toggles, C-c e Emacs.
+;;           C-c d debug, C-c f REPL, C-c t toggles, C-c e Emacs,
+;;           C-c TAB tabs (workspaces).
+;; Evil: the same prefixes under SPC in normal/visual state (see Leader).
+;; Package-owned bindings kept on their upstream defaults: consult's M-g /
+;; M-s maps (completion.el), expreg on C-= (completion.el), dape, magit.
 
 ;;; Code:
 
@@ -12,6 +16,10 @@
 (global-set-key (kbd "<escape>") #'keyboard-escape-quit)
 (global-set-key (kbd "M-o") #'other-window)
 (global-set-key (kbd "C-c w") #'delete-window)
+;; Also works inside the terminal: vterm passes C-c through to Emacs.
+(global-set-key (kbd "C-c '") #'my/vterm-toggle)
+
+;; --- Toggles and Emacs -------------------------------------------------
 
 (defvar my/toggle-map (make-sparse-keymap) "Appearance and editor toggles.")
 (global-set-key (kbd "C-c t") my/toggle-map)
@@ -19,6 +27,23 @@
 (define-key my/toggle-map (kbd "l") #'display-line-numbers-mode)
 (define-key my/toggle-map (kbd "w") #'visual-line-mode)
 (define-key my/toggle-map (kbd "o") #'olivetti-mode)
+(define-key my/toggle-map (kbd "f") #'fontaine-set-preset)
+(define-key my/toggle-map (kbd "s") #'my/sidebar-toggle)
+(define-key my/toggle-map (kbd "S") #'my/sidebar-focus)
+(define-key my/toggle-map (kbd "i") #'indent-bars-mode)
+(define-key my/toggle-map (kbd "h") #'hl-line-mode)
+
+;; --- Tabs (workspaces) ---------------------------------------------------
+
+(defvar my/tab-map (make-sparse-keymap) "Tab-bar workspaces.")
+(global-set-key (kbd "C-c TAB") my/tab-map)
+(define-key my/tab-map (kbd "TAB") #'tab-bar-switch-to-tab)
+(define-key my/tab-map (kbd "n") #'tab-bar-new-tab)
+(define-key my/tab-map (kbd "x") #'tab-bar-close-tab)
+(define-key my/tab-map (kbd "r") #'tab-bar-rename-tab)
+(define-key my/tab-map (kbd "]") #'tab-bar-switch-to-next-tab)
+(define-key my/tab-map (kbd "[") #'tab-bar-switch-to-prev-tab)
+(define-key my/tab-map (kbd "l") #'tab-bar-switch-to-recent-tab)
 
 (defvar my/emacs-map (make-sparse-keymap) "Commands about Emacs itself.")
 (global-set-key (kbd "C-c e") my/emacs-map)
@@ -34,6 +59,11 @@
 (define-key my/search-map (kbd "l") #'consult-line)
 (define-key my/search-map (kbd "o") #'consult-outline)
 (define-key my/search-map (kbd "i") #'consult-imenu)
+(define-key my/search-map (kbd "f") #'consult-fd)
+(define-key my/search-map (kbd "d") #'consult-flymake)
+;; C-c s u {b,d,r,s}: substitute in buffer / defun / below (rest) / above (start).
+(with-eval-after-load 'substitute
+  (define-key my/search-map (kbd "u") substitute-prefix-map))
 
 ;; --- Projects ------------------------------------------------------------
 
@@ -63,6 +93,7 @@
   (define-key eglot-mode-map (kbd "C-c l t") #'eglot-find-typeDefinition)
   (define-key eglot-mode-map (kbd "C-c l r") #'eglot-rename)
   (define-key eglot-mode-map (kbd "C-c l f") #'eglot-format)
+  (define-key eglot-mode-map (kbd "C-c l s") #'consult-eglot-symbols)
   (define-key eglot-mode-map (kbd "C-c l e") #'flymake-show-buffer-diagnostics)
   (define-key eglot-mode-map (kbd "C-c l n") #'flymake-goto-next-error)
   (define-key eglot-mode-map (kbd "C-c l p") #'flymake-goto-prev-error))
@@ -113,13 +144,72 @@
 
 ;; Only REPLs with real Emacs support; for node, a project vterm (C-c p v)
 ;; beats a bare comint buffer.  utop qualifies: utop.el speaks a dedicated
-;; -emacs protocol with completion and phrase evaluation.
+;; -emacs protocol with completion and phrase evaluation.  In-buffer bindings
+;; (C-c C-c / C-c C-l / C-c C-z) come from each mode; these only open REPLs.
 (defvar my/repl-map (make-sparse-keymap) "Language REPLs.")
 (global-set-key (kbd "C-c f") my/repl-map)
 (define-key my/repl-map (kbd "p") #'run-python)
 (define-key my/repl-map (kbd "s") #'sql-product-interactive)
 (define-key my/repl-map (kbd "e") #'ielm)
 (define-key my/repl-map (kbd "o") #'utop)
+(define-key my/repl-map (kbd "r") #'racket-repl)
+(define-key my/repl-map (kbd "m") #'sml-run)
+(define-key my/repl-map (kbd "h") #'run-haskell)
+
+;; --- Leader (evil) -------------------------------------------------------
+
+;; `SPC' in normal/visual state mirrors the `C-c' prefixes below, so `SPC p f'
+;; is `C-c p f'.  Extra leader keys that have no C-c twin: SPC SPC (M-x),
+;; SPC b (buffers), SPC v (Magit), SPC w (windows), SPC ; (comment).
+(with-eval-after-load 'evil
+  (evil-define-key '(normal visual motion) 'global
+    (kbd "<leader> SPC") #'execute-extended-command
+    (kbd "<leader> b")   #'consult-buffer
+    (kbd "<leader> B")   #'project-switch-to-buffer
+    (kbd "<leader> .")   #'find-file
+    (kbd "<leader> ,")   #'consult-recent-file
+    (kbd "<leader> v")   #'magit-status
+    (kbd "<leader> w")   evil-window-map
+    (kbd "<leader> x")   #'embark-act
+    (kbd "<leader> c")   #'org-capture
+    (kbd "<leader> a")   #'org-agenda
+    (kbd "<leader> j")   #'avy-goto-char-timer
+    (kbd "<leader> s")   my/search-map
+    (kbd "<leader> n")   my/notes-map
+    (kbd "<leader> d")   my/debug-map
+    (kbd "<leader> f")   my/repl-map
+    (kbd "<leader> t")   my/toggle-map
+    (kbd "<leader> e")   my/emacs-map
+    (kbd "<leader> g")   my/agent-map
+    (kbd "<leader> TAB") my/tab-map
+    (kbd "<leader> '")   #'my/vterm-toggle
+    (kbd "<leader> o")   #'my/sidebar-toggle
+    (kbd "<leader> O")   #'my/sidebar-focus)
+  ;; gt / gT switch tabs, as in Vim.
+  (evil-define-key '(normal motion) 'global
+    (kbd "gt") #'tab-bar-switch-to-next-tab
+    (kbd "gT") #'tab-bar-switch-to-prev-tab)
+  (with-eval-after-load 'project
+    (evil-define-key '(normal visual motion) 'global
+      (kbd "<leader> p") project-prefix-map))
+  ;; Vim habits: gd / gr / K on top of xref and eldoc, everywhere.
+  (evil-define-key 'normal 'global
+    (kbd "gd") #'xref-find-definitions
+    (kbd "gr") #'xref-find-references
+    (kbd "K")  #'eldoc-box-help-at-point)
+  ;; Region expansion in visual state: v grows, - shrinks (V keeps its
+  ;; linewise meaning).
+  (evil-define-key 'visual 'global
+    (kbd "v") #'expreg-expand
+    (kbd "-") #'expreg-contract))
+
+;; SPC l is the LSP map only in Eglot-managed buffers, like C-c l.
+(with-eval-after-load 'eglot
+  (with-eval-after-load 'evil
+    (evil-define-key '(normal visual) eglot-mode-map
+      (kbd "<leader> l") (lookup-key eglot-mode-map (kbd "C-c l"))
+      (kbd "gi")         #'eglot-find-implementation
+      (kbd "gy")         #'eglot-find-typeDefinition)))
 
 (provide 'keys)
 ;;; keys.el ends here

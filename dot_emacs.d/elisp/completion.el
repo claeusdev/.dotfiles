@@ -26,10 +26,27 @@
   :init (vertico-mode)
   :custom (vertico-cycle t))
 
+;; Path-aware editing: DEL removes a whole directory component, RET on a
+;; directory descends into it instead of confirming it, and shadowed prefixes
+;; (`~/foo//etc') are tidied away.
+(use-package vertico-directory
+  :ensure nil ; ships inside vertico
+  :after vertico
+  :bind (:map vertico-map
+              ("RET"   . vertico-directory-enter)
+              ("DEL"   . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+
+;; Space-separated components in any order; each component also matches as a
+;; subsequence (`fbz' finds foo_bar.zig), so short fuzzy queries work the way
+;; they do in VS Code or Telescope.  Prefix-style dispatchers still apply:
+;; `=foo' literal, `!foo' exclude, `foo~' forces flex, `foo,' regexp.
 (use-package orderless
   :custom
   (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles partial-completion)))))
+  (orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex))
+  (completion-category-overrides '((file (styles partial-completion orderless)))))
 
 (use-package marginalia
   :init (marginalia-mode))
@@ -41,11 +58,38 @@
         xref-show-definitions-function #'consult-xref
         xref-show-xrefs-function #'consult-xref)
   :bind
-  (("C-x b" . consult-buffer)
-   ("M-y"   . consult-yank-pop)
-   ("M-g g" . consult-goto-line)
-   ("M-g i" . consult-imenu)
-   ("M-g o" . consult-outline)))
+  (("C-x b"   . consult-buffer)
+   ("C-x C-r" . consult-recent-file)
+   ("C-x r b" . consult-bookmark)
+   ("M-y"     . consult-yank-pop)
+   ("M-g g"   . consult-goto-line)
+   ("M-g M-g" . consult-goto-line)
+   ("M-g i"   . consult-imenu)
+   ("M-g I"   . consult-imenu-multi)
+   ("M-g o"   . consult-outline)
+   ("M-g m"   . consult-mark)
+   ("M-g M"   . consult-global-mark)
+   ("M-g f"   . consult-flymake)
+   ("M-s l"   . consult-line)
+   ("M-s L"   . consult-line-multi)
+   ("M-s r"   . consult-ripgrep)
+   ("M-s f"   . consult-fd)
+   ("M-s k"   . consult-keep-lines)
+   ("M-s u"   . consult-focus-lines)
+   :map minibuffer-local-map
+   ("M-s" . consult-history)
+   ("M-r" . consult-history)))
+
+;; Tree-sitter-aware region expansion: repeat to grow from symbol to
+;; expression to statement to defun.
+(use-package expreg
+  :bind (("C-="   . expreg-expand)
+         ("C-M-=" . expreg-contract)))
+
+;; Replace the symbol at point across the buffer, defun, or above/below
+;; point, without a query loop.  Bound under `C-c s u' in keys.el.
+(use-package substitute
+  :custom (substitute-highlight t))
 
 (use-package embark
   :bind
