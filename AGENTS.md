@@ -10,7 +10,7 @@ therefore exists twice — the source copy here and the applied copy in `$HOME`
 
 | Path | Maps to | What it is |
 | :--- | :--- | :--- |
-| `dot_emacs.d/` | `~/.emacs.d/` | Emacs 30 config — see "Emacs configuration" below |
+| `dot_emacs.d/` | `~/.emacs.d/` | Emacs 30+ config (macOS runs 31 via the `emacs-app` cask) — see "Emacs configuration" below |
 | `dot_config/nvim/` | `~/.config/nvim/` | Neovim config — see "Neovim configuration" below |
 | `dot_config/fish/` | `~/.config/fish/` | fish shell, completions, functions, `conf.d/` snippets |
 | `dot_config/ghostty/`, `dot_config/aerospace/`, `dot_config/starship.toml`, `dot_tmux.conf` | terminal, window manager, prompt, tmux | |
@@ -44,7 +44,7 @@ apply that directory while a live-only spec exists un-added.
 
 - `~/.emacs.d/custom.el` (per-machine `package-selected-packages`),
   `~/.emacs.d/local-pre.el`, `~/.emacs.d/local-post.el`
-- `~/.emacs.d/elpa/`, `~/.emacs.d/var/`, `~/.emacs.d/tree-sitter/`
+- `~/.emacs.d/elpa/`, `~/.emacs.d/var/`, `~/.emacs.d/tree-sitter/`, `~/.emacs.d/package-quickstart.el*`
 - fish variables (`fish_variables`), caches, `.DS_Store`, Claude Code state
 
 ## Validation commands
@@ -77,7 +77,7 @@ apply that directory while a live-only spec exists un-added.
 
 ## Emacs configuration (`dot_emacs.d/`)
 
-Emacs 30, `use-package` with `use-package-always-ensure t` (built-in packages
+Emacs 30+ (31 on macOS), `use-package` with `use-package-always-ensure t` (built-in packages
 get `:ensure nil`), completion via vertico/orderless/marginalia/consult +
 corfu/cape/embark, LSP via eglot, tree-sitter major modes throughout.
 
@@ -86,12 +86,15 @@ corfu/cape/embark, LSP via eglot, tree-sitter major modes throughout.
 `elisp/` modules load in dependency order; **keys.el must stay last** so every
 keymap it binds into already exists:
 
-1. `core.el` — editor defaults, session state, theme/font, `my/emacs-health-check`
+1. `core.el` — editor defaults, repeat-mode, Dired, theme, fontaine/pulsar, `my/emacs-health-check`
 2. `completion.el` — minibuffer and in-buffer completion stack
 3. `dev.el` — project.el helpers, eglot, apheleia, magit/forge, envrc, vterm, dape
 4. `langs.el` — tree-sitter grammars/remaps and per-language hooks
-5. `notes.el` — org, denote, cdlatex/org-fragtog, olivetti, jinx, gptel
-6. `keys.el` — every global binding; prefixes documented in its Commentary
+5. `notes.el` — org, denote, citar, cdlatex/org-fragtog, olivetti, jinx, org-present
+6. `vim.el` — evil, evil-collection, evil-surround, evil-commentary, evil-org
+   (file is `vim.el`, not `evil.el`, so it cannot shadow the evil package)
+7. `keys.el` — every global binding, including the evil `SPC` leader;
+   prefixes documented in its Commentary
 
 `local-pre.el` / `local-post.el` (machine-local, not in chezmoi) load around
 everything; `custom.el` holds only `package-selected-packages`.
@@ -109,8 +112,16 @@ everything; `custom.el` holds only `package-selected-packages`.
   `compile-command` + `my/eglot-ensure-when-executable`, and entries in
   `eglot-server-programs` (dev.el) and `apheleia-mode-alist` if applicable.
 - Keybindings live in `keys.el` only, on the established `C-c` prefix maps.
+  The evil leader (`SPC`) mirrors those maps; a new `C-c x` prefix map also
+  gets a `<leader> x` line in the Leader section (end of keys.el).
 - Never add `flymake` to `eglot-stay-out-of` (regexp-matched; silently kills
   all LSP diagnostics — see the NOTE in dev.el).
+- `evil` is `:pin melpa` (vim.el): the ELPA 1.15.0 release breaks on Emacs 31
+  (`void-variable evil-mode-buffers` in post-command-hook). Keep the pin
+  until a release newer than 1.15.0 lands on NonGNU ELPA.
+- `dirvish` is `:pin melpa` (core.el): NonGNU's tarball keeps its extensions
+  (`dirvish-side`, `dirvish-vc`, ...) in a subdirectory package.el does not
+  add to `load-path`; MELPA flattens them.
 
 After verifying: `chezmoi add ~/.emacs.d/init.el ~/.emacs.d/early-init.el
 ~/.emacs.d/elisp/*.el`.

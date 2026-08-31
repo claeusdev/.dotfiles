@@ -10,8 +10,9 @@
 
 ---
 
-A small, modern Emacs 30 configuration for software engineering and research:
-roughly 550 lines across six modules, with 30 packages. Everything Emacs now
+A small, modern Emacs 30+ configuration (31 on macOS) for software engineering
+and research: roughly 1750 lines across seven modules, with 58 packages.
+Everything Emacs now
 does well enough on its own — projects, LSP, diagnostics, tree-sitter,
 which-key, editorconfig — is used from the built-ins rather than replaced.
 
@@ -30,7 +31,8 @@ expects and is the fastest way to find a missing language server.
     dev.el             project, eglot, apheleia, magit, forge, diff-hl, vterm, dape
     langs.el           tree-sitter grammars and per-language setup
     notes.el           org, denote, org-modern, olivetti, jinx, org-present
-    keys.el            every global binding, loaded last
+    vim.el             evil + evil-collection/surround/commentary/org
+    keys.el            every global binding and the SPC leader, loaded last
   custom.el            machine-local; holds package-selected-packages
   local-pre.el         optional, loaded before modules; untracked
   local-post.el        optional, loaded after modules; untracked
@@ -59,8 +61,16 @@ into already exists.
 | React / TSX | `tsx-ts-mode` | vtsls | prettier |
 | JavaScript | `js-ts-mode` | vtsls | prettier |
 | Rust | `rust-ts-mode` | rust-analyzer | rustfmt |
-| OCaml | `tuareg-mode` | ocamllsp | ocamlformat |
-| Python | `python-ts-mode` | basedpyright | ruff |
+| OCaml | `tuareg-mode` (+ `dune-mode`) | ocamllsp (+ ocaml-eglot) | ocamlformat |
+| Haskell | `haskell-mode` | haskell-language-server | ormolu |
+| Racket | `racket-mode` + `racket-xp-mode` | — (racket-mode back end) | — |
+| Standard ML | `sml-mode` | millet-ls | — |
+| Python | `python-ts-mode` | basedpyright (+ flymake-ruff) | ruff isort + format |
+| C / C++ | `c-ts-mode`, `c++-ts-mode` | clangd | clang-format (project opt-in) |
+| CMake | `cmake-ts-mode` | — | — |
+| Go | `go-ts-mode` | gopls | goimports |
+| Lua | `lua-ts-mode` | lua-language-server | stylua |
+| Shell | `bash-ts-mode` | bash-language-server | shfmt |
 | SQL | `sql-mode` | — | sql-formatter |
 | YAML | `yaml-ts-mode` | yaml-language-server | prettier |
 | Dockerfile | `dockerfile-ts-mode` | docker-langserver | — |
@@ -74,15 +84,29 @@ Emacs ships tree-sitter support but no grammars. Install them once with
 Formatting runs on save through Apheleia, asynchronously, without moving
 point.
 
+Lisp source buffers (Racket, Emacs Lisp, Scheme) use paredit for
+structural editing; `electric-pair-mode` is switched off there. REPL
+buffers are left alone so `RET` always submits.
+
+Python REPLs (`C-c f p`) prefer the project venv's `ipython`, then a global
+`ipython` (uv tool), then `python3`. Ruff diagnostics arrive through Flymake
+alongside basedpyright, since Eglot runs one server per buffer.
+
 ## Key packages
 
-- **Completion** — vertico, orderless, marginalia, consult, embark,
-  embark-consult, corfu, cape
+- **Completion** — vertico (+ vertico-directory), orderless, marginalia,
+  consult, consult-eglot, embark, embark-consult, corfu, cape
 - **Git** — magit, forge, diff-hl
-- **Development** — apheleia, wgrep, vterm, dape
-- **Appearance** — modus-themes, doom-modeline, nerd-icons (plus completion
-  and corfu variants), rainbow-delimiters
-- **Languages** — tuareg, markdown-mode
+- **Editing** — expreg (tree-sitter region expansion), substitute, paredit
+  (Lisps only), avy, ws-butler, built-in `repeat-mode`
+- **Development** — apheleia, flymake-ruff, wgrep, vterm, dape
+- **Appearance** — modus-themes (vivendi-tinted, borderless), spacious-padding,
+  fontaine (font presets), pulsar, doom-modeline, breadcrumb, indent-bars,
+  hl-todo, ligature, nerd-icons (plus completion and corfu variants),
+  rainbow-delimiters, built-in tab-bar workspaces
+- **Files** — dirvish (icons, preview, git state, `dirvish-side` sidebar) over Dired
+- **Languages** — tuareg, ocaml-eglot, haskell-mode, racket-mode, sml-mode,
+  markdown-mode, csv-mode, code-cells
 - **Notes and writing** — denote, org-modern, olivetti, jinx, org-present
 - **Research** — Denote Markdown, Citar, PDF Tools
 
@@ -91,6 +115,39 @@ point.
 to run.
 
 ## Keybindings
+
+### Vim keys (evil)
+
+Normal/visual/insert states everywhere; special buffers (Magit, Dired,
+vterm, PDF, agenda, compilation) get Vim-style keys from evil-collection.
+`SPC` is the leader in normal and visual state and mirrors every `C-c`
+prefix below: `SPC p f` is `C-c p f`, `SPC s s` is `C-c s s`, and so on.
+
+| Key | Action |
+| :--- | :--- |
+| `SPC SPC` | M-x |
+| `SPC '` / `C-c '` | Toggle the project terminal (right side; `C-c '` also works inside it) |
+| `SPC o` | Toggle project sidebar |
+| `SPC TAB` | Tab (workspace) map |
+| `SPC b` / `SPC B` | Switch buffer / project buffer |
+| `SPC .` / `SPC ,` | Find file / recent file |
+| `SPC v` | Magit status |
+| `SPC w` + `h j k l s v c o` | Windows (evil's `C-w` map) |
+| `SPC x` | Embark act |
+| `SPC j` | Avy jump |
+| `SPC c` / `SPC a` | Org capture / agenda |
+| `SPC p s n d f t e g l` | Project, search, notes, debug, REPL, toggles, Emacs, agent, LSP |
+| `gd` / `gr` / `gi` / `gy` | Definition / references / implementation / type |
+| `K` | Documentation popup |
+| `gcc`, `gc<motion>` | Comment |
+| `ys` `cs` `ds`, visual `S` | Surround |
+| visual `v` / `-` | Expand / contract region |
+| `[b ]b [e ]e` | Previous/next buffer, error (unimpaired) |
+| `C-u` / `C-d` | Half-page scroll |
+| `u` / `C-r` | Undo / redo |
+
+REPL buffers (utop, Racket, SML, Python, GHCi, vterm) start in insert
+state; `ESC` gets you to normal state for scrolling and copying.
 
 ### General
 
@@ -198,10 +255,21 @@ Adapters: `debugpy` for Python, `lldb-dap` for Rust and native code.
 | :--- | :--- |
 | `C-c t t` | Light / dark theme |
 | `C-c t l` / `w` / `o` | Line numbers / visual line / olivetti |
+| `C-c t f` | Font preset: family (`iosevka`, `commit`, `jetbrains`, `fira`) × size (`-large`, `-present`) |
+| `C-c t s` / `SPC o` | Toggle project sidebar (dirvish-side) |
+| `C-c t S` / `SPC O` | Focus the sidebar |
+| `C-c t i` / `h` | Indent guides / current-line highlight |
+| `C-c TAB` `n x r ] [ l TAB`, `SPC TAB` | Tabs (workspaces): new, close, rename, next, prev, recent, switch |
+| `gt` / `gT` | Next / previous tab |
 | `C-c e h` | Health check |
 | `C-c e g` | Install missing tree-sitter grammars |
 | `C-c g g` / `C-c g c` | terminal agent / copy context |
-| `C-c f o` `p` `n` `s` `e` | REPL: OCaml, Python, Node, SQL, elisp |
+| `C-c f o` `p` `s` `e` | REPL: OCaml (utop), Python, SQL, elisp |
+| `C-c f r` `m` `h` | REPL: Racket, Standard ML, Haskell (GHCi) |
+| `C-=` / `C-M-=` | Expand / contract region (expreg) |
+| `C-c s u` `b`/`d`/`r`/`s` | Substitute symbol in buffer / defun / rest / start |
+| `M-g f`, `C-c s d` | Jump to a Flymake diagnostic |
+| `C-x C-r` | Recent files |
 | `M-$` | Correct spelling at point |
 
 Pause after any prefix and which-key lists what follows.
@@ -211,18 +279,21 @@ Pause after any prefix and which-key lists what follows.
 Required: `git`, `rg`, `node`.
 
 Expected but optional: `vtsls`, `rust-analyzer`, `ocamllsp`,
-`basedpyright-langserver`, `yaml-language-server`, `docker-langserver`,
-`ruff`, `prettier`, `sql-formatter`, `ocamlformat`, `debugpy`, `lldb-dap`,
-`gh`, `enchant`, `fd`.
+`basedpyright-langserver`, `haskell-language-server-wrapper`, `millet-ls`,
+`racket`, `sml`, `yaml-language-server`, `docker-langserver`, `ruff`,
+`prettier`, `sql-formatter`, `ocamlformat`, `ormolu`, `debugpy`, `lldb-dap`,
+`jupytext`, `ipython`, `gh`, `enchant`, `fd`, `gls`.
 
 ```sh
-npm install -g vtsls basedpyright yaml-language-server \
+npm install -g vtsls yaml-language-server \
                dockerfile-language-server-nodejs sql-formatter prettier
-rustup component add rust-analyzer          # the rustup shim alone is not enough
-opam install ocaml-lsp-server ocamlformat
+uv tool install basedpyright jupytext ipython
+brew install rust-analyzer minimal-racket smlnj millet coreutils
+brew install ghc cabal-install haskell-language-server ormolu
+opam install ocaml-lsp-server ocamlformat utop
 brew install enchant                        # jinx will not build without it
-uv tool install debugpy
-ln -sf "$(xcrun --find lldb-dap)" ~/.local/bin/lldb-dap
+ln -sf /opt/homebrew/opt/llvm/bin/lldb-dap ~/.local/bin/lldb-dap
+# debugpy is per project: uv add --dev debugpy
 ```
 
 Terminal coding assistance uses the shared `DEV_AGENT` command in a project vterm. No API keys are stored in this repository.

@@ -23,6 +23,8 @@ LICENSE
 .emacs.d/eln-cache/
 .emacs.d/auto-save-list/
 .emacs.d/recentf
+.emacs.d/package-quickstart.el
+.emacs.d/package-quickstart.elc
 .config/fish/fish_variables
 
 # Codex: manage skills only. Never auth.json, history.jsonl, or the session databases.
