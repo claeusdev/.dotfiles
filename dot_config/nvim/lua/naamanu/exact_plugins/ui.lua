@@ -42,8 +42,29 @@ return {
 				{ "<leader>s", group = "split" },
 				{ "<leader>u", group = "ui/toggle" },
 				{ "<leader>x", group = "trouble" },
+				{ "<leader><tab>", group = "tabs" },
 			},
 		},
+	},
+
+	-- Breadcrumbs in the winbar: project › dir › file › symbol (Emacs: breadcrumb)
+	{
+		"Bekaboo/dropbar.nvim",
+		event = "VeryLazy",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		keys = {
+			{ "<leader>;", function() require("dropbar.api").pick() end, desc = "Breadcrumb pick" },
+		},
+		opts = {},
+	},
+
+	-- Rainbow delimiters (Emacs: rainbow-delimiters); matters for Racket/Lisp.
+	{
+		"HiPhish/rainbow-delimiters.nvim",
+		event = { "BufReadPost", "BufNewFile" },
+		config = function()
+			require("rainbow-delimiters.setup").setup({})
+		end,
 	},
 
 	-- Trouble

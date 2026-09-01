@@ -798,6 +798,11 @@ if command -v npm &> /dev/null; then
         sql-formatter || FAILED_PACKAGES+=(node-editor-tools)
 fi
 
+# Racket language server for Neovim (Emacs uses racket-mode's own back end).
+if command -v raco &> /dev/null; then
+    raco pkg install --auto --skip-installed --batch racket-langserver || FAILED_PACKAGES+=(racket-langserver)
+fi
+
 if command -v go &> /dev/null; then
     GOBIN="$HOME/.local/bin" go install golang.org/x/tools/gopls@latest || FAILED_PACKAGES+=(gopls)
     GOBIN="$HOME/.local/bin" go install github.com/go-delve/delve/cmd/dlv@latest || FAILED_PACKAGES+=(delve)

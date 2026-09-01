@@ -19,6 +19,8 @@ Tools resolve in this order: project environment (`direnv`, `.venv`, `node_modul
 | C/C++ | clangd | clang-format | Make/CMake/Meson |
 | OCaml | ocamllsp | ocamlformat | dune/utop |
 | Haskell | HLS | ormolu | Cabal/Stack |
+| Racket | Emacs: racket-mode back end; Neovim: racket-langserver | — | raco test |
+| Standard ML | millet | — | SML/NJ REPL |
 | Lua | lua-language-server | Stylua | project command |
 | shell | bash-language-server + ShellCheck | shfmt | shellcheck |
 | JSON/YAML/Docker | vscode/yaml/docker servers | Prettier | project command |
@@ -38,6 +40,21 @@ Missing optional binaries leave editing usable and are reported by the doctor.
 | HTTP request | Restclient `.http` buffer | Kulala `.http` buffer |
 | Terminal agent | `C-c g g` | `<leader>aa` |
 | Agent context | `C-c g c` | `<leader>ac` |
+| File sidebar | `SPC o` (dirvish-side) | `<leader>e` (snacks.explorer) |
+| Terminal toggle (right) | `SPC '` / `C-c '` | `<leader>'` / `<C-/>` |
+| Tabs / workspaces | `SPC TAB …`, `gt` | `<leader><tab>…`, `gt` |
+| Breadcrumbs | breadcrumb (header line) | dropbar (winbar), `<leader>;` |
+| Fuzzy finder | Vertico + Consult + Orderless | snacks.picker |
+| Snippets | tempel (`<name`) | blink.cmp + friendly-snippets |
+
+## Shared look
+
+Both editors use **Modus Vivendi Tinted** (modus-themes / modus-themes.nvim) and
+the same faces: **Iosevka Comfy** for text with **Symbols Nerd Font Mono** for
+icons — Emacs via fontaine + a fontset fallback, Neovim via Ghostty's
+`font-family` list. Both show indent guides, breadcrumbs, rainbow delimiters,
+TODO highlighting, git gutters, a current-line highlight and a 100-column
+guide.
 
 Set `DEV_AGENT` to a command name to override agent selection. Otherwise both editors choose `codex`, then `claude`. Context commands copy an explicit `@file:start-end` reference and open a project-root terminal; paste intentionally rather than sending data silently.
 

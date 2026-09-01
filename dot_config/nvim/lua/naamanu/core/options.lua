@@ -28,6 +28,7 @@ opt.termguicolors = true
 opt.background = "dark"
 opt.signcolumn = "yes"
 opt.colorcolumn = "100"
+opt.fillchars:append({ eob = " " })
 
 -- Backspace
 opt.backspace = "indent,eol,start"

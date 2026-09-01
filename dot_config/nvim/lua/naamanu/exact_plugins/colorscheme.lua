@@ -5,7 +5,7 @@ return {
   opts = {
     style = "modus_vivendi",
     variants = {
-      modus_vivendi = "default",
+      modus_vivendi = "tinted", -- matches Emacs (modus-vivendi-tinted)
     },
     dim_inactive = false,
     styles = {

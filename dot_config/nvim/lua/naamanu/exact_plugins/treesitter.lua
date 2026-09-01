@@ -2,6 +2,7 @@
 local ensure_installed = {
 	"bash",
 	"c",
+	"cmake",
 	"cpp",
 	"css",
 	"dockerfile",
@@ -18,6 +19,7 @@ local ensure_installed = {
 	"ocaml_interface",
 	"python",
 	"query",
+	"racket",
 	"regex",
 	"rust",
 	"sql",

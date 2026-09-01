@@ -53,15 +53,15 @@ lua/naamanu/
 | Formatting | conform.nvim |
 | Linting | nvim-lint |
 | Git | gitsigns, diffview.nvim, snacks.lazygit |
-| Navigation | oil.nvim, snacks.picker (also backs `vim.ui.select`) |
+| Navigation | snacks.explorer (sidebar), oil.nvim, snacks.picker (also backs `vim.ui.select`) |
 | Treesitter | nvim-treesitter (main branch), nvim-treesitter-textobjects, nvim-ts-autotag, nvim-treesitter-context |
 | Task runner | overseer.nvim |
 | HTTP | kulala.nvim |
 | Markdown | render-markdown.nvim |
 | Editor | nvim-autopairs, nvim-surround, builtin `gc` comments, todo-comments, flash.nvim, undotree, treesj, snacks.zen |
 | Agent | shared terminal agent (`<leader>a` group) |
-| UI | snacks.nvim, lualine, which-key, trouble.nvim |
-| Theme | modus-themes.nvim |
+| UI | snacks.nvim (indent, scope, scroll, statuscolumn, terminal), lualine, which-key, trouble.nvim, dropbar.nvim (breadcrumbs), rainbow-delimiters.nvim |
+| Theme | modus-themes.nvim, `modus_vivendi` tinted variant — same as Emacs; Ghostty supplies Iosevka Comfy + Symbols Nerd Font |
 
 Native LSP configuration (vim.lsp.config/enable) lives in `lua/naamanu/core/lsp.lua`, required from `core/init.lua` after lazy.nvim. The nvim-treesitter `main` branch needs the `tree-sitter` CLI on PATH to compile parsers (`brew install tree-sitter-cli`).
 
@@ -79,6 +79,8 @@ Native LSP configuration (vim.lsp.config/enable) lives in `lua/naamanu/core/lsp.
 | Lua | lua-language-server |
 | OCaml / Reason | ocaml-lsp |
 | Haskell | haskell-language-server |
+| Standard ML | millet |
+| Racket | racket-langserver (`raco pkg install racket-langserver`) |
 | TypeScript / JavaScript / React | vtsls, eslint-lsp |
 | Vue / CSS / Tailwind | vtsls, css-lsp, tailwindcss-language-server |
 | JSON / YAML | json-lsp, yaml-language-server |
@@ -122,8 +124,11 @@ Format on save is enabled with a 3s timeout. JS/TS/Vue formatting uses Prettier 
 
 | Key | Action |
 | :--- | :--- |
-| `-` | Open Oil parent directory |
-| `<leader>e` | Open Oil file explorer |
+| `<leader>e` | Toggle file sidebar (snacks.explorer) |
+| `-` / `<leader>E` | Oil parent directory / Oil explorer |
+| `<leader>'` / `<C-/>` | Toggle terminal on the right (also from inside it) |
+| `<leader><tab>` `n x ] [ l r` | Tabs: new, close, next, prev, last, move; `gt`/`gT` |
+| `<leader>;` | Pick a breadcrumb (dropbar) |
 | `<leader>ff` | Find files |
 | `<leader>fp` | Project files, using Git files when possible |
 | `<leader>fr` | Recent files |

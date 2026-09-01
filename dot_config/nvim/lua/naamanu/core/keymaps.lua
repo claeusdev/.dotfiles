@@ -52,3 +52,11 @@ keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
 keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
 keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })
+
+-- Tabs as workspaces (one per project), mirroring Emacs tab-bar keys
+keymap.set("n", "<leader><tab>n", "<cmd>tabnew<CR>", { desc = "New tab" })
+keymap.set("n", "<leader><tab>x", "<cmd>tabclose<CR>", { desc = "Close tab" })
+keymap.set("n", "<leader><tab>]", "<cmd>tabnext<CR>", { desc = "Next tab" })
+keymap.set("n", "<leader><tab>[", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
+keymap.set("n", "<leader><tab>l", "g<Tab>", { desc = "Last tab" })
+keymap.set("n", "<leader><tab>r", ":tabmove ", { desc = "Move tab" })

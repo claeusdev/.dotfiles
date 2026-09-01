@@ -218,6 +218,11 @@ local function project_kind(startpath)
 		return "node", root
 	end
 
+	root = find_root_with_glob({ "info.rkt" }, { "*.rkt" }, startpath)
+	if root then
+		return "racket", root
+	end
+
 	return nil, nil
 end
 
@@ -451,6 +456,7 @@ function M.run_project_build(startpath)
 		rust = { "cargo", "build" },
 		python = exists(root .. "/pyproject.toml") and M.python_command({ "-m", "build" }, root) or nil,
 		ocaml = { "dune", "build" },
+		racket = { "raco", "make", "-v", "." },
 		haskell = exists(root .. "/stack.yaml") and { "stack", "build" } or { "cabal", "build", "all" },
 		node = has_script(root, "build") and package_command(package_manager(root), "build") or nil,
 		cpp = exists(root .. "/CMakeLists.txt") and shell_command("cmake -S . -B build && cmake --build build")
@@ -481,6 +487,7 @@ function M.run_project_tests(startpath)
 		rust = { "cargo", "test" },
 		python = M.python_command({ "-m", "pytest" }, root),
 		ocaml = { "dune", "runtest" },
+		racket = { "raco", "test", "." },
 		haskell = exists(root .. "/stack.yaml") and { "stack", "test" } or { "cabal", "test", "all" },
 		node = has_script(root, "test") and package_command(package_manager(root), "test") or nil,
 		cpp = exists(root .. "/Makefile") and { "make", "test" } or nil,

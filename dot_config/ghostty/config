@@ -1,7 +1,9 @@
 # Ghostty Terminal Configuration
 
 # Font configuration
-font-family = "Inconsolata Nerd Font"
+# Same faces as Emacs: Iosevka Comfy for text, Symbols Nerd Font for icons.
+font-family = "Iosevka Comfy"
+font-family = "Symbols Nerd Font Mono"
 font-size = 17
 font-thicken = true
 
@@ -12,7 +14,7 @@ window-decoration = true
 window-theme = dark
 
 # Theme and colors
-theme = Modus Vivendi
+theme = Modus Vivendi Tinted
 background-opacity = 1.0
 unfocused-split-opacity = 1.0
 

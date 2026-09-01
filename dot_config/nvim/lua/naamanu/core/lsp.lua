@@ -270,6 +270,20 @@ lsp.config("yamlls", {
 	},
 })
 
+-- Standard ML (millet) and Racket (racket-langserver, installed with
+-- `raco pkg install racket-langserver`; Emacs uses racket-mode's own back end).
+lsp.config("millet", {
+	cmd = shared_cmd("millet-ls"),
+	filetypes = { "sml" },
+	root_markers = { "millet.toml", ".git" },
+})
+
+lsp.config("racket_langserver", {
+	cmd = shared_cmd("racket", { "--lib", "racket-langserver" }),
+	filetypes = { "racket", "scheme" },
+	root_markers = { "info.rkt", ".git" },
+})
+
 -- Enable servers whose binary is present on the shared PATH, so a
 -- missing tool degrades silently instead of erroring.
 local shared_servers = {
@@ -289,6 +303,8 @@ local shared_servers = {
 	{ name = "cssls", binary = "vscode-css-language-server" },
 	{ name = "jsonls", binary = "vscode-json-language-server" },
 	{ name = "yamlls", binary = "yaml-language-server" },
+	{ name = "millet", binary = "millet-ls" },
+	{ name = "racket_langserver", binary = "racket" },
 }
 
 for _, server in ipairs(shared_servers) do
