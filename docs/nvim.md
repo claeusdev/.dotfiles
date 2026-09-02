@@ -57,7 +57,7 @@ lua/naamanu/
 | Treesitter | nvim-treesitter (main branch), nvim-treesitter-textobjects, nvim-ts-autotag, nvim-treesitter-context |
 | Task runner | overseer.nvim |
 | HTTP | kulala.nvim |
-| Markdown | render-markdown.nvim |
+| Markdown | render-markdown.nvim, lectern.nvim (rendered side pane) |
 | Editor | nvim-autopairs, nvim-surround, builtin `gc` comments, todo-comments, flash.nvim, undotree, treesj, snacks.zen |
 | Agent | shared terminal agent (`<leader>a` group) |
 | UI | snacks.nvim (indent, scope, scroll, statuscolumn, terminal), lualine, which-key, trouble.nvim, dropbar.nvim (breadcrumbs), rainbow-delimiters.nvim |
@@ -225,15 +225,37 @@ Project-aware tasks support Node package scripts, Python (`uv run python`, pytes
 | n, x, o | `]f` / `[f` | Next / previous function |
 | n, x, o | `]c` / `[c` | Next / previous class |
 
+### Markdown pane — `<leader>m`
+
+A read-only rendered-markdown float pinned to the right, so reference
+material stays visible while you work in the main window. It is a `nofile`
+buffer on purpose: render-markdown renders those in *every* mode, so the pane
+keeps its formatting while you type next to it.
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>mm` | Toggle the pane |
+| `<leader>mb` | Show the current buffer |
+| `<leader>mf` | Pick a markdown file from the project |
+| `<leader>mn` | Pick a note from `$NOTES_DIR` |
+| `<leader>mF` | Focus the pane (`q` closes, `<Esc>` returns) |
+| `<leader>mr` | Refresh from source |
+| `<leader>md` / `<leader>mu` | Scroll the pane without leaving your window |
+
+The pane also scrolls with the mouse while unfocused. It follows its source:
+a buffer refreshes as you edit, a file on `:w` or when something outside
+Neovim rewrites it. Plugin lives at `~/workspace/nvim/lectern.nvim`; the spec
+is skipped when the checkout is absent.
+
 ### Editor Utilities
 
 | Key | Action |
 | :--- | :--- |
 | `gcc`, visual `gc` / `gb` | Comment line / selection |
-| `<leader>u` | Toggle undotree |
+| `<leader>uu` | Toggle undotree |
 | `<leader>z` | Toggle zen mode |
 | `<leader>j` | Split / join node with treesj |
-| `<leader>n` / `<leader>ud` | Notification history / dismiss notifications |
+| `<leader>uh` / `<leader>ud` | Notification history / dismiss notifications |
 | `<leader>rf` | Rename current file |
 | `]]` / `[[` | Next / previous reference for word under cursor |
 

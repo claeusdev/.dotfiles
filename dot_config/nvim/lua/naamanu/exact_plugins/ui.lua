@@ -35,6 +35,7 @@ return {
 				{ "<leader>f", group = "find" },
 				{ "<leader>g", group = "git" },
 				{ "<leader>l", group = "lsp" },
+				{ "<leader>m", group = "markdown pane" },
 				{ "<leader>n", group = "notes" },
 				{ "<leader>o", group = "overseer" },
 				{ "<leader>r", group = "rename" },

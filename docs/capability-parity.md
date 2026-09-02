@@ -45,6 +45,7 @@ Missing optional binaries leave editing usable and are reported by the doctor.
 | Tabs / workspaces | `SPC TAB …`, `gt` | `<leader><tab>…`, `gt` |
 | Breadcrumbs | breadcrumb (header line) | dropbar (winbar), `<leader>;` |
 | Fuzzy finder | Vertico + Consult + Orderless | snacks.picker |
+| Rendered markdown pane | — | lectern.nvim (`<leader>m`) |
 | Snippets | tempel (`<name`) | blink.cmp + friendly-snippets |
 
 ## Shared look

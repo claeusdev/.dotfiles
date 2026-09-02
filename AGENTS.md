@@ -116,6 +116,10 @@ everything; `custom.el` holds only `package-selected-packages`.
   gets a `<leader> x` line in the Leader section (end of keys.el).
 - Never add `flymake` to `eglot-stay-out-of` (regexp-matched; silently kills
   all LSP diagnostics — see the NOTE in dev.el).
+- Home-grown Neovim plugins load from `~/workspace/nvim/` by lazy `dir =`
+  (e.g. `exact_plugins/lectern.lua`). The spec file returns `{}` when the
+  checkout is absent, so a fresh machine still starts — the Lua equivalent of
+  the Emacs `:if (file-directory-p ...)` guard. Repo: naamanu/lectern.nvim.
 - Two home-grown packages load from `~/workspace/elisp/` by `:load-path`
   (langs.el): `utop-eros` and `dune-transient`.  Each `use-package` form is
   guarded with `:if (file-directory-p ...)`, so a machine without those
