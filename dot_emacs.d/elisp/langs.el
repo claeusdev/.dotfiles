@@ -306,6 +306,14 @@ With prefix argument FORCE, reinstall grammars that are already present."
   :load-path "~/.opam/default/share/emacs/site-lisp"
   :mode ("\\(?:\\`\\|/\\)dune\\(?:-project\\|-workspace\\)?\\'" . dune-mode))
 
+;; Home-grown: inline evaluation results for utop (eros-style overlays).
+;; Lives in ~/workspace/elisp/utop-eros, not ELPA.
+(use-package utop-eros
+  :ensure nil
+  :if (file-directory-p "~/workspace/elisp/utop-eros")
+  :load-path "~/workspace/elisp/utop-eros"
+  :hook (tuareg-mode . utop-eros-mode))
+
 ;; Merlin features plain Eglot drops: `ocaml-eglot-construct' fills a typed
 ;; hole, `ocaml-eglot-destruct' generates exhaustive match arms, plus
 ;; type-driven search and enclosing-type navigation.
