@@ -116,6 +116,11 @@ everything; `custom.el` holds only `package-selected-packages`.
   gets a `<leader> x` line in the Leader section (end of keys.el).
 - Never add `flymake` to `eglot-stay-out-of` (regexp-matched; silently kills
   all LSP diagnostics — see the NOTE in dev.el).
+- Two home-grown packages load from `~/workspace/elisp/` by `:load-path`
+  (langs.el): `utop-eros` and `dune-transient`.  Each `use-package` form is
+  guarded with `:if (file-directory-p ...)`, so a machine without those
+  checkouts still starts cleanly.  They are NOT chezmoi-managed; their
+  repos are naamanu/utop-eros and naamanu/dune-transient.
 - `evil` is `:pin melpa` (vim.el): the ELPA 1.15.0 release breaks on Emacs 31
   (`void-variable evil-mode-buffers` in post-command-hook). Keep the pin
   until a release newer than 1.15.0 lands on NonGNU ELPA.
