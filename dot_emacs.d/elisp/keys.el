@@ -133,6 +133,14 @@
 (global-set-key (kbd "C-c c") #'org-capture)
 (global-set-key (kbd "C-c a") #'org-agenda)
 
+;; --- OCaml / dune --------------------------------------------------------
+
+;; The dune menu, in OCaml source and dune files.
+(with-eval-after-load 'tuareg
+  (define-key tuareg-mode-map (kbd "C-c b") #'dune-transient))
+(with-eval-after-load 'dune
+  (define-key dune-mode-map (kbd "C-c b") #'dune-transient))
+
 ;; --- Terminal agent -----------------------------------------------------
 
 (defvar my/agent-map (make-sparse-keymap) "Shared terminal-agent commands.")

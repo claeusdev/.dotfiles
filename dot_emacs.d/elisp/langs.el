@@ -314,6 +314,14 @@ With prefix argument FORCE, reinstall grammars that are already present."
   :load-path "~/workspace/elisp/utop-eros"
   :hook (tuareg-mode . utop-eros-mode))
 
+;; Home-grown: Magit-style menu for dune (build/test/exec/fmt/promote
+;; with composable switches).  Bound to C-c b in keys.el.
+(use-package dune-transient
+  :ensure nil
+  :if (file-directory-p "~/workspace/elisp/dune-transient")
+  :load-path "~/workspace/elisp/dune-transient"
+  :commands (dune-transient))
+
 ;; Merlin features plain Eglot drops: `ocaml-eglot-construct' fills a typed
 ;; hole, `ocaml-eglot-destruct' generates exhaustive match arms, plus
 ;; type-driven search and enclosing-type navigation.
