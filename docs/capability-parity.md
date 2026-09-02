@@ -46,6 +46,7 @@ Missing optional binaries leave editing usable and are reported by the doctor.
 | Breadcrumbs | breadcrumb (header line) | dropbar (winbar), `<leader>;` |
 | Fuzzy finder | Vertico + Consult + Orderless | snacks.picker |
 | Rendered markdown pane | — | lectern.nvim (`<leader>m`) |
+| In-editor tutor (Claude skills) | — | lectern.nvim (`<leader>t`) |
 | Snippets | tempel (`<name`) | blink.cmp + friendly-snippets |
 
 ## Shared look

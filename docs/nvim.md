@@ -58,6 +58,7 @@ lua/naamanu/
 | Task runner | overseer.nvim |
 | HTTP | kulala.nvim |
 | Markdown | render-markdown.nvim, lectern.nvim (rendered side pane) |
+| Tutor | lectern.nvim — interactive `claude` beside your work, driving the Claude skills |
 | Editor | nvim-autopairs, nvim-surround, builtin `gc` comments, todo-comments, flash.nvim, undotree, treesj, snacks.zen |
 | Agent | shared terminal agent (`<leader>a` group) |
 | UI | snacks.nvim (indent, scope, scroll, statuscolumn, terminal), lualine, which-key, trouble.nvim, dropbar.nvim (breadcrumbs), rainbow-delimiters.nvim |
@@ -246,6 +247,31 @@ The pane also scrolls with the mouse while unfocused. It follows its source:
 a buffer refreshes as you edit, a file on `:w` or when something outside
 Neovim rewrites it. Plugin lives at `~/workspace/nvim/lectern.nvim`; the spec
 is skipped when the checkout is absent.
+
+### Tutor — `<leader>t`
+
+An interactive `claude` session in the same right-hand column as the markdown
+pane; open both and they stack, reference material above and the conversation
+below. A real TUI rather than a headless one-shot, because several learning
+skills depend on multi-turn structure — `guided-problem-solving` climbs a
+five-rung hint ladder, `mastery-review` re-assesses after remediation — and a
+one-shot invocation collapses them into handing over the answer.
+
+| Key | Action |
+| :--- | :--- |
+| `<leader>tt` | Toggle the tutor |
+| `<leader>ts` | Pick one of the skills in `~/.claude/skills` and start it |
+| `<leader>tf` | Attach the current file as `@path` |
+| `<leader>tv` | Attach the visual selection as `@path:from-to` |
+| `<leader>td` | Attach the diagnostic under the cursor |
+| `<leader>tp` | Attach whatever the markdown pane is showing |
+| `<leader>tq` | Close the tutor |
+
+Context is attached, never sent silently: each command echoes the reference
+and types it into the prompt, and you press Enter. It calls `claude`
+explicitly rather than `DEV_AGENT` — that probe prefers `codex`, which lacks
+`learn-concept`, `paper-reading`, `proof-and-formalism` and
+`research-question`.
 
 ### Editor Utilities
 

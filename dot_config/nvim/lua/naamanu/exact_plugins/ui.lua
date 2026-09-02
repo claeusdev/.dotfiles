@@ -36,6 +36,7 @@ return {
 				{ "<leader>g", group = "git" },
 				{ "<leader>l", group = "lsp" },
 				{ "<leader>m", group = "markdown pane" },
+				{ "<leader>t", group = "tutor" },
 				{ "<leader>n", group = "notes" },
 				{ "<leader>o", group = "overseer" },
 				{ "<leader>r", group = "rename" },
