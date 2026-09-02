@@ -110,11 +110,14 @@ alongside basedpyright, since Eglot runs one server per buffer.
 - **Snippets** — tempel (+ tempel-collection); own templates in
   `~/.emacs.d/templates` for OCaml, Haskell, Racket, SML, Python, C, Rust,
   Org, Markdown and Elisp
-- **Home-grown** — [utop-eros](https://github.com/naamanu/utop-eros)
-  (inline OCaml evaluation results) and
+- **Home-grown** — [fp-repl](https://github.com/naamanu/fp-repl) (inline
+  evaluation results for OCaml, Haskell, Racket and SML),
+  [mli-lens](https://github.com/naamanu/mli-lens) (the interface OCaml infers,
+  diffed against the one you wrote) and
   [dune-transient](https://github.com/naamanu/dune-transient) (Magit-style
   dune menu), loaded from `~/workspace/elisp/` via `:load-path`, not ELPA;
-  both are skipped when the directory is absent
+  each is skipped when its directory is absent.
+  [utop-eros](https://github.com/naamanu/utop-eros) is superseded by fp-repl
 - **Git** — magit, forge, diff-hl
 - **Editing** — expreg (tree-sitter region expansion), substitute, paredit
   (Lisps only), avy, ws-butler, built-in `repeat-mode`
@@ -286,7 +289,9 @@ Adapters: `debugpy` for Python, `lldb-dap` for Rust and native code.
 | `C-c t l` / `w` / `o` | Line numbers / visual line / olivetti |
 | `C-c t f` | Font preset: family (`iosevka`, `commit`, `jetbrains`, `fira`) × size (`-large`, `-present`) |
 | `C-c b` | dune menu: build, runtest, exec, fmt, promote, opam (OCaml buffers) |
-| `C-c C-e` / `C-x C-e` | Eval OCaml phrase, result inline; `C-c ;` shows it untruncated |
+| `C-c C-v` (`C-c C-e` in OCaml) | Eval the phrase at point, result inline — OCaml, Haskell, Racket, SML |
+| `C-c ;` | Show the last result untruncated; `C-u` for the history |
+| `C-c i i` / `C-c i d` / `C-c i w` | Inferred interface / diff against the .mli / write it |
 | `C-c t s` / `SPC o` | Toggle project sidebar (dirvish-side) |
 | `C-c t S` / `SPC O` | Focus the sidebar |
 | `C-c t i` / `h` | Indent guides / current-line highlight |

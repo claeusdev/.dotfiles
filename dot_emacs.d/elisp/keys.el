@@ -137,9 +137,23 @@
 
 ;; The dune menu, in OCaml source and dune files.
 (with-eval-after-load 'tuareg
-  (define-key tuareg-mode-map (kbd "C-c b") #'dune-transient))
+  (define-key tuareg-mode-map (kbd "C-c b") #'dune-transient)
+  ;; C-c i: the inferred-interface lens.
+  (define-key tuareg-mode-map (kbd "C-c i i") #'mli-lens-show)
+  (define-key tuareg-mode-map (kbd "C-c i d") #'mli-lens-diff)
+  (define-key tuareg-mode-map (kbd "C-c i w") #'mli-lens-insert)
+  (define-key tuareg-mode-map (kbd "C-c i q") #'mli-lens-quit))
 (with-eval-after-load 'dune
   (define-key dune-mode-map (kbd "C-c b") #'dune-transient))
+
+;; --- FP inline evaluation (fp-repl) ---------------------------------------
+
+;; `interactive-haskell-mode-map' binds C-c C-v to haskell-cabal-visit-file
+;; and, being a minor mode too, wins over `fp-repl-mode-map'.  Claim it back
+;; so the key means the same thing in every FP buffer.
+(with-eval-after-load 'haskell
+  (when (boundp 'interactive-haskell-mode-map)
+    (define-key interactive-haskell-mode-map (kbd "C-c C-v") #'fp-repl-eval-phrase)))
 
 ;; --- Terminal agent -----------------------------------------------------
 

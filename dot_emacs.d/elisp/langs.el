@@ -306,13 +306,15 @@ With prefix argument FORCE, reinstall grammars that are already present."
   :load-path "~/.opam/default/share/emacs/site-lisp"
   :mode ("\\(?:\\`\\|/\\)dune\\(?:-project\\|-workspace\\)?\\'" . dune-mode))
 
-;; Home-grown: inline evaluation results for utop (eros-style overlays).
-;; Lives in ~/workspace/elisp/utop-eros, not ELPA.
-(use-package utop-eros
+;; Home-grown: eros-style inline evaluation results across the FP stack —
+;; OCaml (utop), Haskell (GHCi), Racket and Standard ML behind one set of
+;; keys.  Supersedes utop-eros, which did OCaml alone; enabling both would
+;; advise the same utop functions twice.
+(use-package fp-repl
   :ensure nil
-  :if (file-directory-p "~/workspace/elisp/utop-eros")
-  :load-path "~/workspace/elisp/utop-eros"
-  :hook (tuareg-mode . utop-eros-mode))
+  :if (file-directory-p "~/workspace/elisp/fp-repl")
+  :load-path "~/workspace/elisp/fp-repl"
+  :hook ((tuareg-mode haskell-mode racket-mode sml-mode) . fp-repl-mode))
 
 ;; Home-grown: Magit-style menu for dune (build/test/exec/fmt/promote
 ;; with composable switches).  Bound to C-c b in keys.el.
@@ -321,6 +323,15 @@ With prefix argument FORCE, reinstall grammars that are already present."
   :if (file-directory-p "~/workspace/elisp/dune-transient")
   :load-path "~/workspace/elisp/dune-transient"
   :commands (dune-transient))
+
+;; Home-grown: the signature ocamllsp infers for the current .ml, and a diff
+;; against the .mli you wrote.  Keys under C-c i in keys.el.
+(use-package mli-lens
+  :ensure nil
+  :if (file-directory-p "~/workspace/elisp/mli-lens")
+  :load-path "~/workspace/elisp/mli-lens"
+  :hook (tuareg-mode . mli-lens-mode)
+  :commands (mli-lens-show mli-lens-diff mli-lens-insert))
 
 ;; Merlin features plain Eglot drops: `ocaml-eglot-construct' fills a typed
 ;; hole, `ocaml-eglot-destruct' generates exhaustive match arms, plus
