@@ -119,12 +119,17 @@ everything; `custom.el` holds only `package-selected-packages`.
 - Home-grown Neovim plugins load from `~/workspace/nvim/` by lazy `dir =`
   (e.g. `exact_plugins/lectern.lua`). The spec file returns `{}` when the
   checkout is absent, so a fresh machine still starts — the Lua equivalent of
-  the Emacs `:if (file-directory-p ...)` guard. Repo: naamanu/lectern.nvim.
-- Two home-grown packages load from `~/workspace/elisp/` by `:load-path`
-  (langs.el): `utop-eros` and `dune-transient`.  Each `use-package` form is
-  guarded with `:if (file-directory-p ...)`, so a machine without those
-  checkouts still starts cleanly.  They are NOT chezmoi-managed; their
-  repos are naamanu/utop-eros and naamanu/dune-transient.
+  the Emacs `:if (file-directory-p ...)` guard. Repo: naamanu/lectern.nvim,
+  cloned by `setup.sh` alongside the `~/workspace/elisp/` packages.
+- Three home-grown packages load from `~/workspace/elisp/` by `:load-path`
+  (langs.el): `fp-repl`, `dune-transient` and `mli-lens`.  Each `use-package`
+  form is guarded with `:if (file-directory-p ...)`, so a machine without
+  those checkouts still starts cleanly.  They are NOT chezmoi-managed; their
+  repos are naamanu/fp-repl, naamanu/dune-transient and naamanu/mli-lens, and
+  `setup.sh` clones all three (with lectern.nvim) in the post-install section.
+- `utop-eros` (naamanu/utop-eros) is superseded by `fp-repl`, which covers
+  OCaml, Haskell, Racket and SML behind one set of keys.  Do NOT wire both:
+  they advise the same utop functions twice.
 - `evil` is `:pin melpa` (vim.el): the ELPA 1.15.0 release breaks on Emacs 31
   (`void-variable evil-mode-buffers` in post-command-hook). Keep the pin
   until a release newer than 1.15.0 lands on NonGNU ELPA.
