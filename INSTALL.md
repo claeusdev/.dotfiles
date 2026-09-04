@@ -55,6 +55,11 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - Databases: PostgreSQL, SQLite
 - Containers: Docker + lazydocker — **opt-in**, set `INSTALL_DOCKER=1`
 - Fonts: JetBrains Mono, Fira Code, Inconsolata (Nerd Font patched); macOS also Iosevka Comfy, Commit Mono, Symbols Nerd Font (icons)
+- Home-grown editor packages (cloned into `~/workspace`, not chezmoi-managed):
+  `fp-repl`, `dune-transient`, `mli-lens` (Emacs, `~/workspace/elisp/`) and
+  `lectern.nvim` (Neovim, `~/workspace/nvim/`).  The editor config is guarded
+  on these directories, so both editors start fine without them — the features
+  simply stay off.
 
 ### macOS Only
 - Homebrew (installed automatically)

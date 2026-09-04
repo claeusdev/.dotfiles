@@ -775,6 +775,22 @@ else
     echo "TPM already installed."
 fi
 
+# Clone the home-grown editor packages.  These are NOT chezmoi-managed: the
+# Emacs `use-package` forms (langs.el) and the Neovim spec (exact_plugins/
+# lectern.lua) are guarded on these directories, so a machine without them
+# still starts cleanly — cloning them here is what turns the features on.
+# HTTPS, not SSH: this runs before `gh auth login` on a fresh machine.
+for repo in elisp/fp-repl elisp/dune-transient elisp/mli-lens nvim/lectern.nvim; do
+    dest="$HOME/workspace/$repo"
+    name="${repo##*/}"
+    if [ ! -d "$dest" ]; then
+        echo "Cloning $name..."
+        mkdir -p "$(dirname "$dest")"
+        git clone --quiet "https://github.com/naamanu/$name.git" "$dest" \
+            || FAILED_PACKAGES+=("$name")
+    fi
+done
+
 # Set up Neovim Python provider
 if command -v uv &> /dev/null; then
     echo "Setting up Neovim Python provider..."
@@ -916,6 +932,7 @@ echo "What was done:"
 echo "  - chezmoi installed and dotfiles deployed"
 echo "  - Development tools installed ($PLATFORM)"
 echo "  - TPM (Tmux Plugin Manager) installed"
+echo "  - Home-grown Emacs/Neovim packages cloned into ~/workspace"
 echo "  - Default shell set to fish"
 
 if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then

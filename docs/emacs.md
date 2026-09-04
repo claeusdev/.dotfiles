@@ -116,7 +116,8 @@ alongside basedpyright, since Eglot runs one server per buffer.
   diffed against the one you wrote) and
   [dune-transient](https://github.com/naamanu/dune-transient) (Magit-style
   dune menu), loaded from `~/workspace/elisp/` via `:load-path`, not ELPA;
-  each is skipped when its directory is absent.
+  each is skipped when its directory is absent, and `setup.sh` clones all
+  three on a fresh machine.
   [utop-eros](https://github.com/naamanu/utop-eros) is superseded by fp-repl
 - **Git** — magit, forge, diff-hl
 - **Editing** — expreg (tree-sitter region expansion), substitute, paredit

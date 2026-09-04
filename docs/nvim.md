@@ -246,7 +246,8 @@ keeps its formatting while you type next to it.
 The pane also scrolls with the mouse while unfocused. It follows its source:
 a buffer refreshes as you edit, a file on `:w` or when something outside
 Neovim rewrites it. Plugin lives at `~/workspace/nvim/lectern.nvim`; the spec
-is skipped when the checkout is absent.
+is skipped when the checkout is absent, and `setup.sh` clones it on a fresh
+machine.
 
 ### Tutor — `<leader>t`
 
