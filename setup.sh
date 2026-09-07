@@ -379,6 +379,18 @@ elif [ "$PLATFORM" = "linux" ]; then
         install_pkg fish tmux emacs
     fi
 
+    # tmux-yank needs a clipboard helper, or `y' in copy-mode quietly copies
+    # to the tmux buffer only and never reaches the system clipboard. macOS
+    # has pbcopy built in; Linux has nothing by default.
+    #
+    # tmux-yank probes wl-copy BEFORE xsel and does not look at the session
+    # type, so wl-clipboard present on an X11 machine makes every yank fail.
+    # Install it only where Wayland is actually in use.
+    install_pkg xsel
+    if [ "${XDG_SESSION_TYPE:-}" = "wayland" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+        install_pkg wl-clipboard
+    fi
+
     # emacs-libvterm compiles a native module against the system libvterm and
     # needs its headers, not just the runtime library. Without them the build
     # fails with LIBVTERM_INCLUDE_DIR-NOTFOUND and vterm reports at runtime

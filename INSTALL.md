@@ -36,7 +36,9 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 
 ### Both Platforms
 - Core: build tools, git, curl, wget, cmake
-- Shell: fish, tmux, starship, zoxide
+- Shell: fish, tmux, starship, zoxide, xsel (clipboard backend for tmux-yank;
+  wl-clipboard instead on a Wayland session — tmux-yank prefers wl-copy over
+  xsel without checking the session type, so only one of the two is installed)
 - CLI: neovim, ripgrep, fd, fzf, bat, eza, jq, btop, yazi, atuin, glow, dust, procs, hyperfine, tokei
   (on Debian/Ubuntu, neovim and the tree-sitter CLI come from official GitHub
   release binaries into `~/.local` — the apt packages are too old for this
