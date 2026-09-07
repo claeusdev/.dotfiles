@@ -309,6 +309,18 @@ check() {
         fi
     fi
 
+    # btop names its theme in its own config; the theme files themselves are
+    # generated, so a missing one is as much a mismatch as a stale name.
+    if command -v btop >/dev/null 2>&1; then
+        if ! [ -f "$HOME/.config/btop/themes/modus-$mode.theme" ]; then
+            row btop "theme not generated" "MISMATCH"; MISMATCH=1
+        elif grep -q "^color_theme = \"modus-$mode\"" "$HOME/.config/btop/btop.conf" 2>/dev/null; then
+            row btop "modus-$mode" "ok"
+        else
+            row btop "config points elsewhere" "MISMATCH"; MISMATCH=1
+        fi
+    fi
+
     echo
     if [ "$MISMATCH" -eq 0 ]; then
         echo "all surfaces agree"
