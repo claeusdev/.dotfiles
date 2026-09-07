@@ -19,7 +19,28 @@ return {
       ["<C-f>"] = { "scroll_documentation_down", "fallback" },
     },
     snippets = {
-      expand = function(snippet) vim.snippet.expand(snippet) end,
+      -- Some servers send insertTextFormat=Snippet with an unescaped `$`,
+      -- which the LSP spec requires to be written `\$`. HLS does this for
+      -- Haskell's operator family -- `($)`, `<$>`, `($!)`, `f $ x` -- and
+      -- vim.snippet's parser correctly rejects the body, which surfaced as
+      -- "snippet parsing failed" on every such completion. Escape the stray
+      -- dollars and retry, then fall back to plain text, so a malformed
+      -- snippet degrades instead of erroring out of the completion.
+      expand = function(snippet)
+        if pcall(vim.snippet.expand, snippet) then
+          return
+        end
+        -- A `$` is only meaningful before a digit, `{`, or a variable name.
+        local escaped = snippet:gsub("%$([^%w_{])", "\\$%1"):gsub("%$$", "\\$")
+        if pcall(vim.snippet.expand, escaped) then
+          return
+        end
+        local literal = snippet
+          :gsub("%${%d+:([^}]*)}", "%1")
+          :gsub("%${%d+}", "")
+          :gsub("%$%d+", "")
+        vim.api.nvim_put(vim.split(literal, "\n", { plain = true }), "c", false, true)
+      end,
       active = function(filter)
         if filter and filter.direction then
           return vim.snippet.active({ direction = filter.direction })
