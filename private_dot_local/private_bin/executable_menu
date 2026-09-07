@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+#
+# menu -- one fuzzy list of the things you actually do to this machine.
+#
+# Omarchy's Super+Alt+Space, rebuilt on what is already here: fzf, the desktop
+# scripts, and GNOME's own settings panels. Entries whose command is missing
+# are hidden rather than shown and then failing, so the list only ever offers
+# what this machine can do.
+#
+#   menu             pick an action
+#   menu --list      print the available actions
+
+set -u
+
+PLAIN=0
+for arg in "$@"; do
+    case "$arg" in
+        --list)    PLAIN=1 ;;
+        -h|--help) sed -n '3,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *)         echo "menu: unknown argument: $arg" >&2; exit 2 ;;
+    esac
+done
+
+# label|requires|command
+#
+# `requires' is the binary that must exist for the entry to show up. A few
+# entries need a terminal of their own: they are wrapped at launch, not here,
+# so running `menu' from a shell keeps them in that shell.
+actions() {
+    cat <<'EOF'
+Theme: toggle light/dark|theme-mode|theme-mode toggle
+Theme: current mode|theme-mode|theme-mode
+Wallpaper: choose|desktop-wallpaper|__wallpaper
+Wallpaper: regenerate|desktop-wallpaper|desktop-wallpaper --regenerate
+Desktop: re-apply the look|desktop-theme|desktop-theme
+Desktop: what is installed|desktop-theme|desktop-theme --check
+Desktop: reset to Ubuntu defaults|desktop-theme|desktop-theme --reset
+Keybindings: cheatsheet|keys|keys
+Extensions: manage|extension-manager|extension-manager
+Tweaks: GNOME|gnome-tweaks|gnome-tweaks
+System: monitor|btop|btop
+System: health check|dev-doctor|dev-doctor --all
+Git: terminal UI|lazygit|lazygit
+Files: browse|yazi|yazi
+Docker: terminal UI|lazydocker|lazydocker
+Screenshot: capture and annotate|flameshot|flameshot gui
+Settings: displays|gnome-control-center|gnome-control-center display
+Settings: wi-fi|gnome-control-center|gnome-control-center wifi
+Settings: bluetooth|gnome-control-center|gnome-control-center bluetooth
+Settings: sound|gnome-control-center|gnome-control-center sound
+Settings: power|gnome-control-center|gnome-control-center power
+Session: lock screen|loginctl|loginctl lock-session
+Session: suspend|systemctl|systemctl suspend
+Session: log out|gnome-session-quit|gnome-session-quit --logout
+EOF
+}
+
+available() {
+    while IFS='|' read -r label requires command; do
+        [ -n "$label" ] || continue
+        command -v "$requires" > /dev/null 2>&1 || continue
+        printf '%s|%s\n' "$label" "$command"
+    done < <(actions)
+}
+
+if [ "$PLAIN" -eq 1 ]; then
+    available | cut -d'|' -f1
+    exit 0
+fi
+
+if ! command -v fzf > /dev/null 2>&1; then
+    echo "menu: fzf is required." >&2
+    exit 1
+fi
+
+choice="$(available | cut -d'|' -f1 | fzf \
+    --prompt 'menu> ' \
+    --header 'What would you like to do?' \
+    --height 100% --layout reverse --info inline)" || exit 0
+[ -n "$choice" ] || exit 0
+
+command="$(available | awk -F'|' -v c="$choice" '$1 == c { print $2 }')"
+
+# The wallpaper picker is a menu of its own rather than 6 more top-level rows.
+if [ "$command" = "__wallpaper" ]; then
+    pick="$(desktop-wallpaper --list | awk 'NR>1 && $1 != "*" && NF > 1 { sub(/^\*/, "", $1); print $1 }' \
+        | fzf --prompt 'wallpaper> ' --height 100% --layout reverse)" || exit 0
+    [ -n "$pick" ] || exit 0
+    exec desktop-wallpaper "$pick"
+fi
+
+exec $command
