@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+#
+# desktop-wallpaper -- generate and set the desktop gradient wallpapers.
+#
+# The wallpapers are *generated*, not shipped: a dotfiles repo has no business
+# carrying tens of megabytes of image, and rendering locally means every machine
+# gets them at its own resolution.  ImageMagick draws a mesh gradient from a
+# handful of colour control points on a tiny canvas, then scales it up -- the
+# upscale is what makes the blend smooth.
+#
+#   desktop-wallpaper                 generate any that are missing, then set
+#                                     the default one
+#   desktop-wallpaper <name>          set this wallpaper (generating first)
+#   desktop-wallpaper --list          list the available wallpapers
+#   desktop-wallpaper --regenerate    re-render every wallpaper
+#   desktop-wallpaper --size WxH      render at this size instead of detecting
+#
+# Each wallpaper has a dark and a light rendering, wired to picture-uri-dark
+# and picture-uri, so the desktop follows the system colour scheme.
+
+set -u
+
+OUT_DIR="$HOME/.local/share/backgrounds"
+DEFAULT_WALLPAPER="aurora"
+
+REGENERATE=0
+SIZE=""
+LIST=0
+WANTED=""
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --list)       LIST=1 ;;
+        --regenerate) REGENERATE=1 ;;
+        --size)       SIZE="${2:-}"; shift ;;
+        -h|--help)    sed -n '3,21p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -*)           echo "desktop-wallpaper: unknown argument: $1" >&2; exit 2 ;;
+        *)            WANTED="$1" ;;
+    esac
+    shift
+done
+
+if ! command -v convert > /dev/null 2>&1; then
+    echo "desktop-wallpaper: ImageMagick ('convert') is required -- run setup.sh." >&2
+    exit 1
+fi
+
+# ── Palettes ──────────────────────────────────────────────────
+#
+# name|description|dark control points|light control points
+#
+# Control points are "x,y #rrggbb" on a 64x36 grid, fed to -sparse-color
+# Shepards.  Corners anchor the overall tone; interior points are the glow.
+palettes() {
+    cat <<'EOF'
+aurora|Indigo and violet with a teal horizon|0,0 #1b0f3a 63,0 #0e3f5c 0,35 #3d1259 63,35 #14213a 30,15 #7b2d8f 46,23 #12557a|0,0 #e8e2f7 63,0 #cfe6f2 0,35 #f0dcf0 63,35 #dfe7f5 30,15 #c9a8e0 46,23 #a8cfe3
+monterey|Deep ocean blue drifting into cyan|0,0 #05132e 63,0 #0a2f57 0,35 #071b3d 63,35 #08243f 26,14 #1c5fa8 48,24 #0e7c96|0,0 #dce9fb 63,0 #c3dcf7 0,35 #e6eefc 63,35 #d2e2f8 26,14 #9cc4ee 48,24 #a5dae6
+ember|Charcoal with a low ember glow|0,0 #14100e 63,0 #1d1210 0,35 #0b0908 63,35 #2a1712 30,26 #8f3a17 48,30 #b5541f|0,0 #f7ece4 63,0 #fae3d5 0,35 #f2e6dc 63,35 #fbe0cd 30,26 #f0b487 48,30 #e8a06b
+abyss|Near-black with a single cold blue swell|0,0 #05070d 63,0 #080d18 0,35 #04060b 63,35 #070b14 34,18 #133a63 20,26 #0d2440|0,0 #eef1f6 63,0 #e4eaf3 0,35 #f2f4f8 63,35 #e8edf4 34,18 #b9cde4 20,26 #cdd9ea
+sequoia|Deep forest teal and emerald|0,0 #04140f 63,0 #072a20 0,35 #051a14 63,35 #06231b 28,18 #10614a 46,24 #14795a|0,0 #e0f2ea 63,0 #cdeade 0,35 #e9f5ef 63,35 #dcefe6 28,18 #9fd6bf 46,24 #b6e2cd
+dusk|Magenta sunset falling into deep purple|0,0 #2a0b2e 63,0 #4a1030 0,35 #150720 63,35 #24102e 30,12 #a12a63 50,20 #d4562f|0,0 #f7e2f2 63,0 #fbdce6 0,35 #ece0f5 63,35 #e6dcf0 30,12 #eba8c8 50,20 #f5b89a
+EOF
+}
+
+palette_names() { palettes | cut -d'|' -f1; }
+
+if [ "$LIST" -eq 1 ]; then
+    current="$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d "'")"
+    printf '%-12s %s\n' "NAME" "DESCRIPTION"
+    while IFS='|' read -r name desc _ _; do
+        [ -n "$name" ] || continue
+        marker=" "
+        case "$current" in *"/$name-dark.jpg") marker="*" ;; esac
+        printf '%s%-11s %s\n' "$marker" "$name" "$desc"
+    done < <(palettes)
+    echo ""
+    echo "* = currently set.  Apply one with: desktop-wallpaper <name>"
+    exit 0
+fi
+
+# ── Target size ───────────────────────────────────────────────
+#
+# Render at the largest attached display so an external monitor is not fed an
+# upscaled laptop-sized image.  Capped at 4K: beyond that the files get large
+# for no visible gain on a gradient.
+detect_size() {
+    local best_w=0 best_h=0 w h mode
+    if command -v xrandr > /dev/null 2>&1; then
+        while read -r mode; do
+            w="${mode%x*}"; h="${mode#*x}"
+            case "$w$h" in *[!0-9]*|"") continue ;; esac
+            if [ $((w * h)) -gt $((best_w * best_h)) ]; then best_w="$w"; best_h="$h"; fi
+        done < <(xrandr --current 2>/dev/null | awk '/\*/ {print $1}')
+    fi
+    if [ "$best_w" -eq 0 ]; then best_w=2560; best_h=1440; fi
+    [ "$best_w" -le 3840 ] || { best_w=3840; best_h=2160; }
+    printf '%sx%s' "$best_w" "$best_h"
+}
+
+[ -n "$SIZE" ] || SIZE="$(detect_size)"
+case "$SIZE" in
+    [0-9]*x[0-9]*) ;;
+    *) echo "desktop-wallpaper: --size expects WxH, got '$SIZE'" >&2; exit 2 ;;
+esac
+
+# ── Rendering ─────────────────────────────────────────────────
+#
+# 64x36 mesh -> upscale -> vignette -> grain.  The grain matters: a smooth
+# 8-bit gradient across 1920px bands visibly, and a little noise dithers it
+# away while reading as texture rather than dirt.
+render() {
+    local out="$1" points="$2"
+    convert -size 64x36 xc: \
+        -sparse-color Shepards "$points" \
+        -resize "${SIZE}!" \
+        \( -size "$SIZE" radial-gradient:'#ffffff'-'#bcbcbc' \) \
+        -compose Multiply -composite \
+        -attenuate 0.08 +noise Gaussian \
+        -quality 95 -strip "$out"
+}
+
+generated=0
+while IFS='|' read -r name desc dark light; do
+    [ -n "$name" ] || continue
+    if [ -n "$WANTED" ] && [ "$WANTED" != "$name" ]; then continue; fi
+    mkdir -p "$OUT_DIR"
+    for variant in dark light; do
+        target="$OUT_DIR/$name-$variant.jpg"
+        if [ "$variant" = dark ]; then points="$dark"; else points="$light"; fi
+        if [ "$REGENERATE" -eq 1 ] || [ ! -f "$target" ]; then
+            printf 'Rendering %s (%s, %s)...\n' "$name" "$variant" "$SIZE"
+            if render "$target" "$points"; then
+                generated=$((generated + 1))
+            else
+                echo "desktop-wallpaper: failed to render $target" >&2
+                exit 1
+            fi
+        fi
+    done
+done < <(palettes)
+
+# ── Apply ─────────────────────────────────────────────────────
+
+if [ -n "$WANTED" ]; then
+    if ! palette_names | grep -qx "$WANTED"; then
+        echo "desktop-wallpaper: no wallpaper named '$WANTED'. Try --list." >&2
+        exit 2
+    fi
+    chosen="$WANTED"
+elif [ "$REGENERATE" -eq 1 ]; then
+    # A bare --regenerate is a refresh, not a request to change the wallpaper.
+    echo ""
+    echo "Regenerated $generated image(s) in $OUT_DIR."
+    exit 0
+else
+    chosen="$DEFAULT_WALLPAPER"
+fi
+
+if command -v gsettings > /dev/null 2>&1; then
+    gsettings set org.gnome.desktop.background picture-uri "file://$OUT_DIR/$chosen-light.jpg"
+    gsettings set org.gnome.desktop.background picture-uri-dark "file://$OUT_DIR/$chosen-dark.jpg"
+    gsettings set org.gnome.desktop.background picture-options 'zoom'
+    gsettings set org.gnome.desktop.screensaver picture-uri "file://$OUT_DIR/$chosen-dark.jpg"
+    gsettings set org.gnome.desktop.screensaver picture-options 'zoom'
+    echo ""
+    echo "Wallpaper set to '$chosen' ($OUT_DIR/$chosen-{dark,light}.jpg)."
+else
+    echo "gsettings not available; images are in $OUT_DIR."
+fi

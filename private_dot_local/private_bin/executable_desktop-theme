@@ -1,0 +1,505 @@
+#!/usr/bin/env bash
+#
+# desktop-theme -- apply the macOS-inspired GNOME desktop look.
+#
+# setup.sh installs the parts (shell extensions, icon and cursor themes);
+# this script is the configuration half and is the only thing here that
+# writes gsettings.  It is idempotent -- run it after a fresh bootstrap, or
+# any time the desktop drifts back towards stock Ubuntu.
+#
+#   desktop-theme             apply the look
+#   desktop-theme --check     report which parts are installed
+#   desktop-theme --dry-run   print every setting without writing one
+#   desktop-theme --reset     hand every key it manages back to its default
+#
+# Traffic-light window buttons (close/minimise/maximise on the LEFT, as on
+# macOS) are the one change that is muscle memory rather than looks, so it
+# has its own switch:  TRAFFIC_LIGHTS=0 desktop-theme  keeps them on the
+# right, the Ubuntu way.
+#
+# Every extension schema is read from the extension's own schemas/ directory,
+# so this works before GNOME has ever loaded the extension.
+
+set -u
+
+TRAFFIC_LIGHTS="${TRAFFIC_LIGHTS:-1}"
+EXT_DIR="$HOME/.local/share/gnome-shell/extensions"
+
+DRY_RUN=0
+RESET=0
+CHECK=0
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run) DRY_RUN=1 ;;
+        --reset)   RESET=1 ;;
+        --check)   CHECK=1 ;;
+        -h|--help)
+            sed -n '3,22p' "$0" | sed 's/^# \{0,1\}//'
+            exit 0
+            ;;
+        *) echo "desktop-theme: unknown argument: $arg" >&2; exit 2 ;;
+    esac
+done
+
+if ! command -v gsettings > /dev/null 2>&1; then
+    echo "desktop-theme: gsettings not found -- this is a GNOME-only script." >&2
+    exit 1
+fi
+
+# ── Extensions ────────────────────────────────────────────────
+#
+# Enabled for the look.  Ubuntu ships ubuntu-dock (a Dash to Dock fork on the
+# stock dash-to-dock schema), so the dock below needs no extra extension --
+# installing real Dash to Dock alongside it only causes two docks to fight.
+ENABLE_EXTENSIONS=(
+    ubuntu-dock@ubuntu.com
+    ubuntu-appindicators@ubuntu.com
+    blur-my-shell@aunetx
+    just-perfection-desktop@just-perfection
+    rounded-window-corners@fxgn
+    search-light@icedman.github.com
+    tilingshell@ferrarodomenico.com
+)
+
+# Ubuntu's own tiler and Tiling Shell both grab the same drag-to-edge gesture
+# and fight over it; Tiling Shell is the one being configured here.
+DISABLE_EXTENSIONS=(
+    tiling-assistant@ubuntu.com
+)
+
+# ── Settings ──────────────────────────────────────────────────
+#
+# One record per line: extension-uuid|schema|key|value
+# An empty first field means a system schema (no --schemadir needed).
+# --reset walks this same table, so it resets exactly what was set and
+# leaves neighbouring keys in those schemas alone.
+# Deliberately absent: color-scheme, gtk-theme and icon-theme. Those follow
+# the light/dark mode, and theme-mode(1) owns them -- setting them here would
+# force the desktop back to dark every time this script ran.
+settings() {
+    cat <<'EOF'
+|org.gnome.desktop.interface|cursor-theme|'Bibata-Modern-Classic'
+|org.gnome.desktop.interface|cursor-size|24
+|org.gnome.desktop.interface|font-name|'Inter 11'
+|org.gnome.desktop.interface|document-font-name|'Inter 11'
+|org.gnome.desktop.interface|monospace-font-name|'JetBrainsMono Nerd Font 12'
+|org.gnome.desktop.interface|font-antialiasing|'rgba'
+|org.gnome.desktop.interface|font-hinting|'slight'
+|org.gnome.desktop.interface|enable-hot-corners|true
+|org.gnome.desktop.interface|enable-animations|true
+|org.gnome.desktop.interface|clock-show-weekday|true
+|org.gnome.desktop.interface|show-battery-percentage|true
+|org.gnome.desktop.wm.preferences|titlebar-font|'Inter 11'
+|org.gnome.desktop.wm.preferences|resize-with-right-button|true
+|org.gnome.mutter|center-new-windows|true
+|org.gnome.mutter|attach-modal-dialogs|true
+|org.gnome.mutter|edge-tiling|true
+|org.gnome.desktop.peripherals.touchpad|natural-scroll|true
+|org.gnome.desktop.peripherals.touchpad|tap-to-click|true
+|org.gnome.desktop.peripherals.touchpad|two-finger-scrolling-enabled|true
+|org.gnome.desktop.peripherals.touchpad|disable-while-typing|true
+|org.gnome.shell.extensions.ding|show-home|false
+|org.gnome.shell.extensions.ding|start-corner|'top-right'
+|org.gnome.shell.extensions.dash-to-dock|dock-position|'BOTTOM'
+|org.gnome.shell.extensions.dash-to-dock|extend-height|false
+|org.gnome.shell.extensions.dash-to-dock|dock-fixed|false
+|org.gnome.shell.extensions.dash-to-dock|autohide|true
+|org.gnome.shell.extensions.dash-to-dock|intellihide|true
+|org.gnome.shell.extensions.dash-to-dock|intellihide-mode|'FOCUS_APPLICATION_WINDOWS'
+|org.gnome.shell.extensions.dash-to-dock|dash-max-icon-size|44
+|org.gnome.shell.extensions.dash-to-dock|show-apps-at-top|false
+|org.gnome.shell.extensions.dash-to-dock|show-show-apps-button|true
+|org.gnome.shell.extensions.dash-to-dock|show-trash|false
+|org.gnome.shell.extensions.dash-to-dock|show-mounts|false
+|org.gnome.shell.extensions.dash-to-dock|running-indicator-style|'DOTS'
+|org.gnome.shell.extensions.dash-to-dock|click-action|'minimize-or-previews'
+|org.gnome.shell.extensions.dash-to-dock|scroll-action|'cycle-windows'
+|org.gnome.shell.extensions.dash-to-dock|apply-custom-theme|false
+|org.gnome.shell.extensions.dash-to-dock|custom-theme-shrink|true
+|org.gnome.shell.extensions.dash-to-dock|transparency-mode|'FIXED'
+|org.gnome.shell.extensions.dash-to-dock|background-opacity|0.25
+|org.gnome.shell.extensions.dash-to-dock|animation-time|0.15
+|org.gnome.shell.extensions.dash-to-dock|hide-delay|0.15
+|org.gnome.shell.extensions.dash-to-dock|show-delay|0.1
+|org.gnome.shell.extensions.dash-to-dock|isolate-workspaces|false
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell|hacks-level|1
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.panel|blur|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.panel|static-blur|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.panel|customize|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.panel|sigma|24
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.panel|brightness|0.65
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.panel|override-background|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.panel|unblur-in-overview|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.overview|blur|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.overview|customize|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.overview|sigma|30
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.overview|brightness|0.6
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.dash-to-dock|blur|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.dash-to-dock|static-blur|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.dash-to-dock|customize|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.dash-to-dock|sigma|24
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.dash-to-dock|brightness|0.65
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.dash-to-dock|corner-radius|18
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.dash-to-dock|override-background|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.applications|blur|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.applications|enable-all|false
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.applications|whitelist|['com.mitchellh.ghostty']
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.applications|customize|true
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.applications|sigma|30
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.applications|opacity|230
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.applications|corner-radius|12
+blur-my-shell@aunetx|org.gnome.shell.extensions.blur-my-shell.applications|dynamic-opacity|false
+just-perfection-desktop@just-perfection|org.gnome.shell.extensions.just-perfection|startup-status|0
+just-perfection-desktop@just-perfection|org.gnome.shell.extensions.just-perfection|clock-menu-position|1
+just-perfection-desktop@just-perfection|org.gnome.shell.extensions.just-perfection|clock-menu-position-offset|0
+just-perfection-desktop@just-perfection|org.gnome.shell.extensions.just-perfection|panel-size|30
+just-perfection-desktop@just-perfection|org.gnome.shell.extensions.just-perfection|animation|2
+just-perfection-desktop@just-perfection|org.gnome.shell.extensions.just-perfection|notification-banner-position|2
+just-perfection-desktop@just-perfection|org.gnome.shell.extensions.just-perfection|activities-button|false
+just-perfection-desktop@just-perfection|org.gnome.shell.extensions.just-perfection|dash-separator|false
+just-perfection-desktop@just-perfection|org.gnome.shell.extensions.just-perfection|panel-in-overview|true
+rounded-window-corners@fxgn|org.gnome.shell.extensions.rounded-window-corners-reborn|skip-libadwaita-app|true
+rounded-window-corners@fxgn|org.gnome.shell.extensions.rounded-window-corners-reborn|enable-preferences-entry|false
+search-light@icedman.github.com|org.gnome.shell.extensions.search-light|shortcut-search|['<Super>space']
+search-light@icedman.github.com|org.gnome.shell.extensions.search-light|blur-background|true
+search-light@icedman.github.com|org.gnome.shell.extensions.search-light|blur-sigma|30.0
+search-light@icedman.github.com|org.gnome.shell.extensions.search-light|blur-brightness|0.6
+search-light@icedman.github.com|org.gnome.shell.extensions.search-light|border-radius|20.0
+search-light@icedman.github.com|org.gnome.shell.extensions.search-light|border-thickness|1
+search-light@icedman.github.com|org.gnome.shell.extensions.search-light|use-animations|true
+search-light@icedman.github.com|org.gnome.shell.extensions.search-light|show-panel-icon|false
+tilingshell@ferrarodomenico.com|org.gnome.shell.extensions.tilingshell|inner-gaps|8
+tilingshell@ferrarodomenico.com|org.gnome.shell.extensions.tilingshell|outer-gaps|8
+tilingshell@ferrarodomenico.com|org.gnome.shell.extensions.tilingshell|enable-tiling-system|true
+tilingshell@ferrarodomenico.com|org.gnome.shell.extensions.tilingshell|enable-snap-assist|true
+tilingshell@ferrarodomenico.com|org.gnome.shell.extensions.tilingshell|active-screen-edges|true
+tilingshell@ferrarodomenico.com|org.gnome.shell.extensions.tilingshell|enable-blur-snap-assistant|true
+tilingshell@ferrarodomenico.com|org.gnome.shell.extensions.tilingshell|enable-smart-window-border-radius|true
+tilingshell@ferrarodomenico.com|org.gnome.shell.extensions.tilingshell|enable-window-border|false
+tilingshell@ferrarodomenico.com|org.gnome.shell.extensions.tilingshell|override-alt-tab|false
+EOF
+}
+
+# Super+space is GNOME's input-source switcher.  With a single keyboard
+# layout installed it switches between one thing and itself, so Search Light
+# claims it as the Spotlight key.  Reset restores it.
+FREED_KEYS="
+org.gnome.desktop.wm.keybindings|switch-input-source|@as []
+org.gnome.desktop.wm.keybindings|switch-input-source-backward|@as []
+"
+
+# ── Plumbing ──────────────────────────────────────────────────
+
+SCHEMAS="$(gsettings list-schemas 2>/dev/null)"
+applied=0
+skipped=0
+failed=0
+SKIPPED_NOTES=""
+
+have_schema() {
+    printf '%s\n' "$SCHEMAS" | grep -qx "$1"
+}
+
+# Echo the gsettings argv for a schema, or return 1 when the schema is not
+# available on this machine (extension not installed, or Ubuntu-only schema).
+gs_argv() {
+    local uuid="$1" schema="$2"
+    if [ -n "$uuid" ]; then
+        local dir="$EXT_DIR/$uuid/schemas"
+        [ -d "$dir" ] || return 1
+        printf 'gsettings\n--schemadir\n%s\n' "$dir"
+    else
+        have_schema "$schema" || return 1
+        printf 'gsettings\n'
+    fi
+}
+
+write_setting() {
+    local uuid="$1" schema="$2" key="$3" value="$4"
+    local argv
+    if ! argv="$(gs_argv "$uuid" "$schema")"; then
+        skipped=$((skipped + 1))
+        SKIPPED_NOTES="${SKIPPED_NOTES}  ${schema} (not installed)"$'\n'
+        return 0
+    fi
+    mapfile -t gs < <(printf '%s' "$argv")
+
+    if [ "$RESET" -eq 1 ]; then
+        if [ "$DRY_RUN" -eq 1 ]; then
+            printf '  reset  %s %s\n' "$schema" "$key"
+        elif ! "${gs[@]}" reset "$schema" "$key" 2>/dev/null; then
+            printf 'desktop-theme: could not reset %s %s\n' "$schema" "$key" >&2
+            failed=$((failed + 1)); return 0
+        fi
+    else
+        if [ "$DRY_RUN" -eq 1 ]; then
+            printf '  set    %s %s %s\n' "$schema" "$key" "$value"
+        elif ! "${gs[@]}" set "$schema" "$key" "$value" 2>/dev/null; then
+            printf 'desktop-theme: could not set %s %s = %s\n' "$schema" "$key" "$value" >&2
+            failed=$((failed + 1)); return 0
+        fi
+    fi
+    applied=$((applied + 1))
+}
+
+# ── --check ───────────────────────────────────────────────────
+
+if [ "$CHECK" -eq 1 ]; then
+    printf '%-44s %s\n' "COMPONENT" "STATUS"
+    missing=0
+    for uuid in "${ENABLE_EXTENSIONS[@]}"; do
+        case "$uuid" in
+            ubuntu-*|ding@*) [ -d "/usr/share/gnome-shell/extensions/$uuid" ] && s=ok || s=MISSING ;;
+            *) [ -d "$EXT_DIR/$uuid" ] && s=ok || s=MISSING ;;
+        esac
+        [ "$s" = ok ] || missing=$((missing + 1))
+        printf '%-44s %s\n' "$uuid" "$s"
+    done
+    for theme in "Colloid-Dark:icon theme" "Bibata-Modern-Classic:cursor theme"; do
+        name="${theme%%:*}"
+        if [ -d "$HOME/.local/share/icons/$name" ] || [ -d "/usr/share/icons/$name" ]; then s=ok; else s=MISSING; missing=$((missing + 1)); fi
+        printf '%-44s %s\n' "$name (${theme#*:})" "$s"
+    done
+    for font in "Inter:UI font" "JetBrainsMono Nerd Font:monospace"; do
+        name="${font%%:*}"
+        if fc-list : family 2>/dev/null | grep -qF "$name"; then s=ok; else s=MISSING; missing=$((missing + 1)); fi
+        printf '%-44s %s\n' "$name (${font#*:})" "$s"
+    done
+    echo ""
+    if [ "$missing" -eq 0 ]; then
+        echo "All desktop components present. Run 'desktop-theme' to apply the look."
+    else
+        echo "$missing component(s) missing -- run setup.sh to install them."
+    fi
+    exit "$missing"
+fi
+
+# ── Apply ─────────────────────────────────────────────────────
+
+if [ "$RESET" -eq 1 ]; then
+    echo "Resetting the GNOME desktop to Ubuntu defaults..."
+else
+    echo "Applying the macOS-inspired GNOME desktop look..."
+fi
+[ "$DRY_RUN" -eq 0 ] || echo "(dry run -- nothing is written)"
+echo ""
+
+while IFS='|' read -r uuid schema key value; do
+    [ -n "$schema" ] || continue
+    write_setting "$uuid" "$schema" "$key" "$value"
+done < <(settings)
+
+while IFS='|' read -r schema key value; do
+    [ -n "$schema" ] || continue
+    write_setting "" "$schema" "$key" "$value"
+done <<< "$FREED_KEYS"
+
+# Window buttons are opt-out rather than part of the table, so --reset always
+# restores Ubuntu's right-hand layout regardless of how it was applied.
+if [ "$RESET" -eq 1 ]; then
+    write_setting "" org.gnome.desktop.wm.preferences button-layout ""
+elif [ "$TRAFFIC_LIGHTS" = 1 ]; then
+    write_setting "" org.gnome.desktop.wm.preferences button-layout "'close,minimize,maximize:'"
+fi
+
+# ── Extensions on/off ─────────────────────────────────────────
+#
+# Written straight into org.gnome.shell's arrays rather than shelled out to
+# `gnome-extensions enable`.  That command talks to the *running* shell, which
+# only knows about extensions it has already scanned -- so on the very run
+# that installs them it reports "not installed" and quietly does nothing.
+# These two arrays are what the shell reads at startup, so writing them works
+# before the first restart.
+
+ext_installed() {
+    [ -d "$EXT_DIR/$1" ] || [ -d "/usr/share/gnome-shell/extensions/$1" ]
+}
+
+list_get() {
+    gsettings get org.gnome.shell "$1" \
+        | sed "s/^@as //; s/^\[//; s/\]$//; s/'//g; s/, /\n/g" \
+        | sed '/^$/d'
+}
+
+list_set() {
+    local key="$1"; shift
+    local out="[" first=1 uuid
+    for uuid in "$@"; do
+        [ "$first" -eq 1 ] || out="$out, "
+        out="$out'$uuid'"
+        first=0
+    done
+    out="$out]"
+    if [ "$DRY_RUN" -eq 1 ]; then
+        printf '  set    org.gnome.shell %s %s\n' "$key" "$out"
+    else
+        gsettings set org.gnome.shell "$key" "$out"
+    fi
+}
+
+in_list() {
+    local needle="$1"; shift
+    local item
+    for item in "$@"; do [ "$item" = "$needle" ] || continue; return 0; done
+    return 1
+}
+
+echo ""
+if [ "$RESET" -eq 1 ]; then
+    # The distro ships its defaults as a gschema override, so resetting the
+    # keys restores exactly what Ubuntu intended -- better than guessing.
+    if [ "$DRY_RUN" -eq 1 ]; then
+        echo "  reset  org.gnome.shell enabled-extensions"
+        echo "  reset  org.gnome.shell disabled-extensions"
+    else
+        gsettings reset org.gnome.shell enabled-extensions
+        gsettings reset org.gnome.shell disabled-extensions
+    fi
+else
+    mapfile -t cur_enabled < <(list_get enabled-extensions)
+    mapfile -t cur_disabled < <(list_get disabled-extensions)
+
+    want_enabled=()
+    for uuid in "${cur_enabled[@]}"; do
+        in_list "$uuid" "${DISABLE_EXTENSIONS[@]}" && continue
+        want_enabled+=("$uuid")
+    done
+    for uuid in "${ENABLE_EXTENSIONS[@]}"; do
+        if ! ext_installed "$uuid"; then
+            printf '  not installed, skipping: %s\n' "$uuid"
+            skipped=$((skipped + 1))
+            continue
+        fi
+        in_list "$uuid" "${want_enabled[@]}" && continue
+        want_enabled+=("$uuid")
+    done
+
+    want_disabled=()
+    for uuid in "${cur_disabled[@]}"; do
+        in_list "$uuid" "${ENABLE_EXTENSIONS[@]}" && continue
+        want_disabled+=("$uuid")
+    done
+    for uuid in "${DISABLE_EXTENSIONS[@]}"; do
+        in_list "$uuid" "${want_disabled[@]}" && continue
+        want_disabled+=("$uuid")
+    done
+
+    list_set enabled-extensions "${want_enabled[@]}"
+    list_set disabled-extensions "${want_disabled[@]}"
+    printf '  %s extension(s) enabled\n' "${#want_enabled[@]}"
+fi
+
+# ── Custom keybindings ────────────────────────────────────────
+#
+# Two, and only two: the action menu and the keybinding cheatsheet, both
+# opened in a small undecorated Ghostty window so they read as overlays rather
+# than terminals. Set MENU_KEYS=0 to skip them entirely.
+#
+# GNOME keeps these in a relocatable schema -- one dconf path per binding,
+# with a separate key listing the paths -- so each is addressed by path, and
+# the list is merged rather than replaced: clobbering it would silently drop
+# whatever else the user had bound.
+
+MENU_KEYS="${MENU_KEYS:-1}"
+CUSTOM_BASE="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
+CUSTOM_SCHEMA="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding"
+POPUP="ghostty --window-decoration=false --window-width=92 --window-height=26 -e"
+
+custom_paths() {
+    gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings \
+        | sed "s/^@as //; s/^\[//; s/\]$//; s/'//g; s/, /\n/g" | sed '/^$/d'
+}
+
+set_custom_binding() {  # slot | name | binding | command
+    local path="$CUSTOM_BASE/$1/" schema
+    schema="$CUSTOM_SCHEMA:$path"
+    if [ "$DRY_RUN" -eq 1 ]; then
+        printf '  set    %s %s -> %s\n' "$2" "$3" "$4"
+        return 0
+    fi
+    gsettings set "$schema" name "$2" 2>/dev/null
+    gsettings set "$schema" binding "$3" 2>/dev/null
+    gsettings set "$schema" command "$4" 2>/dev/null
+}
+
+if command -v gsettings > /dev/null 2>&1 && [ "$MENU_KEYS" = 1 ]; then
+    echo ""
+    mapfile -t paths < <(custom_paths)
+    keep=()
+    for pth in "${paths[@]}"; do
+        case "$pth" in
+            "$CUSTOM_BASE/dotfiles-menu/"|"$CUSTOM_BASE/dotfiles-keys/") ;;
+            *) keep+=("$pth") ;;
+        esac
+    done
+
+    if [ "$RESET" -eq 1 ]; then
+        want=("${keep[@]}")
+        printf '  removed the menu and cheatsheet keybindings\n'
+    else
+        want=("${keep[@]}" "$CUSTOM_BASE/dotfiles-menu/" "$CUSTOM_BASE/dotfiles-keys/")
+        set_custom_binding dotfiles-menu "Action menu" "<Super><Alt>space" "$POPUP menu"
+        set_custom_binding dotfiles-keys "Keybinding cheatsheet" "<Super>k" "$POPUP keys"
+    fi
+
+    if [ "$DRY_RUN" -eq 0 ]; then
+        out="[" first=1
+        for pth in ${want[@]+"${want[@]}"}; do
+            [ "$first" -eq 1 ] || out="$out, "
+            out="$out'$pth'"; first=0
+        done
+        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$out]" 2>/dev/null
+    fi
+fi
+
+# ── Light/dark mode ───────────────────────────────────────────
+#
+# Delegated to theme-mode(1), the single owner of colour-scheme, GTK theme and
+# icon theme. Re-applying the current mode is what makes those keys correct
+# after a fresh install without overriding the mode already chosen.
+
+if [ "$DRY_RUN" -eq 0 ] && command -v theme-mode > /dev/null 2>&1; then
+    if [ "$RESET" -eq 1 ]; then
+        for key in color-scheme gtk-theme icon-theme; do
+            gsettings reset org.gnome.desktop.interface "$key" 2>/dev/null
+        done
+    else
+        echo ""
+        theme-mode "$(theme-mode)"
+    fi
+fi
+
+# ── Wallpaper ─────────────────────────────────────────────────
+#
+# Delegated to desktop-wallpaper, which owns generating and setting the
+# gradients.  An existing choice from that set is left alone, so re-running
+# desktop-theme never overrides the wallpaper you picked.
+
+if [ "$DRY_RUN" -eq 0 ] && command -v desktop-wallpaper > /dev/null 2>&1; then
+    if [ "$RESET" -eq 1 ]; then
+        for key in picture-uri picture-uri-dark picture-options; do
+            gsettings reset org.gnome.desktop.background "$key" 2>/dev/null
+        done
+        gsettings reset org.gnome.desktop.screensaver picture-uri 2>/dev/null
+    else
+        case "$(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null)" in
+            *"/.local/share/backgrounds/"*) ;;
+            *) echo ""; desktop-wallpaper ;;
+        esac
+    fi
+fi
+
+# ── Summary ───────────────────────────────────────────────────
+
+echo ""
+if [ "$RESET" -eq 1 ]; then verb="reset"; else verb="written"; fi
+echo "Settings $verb: $applied   skipped: $skipped   failed: $failed"
+[ -z "$SKIPPED_NOTES" ] || printf 'Skipped schemas:\n%s' "$SKIPPED_NOTES"
+
+if [ "$DRY_RUN" -eq 0 ] && [ "$RESET" -eq 0 ]; then
+    echo ""
+    echo "Log out and back in to load the newly enabled extensions."
+    echo "(On X11, Alt+F2 then 'r' restarts the shell without logging out.)"
+fi
+
+[ "$failed" -eq 0 ]

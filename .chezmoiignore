@@ -33,3 +33,12 @@ LICENSE
 .codex/skills/**/node_modules
 # Held out of this public repo pending confirmation of its origin (no LICENSE/author recorded).
 .codex/skills/ui-ux-pro-max
+
+# The desktop look is a Linux/GNOME answer to wanting a Mac-like desktop, so
+# it has no business on an actual Mac -- macOS already is one, and neither
+# script has a target there. setup.sh installs their parts inside the Linux
+# branch only; this keeps the scripts themselves off the machine too.
+{{ if ne .chezmoi.os "linux" }}
+.local/bin/desktop-theme
+.local/bin/desktop-wallpaper
+{{ end }}
