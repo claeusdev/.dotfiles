@@ -8,8 +8,11 @@ font-size = 17
 font-thicken = true
 
 # Window configuration
-window-padding-x = 8
-window-padding-y = 8
+# Roomier padding than the default: the desktop runs rounded window corners,
+# and tight padding puts the first column right up against the curve.
+window-padding-x = 14
+window-padding-y = 12
+window-padding-balance = true
 window-decoration = true
 window-theme = auto
 
@@ -18,8 +21,12 @@ window-theme = auto
 # theme-mode(1) sets, so the terminal turns over with everything else and needs
 # no push of its own.
 theme = light:Modus Operandi,dark:Modus Vivendi Tinted
-background-opacity = 1.0
-unfocused-split-opacity = 1.0
+# Translucent so the desktop blur reads through the terminal.  The blur
+# itself is NOT ghostty's `background-blur` -- that is a macOS and
+# KDE/Wayland path and does nothing on GNOME/X11.  Blur My Shell provides it
+# instead, whitelisted to com.mitchellh.ghostty by `desktop-theme`.
+background-opacity = 0.92
+unfocused-split-opacity = 0.95
 
 # Shell
 shell-integration = fish
