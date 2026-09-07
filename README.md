@@ -67,6 +67,32 @@ See [INSTALL.md](INSTALL.md) for details and manual alternatives.
 - [Neovim setup overview](docs/nvim.md)
 - [Neovim tutorials](docs/nvim-tutorials.md)
 - [tmux setup overview](docs/tmux.md)
+- [Desktop setup (GNOME)](docs/desktop.md)
+
+## Desktop (Linux/GNOME)
+
+A macOS-inspired GNOME desktop — floating bottom dock, translucency, rounded
+corners, thin top bar, Spotlight-style launcher — with the stock shell theme
+left in place, so a GNOME upgrade cannot break it.
+
+```sh
+desktop-theme                  # apply the look
+desktop-theme --check          # what is installed
+desktop-theme --reset          # back to Ubuntu defaults
+desktop-wallpaper --list       # the generated gradient wallpapers
+```
+
+Two overlays come with it, on the Omarchy pattern:
+
+```sh
+menu                           # Super+Alt+Space -- theme, wallpaper, settings
+keys                           # Super+K -- searchable keybinding cheatsheet
+theme-mode toggle              # light/dark across every surface, desktop included
+```
+
+`setup.sh` installs the parts; `desktop-theme` writes the configuration. All of
+it is Linux-only — macOS is excluded in `.chezmoiignore`. See
+[docs/desktop.md](docs/desktop.md).
 
 ## Emacs machine setup
 

@@ -16,6 +16,7 @@ therefore exists twice — the source copy here and the applied copy in `$HOME`
 | `dot_config/ghostty/`, `dot_config/aerospace/`, `dot_config/starship.toml`, `dot_tmux.conf` | terminal, window manager, prompt, tmux | |
 | `dot_claude/` | `~/.claude/` | Claude Code user config, statusline, `skills/` |
 | `dot_gitconfig`, `dot_zprofile` | git and login-shell config | |
+| `private_dot_local/private_bin/` | `~/.local/bin/` | `dev-doctor`, plus `desktop-theme`/`desktop-wallpaper` — see "GNOME desktop" below |
 | `setup.sh` | not applied | New-machine bootstrap: installs packages only, never writes config |
 | `docs/`, `README.md`, `INSTALL.md` | not applied | Human documentation and keybinding reference |
 
@@ -58,6 +59,8 @@ apply that directory while a live-only spec exists un-added.
 | fish | `fish -n <file>` |
 | tmux | `tmux -L test -f ~/.tmux.conf start-server` |
 | shell scripts | `bash -n setup.sh`; `shellcheck` when available |
+| ghostty | `ghostty +validate-config` — must exit 0 |
+| desktop | `desktop-theme --dry-run` (writes nothing); `desktop-theme --check` |
 
 ## Conventions
 
@@ -191,3 +194,48 @@ the bespoke project build/test command layer consumed by the overseer keymaps.
 - **Language** → parser in `ensure_installed` (plugins/treesitter.lua),
   formatter in `plugins/formatting.lua` (conform), server as above, test
   commands in `core/tasks.lua` if overseer should know it.
+
+---
+
+## GNOME desktop (`private_dot_local/private_bin/`)
+
+Linux only. A macOS-inspired GNOME desktop that keeps the **stock shell
+theme** — no WhiteSur or other third-party GTK theme, because those break on
+every GNOME release. The look comes from extensions, icons, cursors, fonts
+and spacing instead. Full reference: `docs/desktop.md`.
+
+The same split as the rest of the repo: `setup.sh` installs the parts and
+writes no config; `desktop-theme` writes every gsettings key.
+
+### Rules
+
+- **All settings live in one table** — the `settings()` heredoc in
+  `desktop-theme`, one `uuid|schema|key|value` record per line. `--reset`
+  walks the same table, so it resets exactly what was set and leaves
+  neighbouring keys in those schemas alone. Never scatter `gsettings set`
+  calls through the script.
+- **Never trust a guessed schema key.** Read the real ones first:
+  `gsettings --schemadir ~/.local/share/gnome-shell/extensions/<uuid>/schemas
+  list-recursively <schema>`. Extension schemas are not on the default
+  search path, which is why every extension record carries its UUID.
+- **Enable extensions by writing `org.gnome.shell enabled-extensions`**, not
+  via `gnome-extensions enable`. That command talks to the running shell,
+  which only knows about extensions it has already scanned — on the run that
+  installs them it reports "not installed" and silently does nothing.
+- **New extension** → UUID in `ENABLE_EXTENSIONS` (desktop-theme), an
+  `install_gnome_extension` line in `setup.sh`, and a row in the table in
+  `docs/desktop.md`.
+- **Keybindings are deliberately untouched**, so `Ctrl+C`/`Ctrl+V` keep
+  working in terminals and Emacs. `Super+Space` is the sole exception
+  (GNOME's input-source switcher, useless with one layout, reused for the
+  Spotlight launcher). Do not add more without asking.
+- Wallpapers are **generated, never committed** — `desktop-wallpaper` renders
+  them from colour control points via ImageMagick. Adding a palette means a
+  new line in its `palettes()` table, nothing else.
+
+### Validation
+
+`desktop-theme --dry-run` writes nothing and prints every setting;
+`desktop-theme --check` reports which parts are installed. Both scripts must
+stay `shellcheck`-clean. After applying, extensions load only at shell
+startup — log out and back in, or `Alt+F2` then `r` on X11.

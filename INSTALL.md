@@ -29,6 +29,7 @@ Chezmoi manages all configuration files. The setup script only installs packages
 | tmux | `dot_tmux.conf` |
 | git | `dot_gitconfig` |
 | emacs | `dot_emacs.d/` |
+| desktop scripts | `private_dot_local/private_bin/` |
 
 To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 
@@ -81,6 +82,9 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 - [ ] `gh auth login` — authenticate GitHub CLI
 - [ ] `uv tool install jupyterlab --with ipykernel` — verify JupyterLab works
 - [ ] `mlenv test-project ml` — test ML project bootstrapping
+- [ ] Linux/GNOME: log out and back in so the desktop extensions load
+- [ ] Linux/GNOME: `desktop-theme --check` — confirm every desktop part installed
+- [ ] Try `menu` (actions) and `keys` (keybinding cheatsheet)
 
 ## Troubleshooting
 
