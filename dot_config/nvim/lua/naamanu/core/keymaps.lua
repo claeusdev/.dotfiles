@@ -5,11 +5,8 @@ local keymap = vim.keymap
 -- Clear search highlights
 keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 
--- Window navigation
-keymap.set("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
-keymap.set("n", "<C-j>", "<C-w>j", { desc = "Move to lower window" })
-keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move to upper window" })
-keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
+-- Window navigation is provided by vim-tmux-navigator (plugins/navigation.lua),
+-- which moves between Neovim windows and tmux panes with the same keys.
 
 -- Window resize
 keymap.set("n", "<C-Up>", "<cmd>resize +2<CR>", { desc = "Increase window height" })

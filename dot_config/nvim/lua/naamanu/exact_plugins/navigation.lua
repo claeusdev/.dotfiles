@@ -57,4 +57,25 @@ return {
 			{ "<leader>fS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "Workspace symbols" },
 		},
 	},
+
+	-- Pane/window navigation shared with tmux. Needs the matching tmux plugin
+	-- (declared in ~/.tmux.conf); this half is what hands focus back to tmux
+	-- instead of swallowing C-h at the leftmost window.
+	{
+		"christoomey/vim-tmux-navigator",
+		cmd = {
+			"TmuxNavigateLeft",
+			"TmuxNavigateDown",
+			"TmuxNavigateUp",
+			"TmuxNavigateRight",
+			"TmuxNavigatePrevious",
+		},
+		keys = {
+			{ "<C-h>", "<cmd><C-U>TmuxNavigateLeft<cr>", desc = "Move to left window/pane" },
+			{ "<C-j>", "<cmd><C-U>TmuxNavigateDown<cr>", desc = "Move to lower window/pane" },
+			{ "<C-k>", "<cmd><C-U>TmuxNavigateUp<cr>", desc = "Move to upper window/pane" },
+			{ "<C-l>", "<cmd><C-U>TmuxNavigateRight<cr>", desc = "Move to right window/pane" },
+			{ "<C-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>", desc = "Move to previous window/pane" },
+		},
+	},
 }
