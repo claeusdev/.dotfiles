@@ -100,6 +100,16 @@ docker run hello-world
 nvim '+Lazy clean' '+Lazy sync'
 ```
 
+### tmux: Plugin not loading
+Plugins declared with `set -g @plugin` install themselves the next time the
+config is read, and the config is re-sourced automatically once the clone
+finishes — no `prefix + I`. If one is still missing, run the installer by hand
+and reload:
+```sh
+~/.tmux/plugins/tpm/bin/install_plugins
+tmux source-file ~/.tmux.conf
+```
+
 ### Neovim: `attempt to index field 'uv' (a nil value)` on startup
 The running nvim is older than 0.10 (typically the distro package shadowing
 the tarball install). Check `nvim --version` and that `~/.local/bin` precedes
