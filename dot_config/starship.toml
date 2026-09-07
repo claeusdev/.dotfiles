@@ -9,6 +9,11 @@ command_timeout = 500
 # Inserts a blank line between shell prompts
 add_newline = true
 
+# Active modus palette. Switched by theme-mode(1), which for light mode points
+# STARSHIP_CONFIG at a generated copy of this file with this one line rewritten
+# -- starship cannot select a palette from the environment.
+palette = "modus_dark"
+
 # Format
 format = """
 [┌─](bold green)$username$hostname$directory$git_branch$git_status$git_state
@@ -120,3 +125,29 @@ discharging_symbol = "⚡"
 [[battery.display]]
 threshold = 30
 style = "bold red"
+
+# Modus palettes. Every value is the colour Neovim actually renders for the
+# matching highlight group under modus_vivendi (tinted) / modus_operandi, read
+# out of nvim_get_hl -- the same source the fish and tmux themes use.
+#
+# These deliberately shadow starship's built-in colour names, which is why not
+# one style string above had to change: "bold green" now resolves to the modus
+# green rather than ANSI 32.
+
+[palettes.modus_dark]
+green = "#00c06f"           # DiagnosticOk
+red = "#ff7f9f"             # DiagnosticError
+blue = "#79a8ff"            # Keyword
+cyan = "#4ae2f0"            # Identifier
+yellow = "#dfaf7a"          # DiagnosticWarn
+purple = "#b6a0ff"          # Statement
+"bright-black" = "#989898"  # NonText
+
+[palettes.modus_light]
+green = "#00663f"
+red = "#a0132f"
+blue = "#0031a9"
+cyan = "#005e8b"
+yellow = "#7a4f2f"
+purple = "#531ab6"
+"bright-black" = "#595959"

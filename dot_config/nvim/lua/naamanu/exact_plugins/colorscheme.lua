@@ -2,19 +2,11 @@ return {
   "miikanissi/modus-themes.nvim",
   priority = 1000,
   lazy = false,
-  opts = {
-    style = "modus_vivendi",
-    variants = {
-      modus_vivendi = "tinted", -- matches Emacs (modus-vivendi-tinted)
-    },
-    dim_inactive = false,
-    styles = {
-      comments = { italic = true },
-      keywords = { italic = true },
-    },
-  },
-  config = function(_, opts)
-    require("modus-themes").setup(opts)
-    vim.cmd.colorscheme("modus_vivendi")
+  -- Which variant loads is decided by naamanu.theme from the shared mode file,
+  -- so a Neovim started while the desktop is light comes up light. All the
+  -- theme options live there too, next to the light/dark decision.
+  config = function()
+    local theme = require("naamanu.theme")
+    theme.apply(theme.mode())
   end,
 }

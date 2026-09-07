@@ -229,13 +229,42 @@ Use `my/sidebar-focus' (C-c t S / SPC O) to jump into an open sidebar."
   (mapc #'disable-theme custom-enabled-themes)
   (load-theme theme :no-confirm))
 
-(defun my/toggle-theme ()
-  "Toggle between `my/light-theme' and `my/dark-theme'."
+(defun my/theme-mode ()
+  "Return the shared theme mode, the symbol `light' or `dark'.
+Read from $XDG_STATE_HOME/theme-mode, the file `theme-mode\=' writes, so
+Emacs, Neovim, fish, tmux, Ghostty and starship agree on one answer.
+Defaults to dark when the file is missing or unreadable."
+  (let* ((base (or (getenv "XDG_STATE_HOME") (expand-file-name "~/.local/state")))
+         (file (expand-file-name "theme-mode" base)))
+    (if (and (file-readable-p file)
+             (string-prefix-p "light"
+                              (with-temp-buffer
+                                (insert-file-contents file)
+                                (string-trim (buffer-string)))))
+        'light
+      'dark)))
+
+(defun my/apply-theme-mode (&optional mode)
+  "Load the theme for MODE, defaulting to the shared mode on disk.
+MODE may be a symbol or a string, the latter because `theme-mode\=' calls
+this over emacsclient when the mode changes while Emacs is running."
   (interactive)
-  (my/load-theme (if (memq my/light-theme custom-enabled-themes)
-                     my/dark-theme
-                   my/light-theme))
-  (message "Theme: %s" (car custom-enabled-themes)))
+  (let ((mode (cond ((stringp mode) (intern mode))
+                    (mode mode)
+                    (t (my/theme-mode)))))
+    (my/load-theme (if (eq mode 'light) my/light-theme my/dark-theme))))
+
+(defun my/toggle-theme ()
+  "Flip between `my/light-theme' and `my/dark-theme'.
+Applies the new theme here immediately -- so this still works with no
+Emacs server running -- and then hands the mode to `theme-mode\=', which
+turns Neovim, fish, tmux, Ghostty and starship over to match."
+  (interactive)
+  (let ((mode (if (eq (my/theme-mode) 'light) 'dark 'light)))
+    (my/apply-theme-mode mode)
+    (when (executable-find "theme-mode")
+      (start-process "theme-mode" nil "theme-mode" (symbol-name mode)))
+    (message "Theme: %s" (car custom-enabled-themes))))
 
 ;; Emacs bundles the modus theme *files*, but not `modus-themes.el' itself,
 ;; which is where the customization options and the newest palettes live.
@@ -259,8 +288,9 @@ Use `my/sidebar-focus' (C-c t S / SPC O) to jump into an open sidebar."
           (bg-line-number-active unspecified)
           (bg-line-number-inactive unspecified)))
   :config
-  ;; Start dark; `C-c t t' flips to `my/light-theme'.
-  (my/load-theme my/dark-theme))
+  ;; Follow the shared mode, so an Emacs started while the desktop is light
+  ;; comes up light.  `C-c t t' flips it, and everything else with it.
+  (my/apply-theme-mode))
 
 ;; Padding around windows and a subtle, borderless mode line.
 (use-package spacious-padding

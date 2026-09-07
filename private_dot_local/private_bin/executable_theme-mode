@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+#
+# theme-mode -- switch every themed surface between the two modus pairs at
+# once: Emacs, Neovim, fish, Ghostty, tmux and starship.
+#
+#   theme-mode           print the current mode
+#   theme-mode dark      modus-vivendi-tinted
+#   theme-mode light     modus-operandi
+#   theme-mode toggle    flip
+#
+# The mode lives in $XDG_STATE_HOME/theme-mode and every tool reads it at
+# startup, so a new shell, editor or tmux server always comes up correct.
+# The rest of this script exists for the sessions ALREADY running: none of
+# them poll, so each has to be pushed at, and each has its own way in.
+#
+# Ghostty needs nothing here. Its config names both themes at once
+# (theme = light:...,dark:...) and follows the desktop colour-scheme, which
+# this script sets -- so it is driven, just not by a push.
+
+set -u
+
+STATE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/theme-mode"
+STARSHIP_LIGHT="${XDG_CACHE_HOME:-$HOME/.cache}/starship/light.toml"
+
+current_mode() {
+    case "$([ -r "$STATE_FILE" ] && cat "$STATE_FILE")" in
+        light) echo light ;;
+        *)     echo dark ;;
+    esac
+}
+
+# GNOME, and through it Ghostty and the GTK apps.
+push_desktop() {
+    command -v gsettings >/dev/null 2>&1 || return 0
+    case "$1" in
+        light) gsettings set org.gnome.desktop.interface color-scheme prefer-light ;;
+        dark)  gsettings set org.gnome.desktop.interface color-scheme prefer-dark ;;
+    esac 2>/dev/null || true
+}
+
+# A universal variable reaches every running fish at once, where the
+# --on-variable handler in conf.d/modus-theme.fish repaints the palette.
+push_fish() {
+    command -v fish >/dev/null 2>&1 || return 0
+    fish -c "set -U __theme_mode $1" >/dev/null 2>&1 || true
+}
+
+push_tmux() {
+    command -v tmux >/dev/null 2>&1 || return 0
+    tmux has-session >/dev/null 2>&1 || return 0
+    tmux source-file "$HOME/.tmux.conf" >/dev/null 2>&1 || true
+}
+
+# Neovim listens on a socket per instance without being asked, so every
+# running editor can be reached by name.
+push_nvim() {
+    command -v nvim >/dev/null 2>&1 || return 0
+    local sock
+    for sock in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim.*; do
+        [ -S "$sock" ] || continue
+        nvim --server "$sock" --remote-expr \
+            "luaeval(\"require('naamanu.theme').apply(_A)\", '$1')" >/dev/null 2>&1 || true
+    done
+}
+
+# Only when a server is actually up: emacsclient without one blocks or errors.
+push_emacs() {
+    command -v emacsclient >/dev/null 2>&1 || return 0
+    local sock="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/emacs/server"
+    [ -S "$sock" ] || return 0
+    emacsclient --eval "(my/apply-theme-mode \"$1\")" >/dev/null 2>&1 || true
+}
+
+# starship cannot pick a palette from the environment, so the light variant is
+# the managed config with a single line rewritten. Regenerated on every switch,
+# so an edit to starship.toml can never leave it stale.
+regen_starship_light() {
+    local src="$HOME/.config/starship.toml"
+    [ -r "$src" ] || return 0
+    mkdir -p "$(dirname "$STARSHIP_LIGHT")"
+    sed 's/^palette = .*/palette = "modus_light"/' "$src" > "$STARSHIP_LIGHT"
+}
+
+apply() {
+    local mode="$1"
+    mkdir -p "$(dirname "$STATE_FILE")"
+    printf '%s\n' "$mode" > "$STATE_FILE"
+    regen_starship_light
+    push_desktop "$mode"
+    push_fish    "$mode"
+    push_tmux
+    push_nvim    "$mode"
+    push_emacs   "$mode"
+    echo "theme-mode: $mode"
+}
+
+case "${1-}" in
+    "")            current_mode ;;
+    light|dark)    apply "$1" ;;
+    toggle)        if [ "$(current_mode)" = dark ]; then apply light; else apply dark; fi ;;
+    -h|--help)     sed -n '3,19p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *)             echo "theme-mode: unknown argument: $1" >&2; exit 2 ;;
+esac
