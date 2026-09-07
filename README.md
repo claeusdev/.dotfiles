@@ -452,7 +452,50 @@ Active in `eglot-mode-map` when an LSP server is attached.
 | `C-c f o`  | OCaml REPL (utop)            |
 | `C-c f e`  | Emacs Lisp REPL (ielm)       |
 
-### Fish Shell — Aliases & Functions
+### Org Mode
+
+| Keybinding | Description                |
+| :--------- | :------------------------- |
+| `C-c a`    | Org agenda                 |
+| `C-c c`    | Org capture                |
+| `C-c C-c`  | Execute babel source block |
+
+### Org Citations (Citar, in org-mode)
+
+| Keybinding | Description        |
+| :--------- | :----------------- |
+| `C-c b o`  | Open reference     |
+| `C-c b i`  | Insert citation    |
+| `C-c b n`  | Open citation notes |
+
+### Org-noter (in org-mode)
+
+| Keybinding | Description |
+| :--------- | :---------- |
+| `C-c N`    | Org-noter   |
+
+### Org-roam (Zettelkasten Notes)
+
+**Prefix**: `C-c n`
+
+| Keybinding | Description              |
+| :--------- | :----------------------- |
+| `C-c n f`  | Find node                |
+| `C-c n i`  | Insert node link         |
+| `C-c n b`  | Toggle backlinks buffer  |
+| `C-c n c`  | Capture to node          |
+| `C-c n d`  | Daily note (today)       |
+
+### Which-Key
+
+- Press any prefix key (like `C-c`, `C-x`, or `C-c p`) and wait 0.3 seconds
+- A popup will show all available completions for that prefix
+
+---
+
+## Shell Keybindings
+
+### Aliases & Functions
 
 | Alias | Command                  |
 | :---- | :----------------------- |
@@ -507,45 +550,6 @@ Active in `eglot-mode-map` when an LSP server is attached.
 | procs | ps | Modern process viewer |
 | hyperfine | time | Command benchmarking |
 | tokei | cloc | Code statistics by language |
-
-### Org Mode
-
-| Keybinding | Description                |
-| :--------- | :------------------------- |
-| `C-c a`    | Org agenda                 |
-| `C-c c`    | Org capture                |
-| `C-c C-c`  | Execute babel source block |
-
-### Org Citations (Citar, in org-mode)
-
-| Keybinding | Description        |
-| :--------- | :----------------- |
-| `C-c b o`  | Open reference     |
-| `C-c b i`  | Insert citation    |
-| `C-c b n`  | Open citation notes |
-
-### Org-noter (in org-mode)
-
-| Keybinding | Description |
-| :--------- | :---------- |
-| `C-c N`    | Org-noter   |
-
-### Org-roam (Zettelkasten Notes)
-
-**Prefix**: `C-c n`
-
-| Keybinding | Description              |
-| :--------- | :----------------------- |
-| `C-c n f`  | Find node                |
-| `C-c n i`  | Insert node link         |
-| `C-c n b`  | Toggle backlinks buffer  |
-| `C-c n c`  | Capture to node          |
-| `C-c n d`  | Daily note (today)       |
-
-### Which-Key
-
-- Press any prefix key (like `C-c`, `C-x`, or `C-c p`) and wait 0.3 seconds
-- A popup will show all available completions for that prefix
 
 ---
 
