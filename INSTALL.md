@@ -11,7 +11,7 @@ This single command will:
 1. **Install chezmoi** (dotfile manager)
 2. **Clone and deploy dotfiles** via SSH
 3. **Install development tools** (platform-appropriate)
-4. **Post-install setup**: TPM (tmux plugin manager), set fish as default shell
+4. **Post-install setup**: TPM and the tmux plugins it manages, set fish as default shell
 
 The script is idempotent — safe to re-run on an already-configured machine.
 
@@ -77,7 +77,6 @@ To edit a config: `chezmoi edit ~/.config/fish/config.fish --apply`
 
 - [ ] Restart terminal (or log out/in)
 - [ ] `nvim '+Lazy sync' +qa` — install Neovim plugins
-- [ ] Open tmux, press `prefix + I` — install tmux plugins
 - [ ] Log out/in for Docker group changes (Linux, only if `INSTALL_DOCKER=1`)
 - [ ] `gh auth login` — authenticate GitHub CLI
 - [ ] `uv tool install jupyterlab --with ipykernel` — verify JupyterLab works

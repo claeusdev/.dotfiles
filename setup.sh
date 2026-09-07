@@ -787,6 +787,18 @@ else
     echo "TPM already installed."
 fi
 
+# Install the plugins .tmux.conf declares. TPM documents this as `prefix + I'
+# inside a running session, which is easy to never get round to -- and a
+# machine that skips it gets no clipboard yank (tmux-yank) and no session
+# save/restore (tmux-resurrect), with nothing on screen to explain why.
+# install_plugins is the same operation headless, and is a no-op for plugins
+# that are already cloned. Dotfiles were applied in step 3, so .tmux.conf is
+# in place by now.
+if [ -x "$HOME/.tmux/plugins/tpm/bin/install_plugins" ]; then
+    echo "Installing tmux plugins..."
+    "$HOME/.tmux/plugins/tpm/bin/install_plugins" || FAILED_PACKAGES+=("tmux plugins")
+fi
+
 # Clone the home-grown editor packages.  These are NOT chezmoi-managed: the
 # Emacs `use-package` forms (langs.el) and the Neovim spec (exact_plugins/
 # lectern.lua) are guarded on these directories, so a machine without them
@@ -943,7 +955,7 @@ echo ""
 echo "What was done:"
 echo "  - chezmoi installed and dotfiles deployed"
 echo "  - Development tools installed ($PLATFORM)"
-echo "  - TPM (Tmux Plugin Manager) installed"
+echo "  - TPM (Tmux Plugin Manager) and tmux plugins installed"
 echo "  - Home-grown Emacs/Neovim packages cloned into ~/workspace"
 echo "  - Default shell set to fish"
 
@@ -959,9 +971,8 @@ echo ""
 echo "Manual next steps:"
 echo "  1. Restart your terminal (or log out and back in)"
 echo "  2. Install Neovim plugins:  nvim '+Lazy sync' +qa"
-echo "  3. Install tmux plugins:    prefix + I  (inside tmux)"
 if [ "$PLATFORM" = "linux" ] && [ "$INSTALL_DOCKER" = "1" ]; then
-echo "  4. Log out/in for Docker group changes"
+echo "  3. Log out/in for Docker group changes"
 fi
 if [ "$INSTALL_DOCKER" != "1" ]; then
 echo ""
