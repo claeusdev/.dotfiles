@@ -45,6 +45,9 @@ optional|tree-sitter|parser compiler
 optional|pandoc|research document conversion
 optional|gh|GitHub workflows
 optional|lazygit|terminal Git UI
+optional|yazi|terminal file manager
+optional|fastfetch|system summary
+optional|flameshot|screenshot and annotation
 optional|codex|terminal coding agent
 optional|claude|terminal coding agent
 EOF

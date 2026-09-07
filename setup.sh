@@ -772,6 +772,115 @@ elif [ "$PLATFORM" = "linux" ]; then
     fi
 
     fc-cache -f
+
+    # ── Terminal tools without an apt package ─────────────────
+    #
+    # Neither is in the Ubuntu archive, and both publish a static release, so
+    # take it directly rather than adding a PPA for two binaries.
+
+    if ! command -v yazi &> /dev/null; then
+        echo "Installing yazi (terminal file manager)..."
+        yazi_tmp="$(mktemp -d)"
+        if curl -fsSL -o "$yazi_tmp/yazi.zip" \
+            "https://github.com/sxyazi/yazi/releases/latest/download/yazi-x86_64-unknown-linux-gnu.zip" \
+            && unzip -oq "$yazi_tmp/yazi.zip" -d "$yazi_tmp"; then
+            find "$yazi_tmp" -type f \( -name yazi -o -name ya \) \
+                -exec install -m 755 {} "$HOME/.local/bin/" \;
+        else
+            FAILED_PACKAGES+=(yazi)
+        fi
+        rm -rf "$yazi_tmp"
+    fi
+
+    if ! command -v fastfetch &> /dev/null; then
+        echo "Installing fastfetch..."
+        ff_tmp="$(mktemp -d)"
+        if curl -fsSL -o "$ff_tmp/fastfetch.deb" \
+            "https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb"; then
+            sudo dpkg -i "$ff_tmp/fastfetch.deb" &> /dev/null || FAILED_PACKAGES+=(fastfetch)
+        else
+            FAILED_PACKAGES+=(fastfetch)
+        fi
+        rm -rf "$ff_tmp"
+    fi
+
+    # ── GNOME desktop ─────────────────────────────────────────
+    #
+    # The macOS-inspired desktop look. This installs the *parts*; all of the
+    # configuration lives in `desktop-theme`, which chezmoi deploys and the
+    # post-install step below runs. Skipped on machines with no GNOME session
+    # (servers, containers, another desktop).
+
+    if command -v gnome-shell &> /dev/null; then
+        echo ""
+        echo "Installing GNOME desktop components..."
+
+        install_optional_pkg gnome-shell-extension-manager
+        install_optional_pkg gnome-tweaks
+        # GNOME can take a screenshot but cannot annotate one.
+        install_optional_pkg flameshot
+        install_optional_pkg dconf-cli
+        install_optional_pkg imagemagick
+        install_optional_pkg fonts-inter
+        install_optional_pkg x11-xserver-utils
+
+        GNOME_SHELL_VERSION="$(gnome-shell --version | grep -oE '[0-9]+' | head -1)"
+
+        # extensions.gnome.org serves a zip built for one shell version, so the
+        # version has to be asked for by number rather than guessed.
+        install_gnome_extension() {
+            local uuid="$1"
+            [ ! -d "$HOME/.local/share/gnome-shell/extensions/$uuid" ] || return 0
+            echo "Installing GNOME extension: $uuid"
+            local tmp info url
+            tmp="$(mktemp -d)" || { FAILED_PACKAGES+=("gnome-ext:$uuid"); return; }
+            info="$(curl -fsSL "https://extensions.gnome.org/extension-info/?uuid=${uuid/@/%40}&shell_version=$GNOME_SHELL_VERSION" 2> /dev/null)"
+            url="$(printf '%s' "$info" | grep -o '"download_url": "[^"]*"' | head -1 | sed 's/.*"download_url": "//; s/"$//')"
+            if [ -z "$url" ] \
+                || ! curl -fsSL "https://extensions.gnome.org$url" -o "$tmp/ext.zip" \
+                || ! gnome-extensions install --force "$tmp/ext.zip" &> /dev/null; then
+                FAILED_PACKAGES+=("gnome-ext:$uuid")
+            fi
+            rm -rf "$tmp"
+        }
+
+        install_gnome_extension blur-my-shell@aunetx
+        install_gnome_extension just-perfection-desktop@just-perfection
+        install_gnome_extension rounded-window-corners@fxgn
+        install_gnome_extension search-light@icedman.github.com
+        install_gnome_extension tilingshell@ferrarodomenico.com
+
+        # Icon theme: Colloid -- macOS-adjacent shapes without being a clone.
+        if [ ! -d "$HOME/.local/share/icons/Colloid-Dark" ]; then
+            echo "Installing Colloid icon theme..."
+            colloid_tmp="$(mktemp -d)"
+            if git clone --depth=1 -q https://github.com/vinceliuice/Colloid-icon-theme.git \
+                "$colloid_tmp/colloid"; then
+                (cd "$colloid_tmp/colloid" && ./install.sh -d "$HOME/.local/share/icons" -s default) &> /dev/null \
+                    || FAILED_PACKAGES+=(colloid-icon-theme)
+            else
+                FAILED_PACKAGES+=(colloid-icon-theme)
+            fi
+            rm -rf "$colloid_tmp"
+        fi
+
+        # Cursor theme: Bibata Modern Classic -- a black arrow with a white
+        # outline, the shape macOS uses, drawn for modern GNOME sizes.
+        BIBATA_VERSION="v2.0.7"
+        if [ ! -d "$HOME/.local/share/icons/Bibata-Modern-Classic" ]; then
+            echo "Installing Bibata cursor theme..."
+            bibata_tmp="$(mktemp -d)"
+            if curl -fsSL -o "$bibata_tmp/bibata.tar.xz" \
+                "https://github.com/ful1e5/Bibata_Cursor/releases/download/$BIBATA_VERSION/Bibata-Modern-Classic.tar.xz"; then
+                mkdir -p "$HOME/.local/share/icons"
+                tar -xJf "$bibata_tmp/bibata.tar.xz" -C "$HOME/.local/share/icons" \
+                    || FAILED_PACKAGES+=(bibata-cursor-theme)
+            else
+                FAILED_PACKAGES+=(bibata-cursor-theme)
+            fi
+            rm -rf "$bibata_tmp"
+        fi
+    fi
 fi
 
 # ── 5. Post-install setup ─────────────────────────────────────
@@ -945,6 +1054,15 @@ else
     echo "Warning: fish not found. Skipping default shell change."
 fi
 
+# Apply the desktop look. `desktop-theme` was deployed by chezmoi in step 3;
+# it is idempotent, and `desktop-theme --reset` undoes it.
+if [ "$PLATFORM" = "linux" ] && command -v gnome-shell &> /dev/null \
+    && [ -x "$HOME/.local/bin/desktop-theme" ]; then
+    echo ""
+    echo "Applying the desktop theme..."
+    "$HOME/.local/bin/desktop-theme" || FAILED_PACKAGES+=("desktop-theme")
+fi
+
 # ── 6. Summary ─────────────────────────────────────────────────
 
 echo ""
@@ -958,6 +1076,9 @@ echo "  - Development tools installed ($PLATFORM)"
 echo "  - TPM (Tmux Plugin Manager) and tmux plugins installed"
 echo "  - Home-grown Emacs/Neovim packages cloned into ~/workspace"
 echo "  - Default shell set to fish"
+if [ "$PLATFORM" = "linux" ] && command -v gnome-shell &> /dev/null; then
+    echo "  - GNOME desktop themed (desktop-theme; --reset to undo)"
+fi
 
 if [ ${#FAILED_PACKAGES[@]} -gt 0 ]; then
     echo ""
@@ -971,6 +1092,9 @@ echo ""
 echo "Manual next steps:"
 echo "  1. Restart your terminal (or log out and back in)"
 echo "  2. Install Neovim plugins:  nvim '+Lazy sync' +qa"
+if [ "$PLATFORM" = "linux" ] && command -v gnome-shell &> /dev/null; then
+    echo "  3. Log out and back in so the GNOME extensions load"
+fi
 if [ "$PLATFORM" = "linux" ] && [ "$INSTALL_DOCKER" = "1" ]; then
 echo "  3. Log out/in for Docker group changes"
 fi
